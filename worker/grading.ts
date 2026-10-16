@@ -70,13 +70,24 @@ async function createRun(env:Env,session:TaskSession,taskId:string,body:any,brid
  const model=await configuredGradingModel(env,body.profileId),temperature=body.temperature??0.25;
  if(typeof temperature!=='number'||!Number.isFinite(temperature)||temperature<0||temperature>1)fail(400,'批改温度参数不正确。');
  const effectiveTemperature=Math.min(temperature,0.25),key=await digest({owner:session.principal,draftId:body.draftId,inputHash:body.inputHash,profileId:model.id,profileRevision:model.revision,pipeline:GRADING_PIPELINE_VERSION,temperature:effectiveTemperature});
+ const latest=await env.DB.prepare('SELECT * FROM grading_runs WHERE owner=? AND draft_id=? ORDER BY created DESC,id DESC LIMIT 1').bind(session.principal,c.draft.id).first<GradingRun>();
  let generation=0,prior:GradingRun|null=null;const reason=typeof body.reason==='string'?body.reason.trim():'';
- if(body.previousRunId){if(!uuid.test(body.previousRunId)||reason.length<5||reason.length>500)fail(400,'重新批阅须选择原运行并填写至少 5 字的原因。');prior=await ownerRun(env,session,body.previousRunId);if(prior.run_key!==key||prior.state!=='ready')fail(409,'重新批阅的输入或模型已变化，请先核对当前稿次。');generation=prior.generation+1;}
- const id=crypto.randomUUID(),now=Date.now();
+ if(body.previousRunId){
+  if(body.confirmBillable!==true||!uuid.test(body.previousRunId)||reason.length<5||reason.length>500)fail(400,'重新批阅须选择原运行、填写至少 5 字的原因，并确认重新调用 AI。');
+  prior=await ownerRun(env,session,body.previousRunId);
+  if(prior.draft_id!==c.draft.id||prior.task_id!==taskId||prior.member_id!==c.member.id||prior.input_hash!==c.draft.input_hash||prior.state!=='ready'||latest?.id!==prior.id)fail(409,'稿件或最近批阅已变化，请刷新后核对；未完成的运行请使用继续处理。');
+  generation=prior.generation+1;
+ }else if(latest&&latest.input_hash===body.inputHash){
+  if(latest.run_key!==key)fail(409,'本稿已有批阅记录；更换模型请使用明确的重新批阅入口。');
+  await env.DB.prepare("INSERT OR IGNORE INTO grading_operations(owner,request_id,request_hash,run_id,action,created) VALUES(?,?,?,?,'create',?)").bind(session.principal,body.requestId,requestHash,latest.id,Date.now()).run();
+  return (await operation(env,session.principal,body.requestId,requestHash))!;
+ }
+ const id=crypto.randomUUID(),now=Math.max(Date.now(),(latest?.created||0)+1);
+ const latestGuard=latest?'AND (SELECT id FROM grading_runs WHERE owner=? AND draft_id=? ORDER BY created DESC,id DESC LIMIT 1)=?':'AND NOT EXISTS(SELECT 1 FROM grading_runs WHERE owner=? AND draft_id=?)',latestBinds=latest?[session.principal,c.draft.id,latest.id]:[session.principal,c.draft.id];
  await env.DB.batch([
-  env.DB.prepare("INSERT OR IGNORE INTO grading_runs(id,owner,grant_id,task_id,member_id,submission_id,draft_id,input_revision,input_hash,task_version,rubric_hash,class_id,student_provider,student_subject,profile_id,profile_revision,model_name,model_images_json,model_input_hash,pipeline_version,temperature,run_key,generation,previous_run_id,reason,state,created,updated) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'queued',?,? WHERE EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND revision=? AND input_hash=? AND state='received') AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND task_id=? AND status='active')")
-   .bind(id,session.principal,session.grant_id,taskId,c.member.id,c.draft.submission_id,c.draft.id,body.inputRevision,body.inputHash,c.manifest.taskVersion,c.manifest.rubricHash,c.member.class_id,c.member.provider,c.member.subject,model.id,model.revision,model.model,JSON.stringify(c.modelImages),c.modelInputHash,GRADING_PIPELINE_VERSION,effectiveTemperature,key,generation,prior?.id||null,reason,now,now,c.draft.id,body.inputRevision,body.inputHash,c.member.id,taskId),
-  env.DB.prepare("INSERT OR IGNORE INTO grading_operations(owner,request_id,request_hash,run_id,action,created) SELECT ?,?,?,id,'create',? FROM grading_runs WHERE owner=? AND run_key=? AND generation=?").bind(session.principal,body.requestId,requestHash,now,session.principal,key,generation),
+  env.DB.prepare(`INSERT OR IGNORE INTO grading_runs(id,owner,grant_id,task_id,member_id,submission_id,draft_id,input_revision,input_hash,task_version,rubric_hash,class_id,student_provider,student_subject,profile_id,profile_revision,model_name,model_images_json,model_input_hash,pipeline_version,temperature,run_key,generation,previous_run_id,reason,state,created,updated) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'queued',?,? WHERE EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND revision=? AND input_hash=? AND state='received') AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND task_id=? AND status='active') ${latestGuard}`)
+   .bind(id,session.principal,session.grant_id,taskId,c.member.id,c.draft.submission_id,c.draft.id,body.inputRevision,body.inputHash,c.manifest.taskVersion,c.manifest.rubricHash,c.member.class_id,c.member.provider,c.member.subject,model.id,model.revision,model.model,JSON.stringify(c.modelImages),c.modelInputHash,GRADING_PIPELINE_VERSION,effectiveTemperature,key,generation,prior?.id||null,reason,now,now,c.draft.id,body.inputRevision,body.inputHash,c.member.id,taskId,...latestBinds),
+  env.DB.prepare("INSERT OR IGNORE INTO grading_operations(owner,request_id,request_hash,run_id,action,created) SELECT ?,?,?,id,'create',? FROM grading_runs WHERE owner=? AND run_key=? AND generation=? AND id=(SELECT id FROM grading_runs WHERE owner=? AND draft_id=? ORDER BY created DESC,id DESC LIMIT 1)").bind(session.principal,body.requestId,requestHash,now,session.principal,key,generation,session.principal,c.draft.id),
  ]);
  const accepted=await operation(env,session.principal,body.requestId,requestHash);if(!accepted)fail(409,'原稿或运行状态已改变，请重新读取。','grading_input_changed');
  if(accepted.state==='queued')try{await deliver(env,accepted.id);}catch{}return accepted;
@@ -215,6 +226,20 @@ export async function readBoundReport(env:Env,session:TaskSession,id:string,revi
  const current=await env.DB.prepare('SELECT input_hash FROM writing_drafts WHERE id=?').bind(row.draft_id).first<{input_hash:string}>();
  return {report:{id,runId:run.id,revision:wanted,latestRevision:row.current_revision,source:version.source,created:version.created,outdated:current?.input_hash!==row.input_hash},run:summary(run,current?.input_hash),document};
 }
+async function runHistory(env:Env,session:TaskSession,anchor:GradingRun,url:URL){
+ let before=Number.MAX_SAFE_INTEGER,beforeId='~';const cursor=url.searchParams.get('cursor');
+ if(cursor){try{const value=JSON.parse(atob(cursor));if(!Array.isArray(value)||value.length!==2||!Number.isSafeInteger(value[0])||value[0]<1||!uuid.test(value[1]))throw Error();[before,beforeId]=value;}catch{fail(400,'批阅历史分页位置不正确。');}}
+ const rows=await env.DB.prepare('SELECT r.*,p.current_revision AS report_revision FROM grading_runs r LEFT JOIN writing_reports p ON p.id=r.report_id WHERE r.owner=? AND r.draft_id=? AND (r.created<? OR (r.created=? AND r.id<?)) ORDER BY r.created DESC,r.id DESC LIMIT 21').bind(session.principal,anchor.draft_id,before,before,beforeId).all<GradingRun&{report_revision:number|null}>();
+ const current=await env.DB.prepare('SELECT input_hash FROM writing_drafts WHERE id=?').bind(anchor.draft_id).first<{input_hash:string}>(),page=rows.results.slice(0,20),last=page.at(-1);
+ return {runs:page.map(r=>({...summary(r,current?.input_hash),reason:r.reason,previousRunId:r.previous_run_id,reportRevision:r.report_revision})),next:rows.results.length>20?btoa(JSON.stringify([last!.created,last!.id])):null};
+}
+async function revisionHistory(env:Env,session:TaskSession,id:string,url:URL){
+ const run=await ownerRun(env,session,id),before=Number(url.searchParams.get('before')||Number.MAX_SAFE_INTEGER);if(!Number.isSafeInteger(before)||before<1)fail(400,'报告历史分页位置不正确。');
+ const report=await env.DB.prepare('SELECT current_revision FROM writing_reports WHERE id=? AND owner=?').bind(id,session.principal).first<{current_revision:number}>();if(!report)fail(404,'批改报告不存在。');
+ const rows=await env.DB.prepare('SELECT revision,source,reason,created FROM writing_report_revisions WHERE report_id=? AND revision<? ORDER BY revision DESC LIMIT 21').bind(id,before).all();
+ const p=await env.DB.prepare("SELECT p.version,p.report_id,p.report_revision,p.state,m.status AS member_status,d.state AS input_state,EXISTS(SELECT 1 FROM writing_integration_quarantine q WHERE q.draft_id=p.draft_id) AS quarantined,d.input_hash AS current_hash,p.input_hash FROM writing_publications p JOIN writing_drafts d ON d.id=p.draft_id JOIN task_members m ON m.id=p.member_id WHERE p.draft_id=? AND p.owner=?").bind(run.draft_id,session.principal).first<any>();
+ return {latestRevision:report.current_revision,revisions:rows.results.slice(0,20).map((r:any)=>({...r,studentVisible:!!p&&p.state==='published'&&p.member_status==='active'&&p.input_state==='received'&&!p.quarantined&&p.current_hash===p.input_hash&&p.report_id===id&&p.report_revision===r.revision})),next:rows.results.length>20?(rows.results[19] as any).revision:null};
+}
 async function editReport(env:Env,session:TaskSession,id:string,body:any,bridge:Bridge){
  if(!body||!token.test(body.requestId)||!Number.isSafeInteger(body.expectedRevision)||!body.result||typeof body.result!=='object'||Array.isArray(body.result))fail(400,'请提供报告修改、原版本及操作编号。');
  const run=await ownerRun(env,session,id),hash=await digest({action:'report-edit',id,body});
@@ -244,7 +269,7 @@ async function editReport(env:Env,session:TaskSession,id:string,body:any,bridge:
  return readBoundReport(env,session,id,Number(accepted.action.split('/')[1]));
 }
 export async function handleGrading(req:Request,env:Env,session:TaskSession,bridge:Bridge,input:Input):Promise<Response|null>{
- const url=new URL(req.url),taskMatch=url.pathname.match(/^\/api\/tasks\/([a-f0-9-]{36})\/grading$/),runMatch=url.pathname.match(/^\/api\/grading\/([a-f0-9-]{36})(?:\/(resume|pause|accept))?$/),reportMatch=url.pathname.match(/^\/api\/writing-reports\/([a-f0-9-]{36})$/);
+ const url=new URL(req.url),taskMatch=url.pathname.match(/^\/api\/tasks\/([a-f0-9-]{36})\/grading$/),runMatch=url.pathname.match(/^\/api\/grading\/([a-f0-9-]{36})(?:\/(resume|pause|accept|history))?$/),reportMatch=url.pathname.match(/^\/api\/writing-reports\/([a-f0-9-]{36})(?:\/(history))?$/);
  if(!taskMatch&&!runMatch&&!reportMatch)return null;
  if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
  if(taskMatch){
@@ -261,7 +286,7 @@ export async function handleGrading(req:Request,env:Env,session:TaskSession,brid
   const members=page.map(({subject,runId,...member})=>{const run=runsById.get(runId),p=publishedByDraft.get(member.draftId);return {...member,subjectShort:subject.slice(-8),run:run?summary(run,member.inputHash):null,publication:p?{state:p.state,version:p.version,reportId:p.report_id,reportRevision:p.report_revision,viewed:!!p.viewed,quarantined:!!p.quarantined,outdated:p.input_hash!==member.inputHash}:null};});
   return json({members,draftNumber:number,next:rows.results.length>100?rows.results[99].id:null});
  }
- if(runMatch){const run=await ownerRun(env,session,runMatch[1]);if(req.method==='GET'&&!runMatch[2]){const current=await env.DB.prepare('SELECT input_hash FROM writing_drafts WHERE id=?').bind(run.draft_id).first<{input_hash:string}>(),steps=await env.DB.prepare('SELECT id,stage,base_stage,attempt,job_id AS jobId,state,created,updated FROM grading_steps WHERE run_id=? ORDER BY created,id').bind(run.id).all();return json({run:summary(run,current?.input_hash),steps:steps.results});}if(req.method==='POST'&&runMatch[2])return json({run:summary(await (runMatch[2]==='accept'?acceptSavedResult(env,session,run.id,await input(req,8192),bridge):alterRun(env,session,run.id,runMatch[2] as 'resume'|'pause',await input(req,8192),bridge)))},202);fail(405,'批阅运行请求方式不支持。');}
- if(reportMatch){if(req.method==='GET')return json(await readBoundReport(env,session,reportMatch[1],url.searchParams.has('revision')?Number(url.searchParams.get('revision')):undefined));if(req.method==='PATCH')return json(await editReport(env,session,reportMatch[1],await input(req,2*1024*1024),bridge));fail(405,'报告请求方式不支持。');}
+ if(runMatch){const run=await ownerRun(env,session,runMatch[1]);if(req.method==='GET'&&runMatch[2]==='history')return json(await runHistory(env,session,run,url));if(req.method==='GET'&&!runMatch[2]){const current=await env.DB.prepare('SELECT input_hash FROM writing_drafts WHERE id=?').bind(run.draft_id).first<{input_hash:string}>(),steps=await env.DB.prepare('SELECT id,stage,base_stage,attempt,job_id AS jobId,state,created,updated FROM grading_steps WHERE run_id=? ORDER BY created,id').bind(run.id).all();return json({run:summary(run,current?.input_hash),steps:steps.results});}if(req.method==='POST'&&runMatch[2]&&runMatch[2]!=='history')return json({run:summary(await (runMatch[2]==='accept'?acceptSavedResult(env,session,run.id,await input(req,8192),bridge):alterRun(env,session,run.id,runMatch[2] as 'resume'|'pause',await input(req,8192),bridge)))},202);fail(405,'批阅运行请求方式不支持。');}
+ if(reportMatch){if(reportMatch[2]){if(req.method!=='GET')fail(405,'报告历史仅支持读取。');return json(await revisionHistory(env,session,reportMatch[1],url));}if(req.method==='GET')return json(await readBoundReport(env,session,reportMatch[1],url.searchParams.has('revision')?Number(url.searchParams.get('revision')):undefined));if(req.method==='PATCH')return json(await editReport(env,session,reportMatch[1],await input(req,2*1024*1024),bridge));fail(405,'报告请求方式不支持。');}
  return null;
 }
