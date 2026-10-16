@@ -1,4 +1,6 @@
-async page => {
+async rootPage => {
+  const isolated=await rootPage.context().browser().newContext(),page=await isolated.newPage();
+  try{
   const fixture=await (await page.request.get('http://127.0.0.1:5186/scripts/qa/fixtures/teacher-workflow.json')).json();
   await page.addInitScript(seed=>{localStorage.clear();localStorage.setItem('smart_grader_data_v5_0',JSON.stringify(seed));},fixture.seed);
   let modelCalls=0,releaseFirst,firstStarted;
@@ -55,4 +57,5 @@ async page => {
   const backupStream=await backup.createReadStream();let backupText='';for await(const chunk of backupStream)backupText+=chunk.toString('utf8');
   const data=JSON.parse(backupText);
   if(data.files?.filter(f=>f.status==='success').length!==2||!data.rubric||!data.studentProfiles)throw Error('Original full JSON backup was reduced.');
+  }finally{await isolated.close();}
 }

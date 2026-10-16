@@ -6,6 +6,7 @@ import {handleAssets} from './assets';
 import {handleSnapshots} from './snapshots';
 import {handleTasks} from './tasks';
 import {handleSheets} from './sheets';
+import {handleCollection} from './collection';
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
@@ -121,7 +122,7 @@ export default {
       }
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
-      if(/^\/api\/tasks(?:\/|$)/.test(path)){teacher(session);const response=await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
+      if(/^\/api\/tasks(?:\/|$)/.test(path)){teacher(session);const response=await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
       const modelResponse=await handleModelApi(req,env,session,input);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){

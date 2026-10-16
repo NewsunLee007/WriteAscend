@@ -115,4 +115,4 @@ R2 私有图片和报告通过后端授权读取。短期直传如采用 presign
 
 部署旧代码不能撤回已产生的数据。回滚采用兼容字段的增量迁移、功能开关及写入停止点；旧 GitHub 版本先保留，云端新增记录保持可导出。没有数据对账前不清理旧浏览器档案、不删除本机数据库。
 
-技术依据：[Workers 静态资源](https://developers.cloudflare.com/workers/static-assets/)、[R2 预签名地址](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)、[Cloudflare Access 服务凭据](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/)、[PKCE RFC 7636](https://www.rfc-editor.org/info/rfc7636/)。授权码桥接是本项目待实现的受控协议，以上资料不意味着 Daily 已提供 OAuth/OIDC 服务。
+技术依据：[Workers 静态资源](https://developers.cloudflare.com/workers/static-assets/)、[R2 预签名地址](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)、[Cloudflare Access 服务凭据](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/)、[PKCE RFC 7636](https://www.rfc-editor.org/info/rfc7636/)。授权码桥接是本项目实现的受控协议，以上资料不意味着 Daily 已提供 OAuth/OIDC 服务。

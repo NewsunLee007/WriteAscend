@@ -1,4 +1,6 @@
-async page => {
+async rootPage => {
+  const isolated=await rootPage.context().browser().newContext(),page=await isolated.newPage();
+  try{
   const fixture=await(await page.request.get('http://127.0.0.1:5186/scripts/qa/fixtures/teacher-workflow.json')).json();
   const browserErrors=[],requests=[];
   page.on('pageerror',e=>browserErrors.push(e.message));
@@ -71,4 +73,5 @@ async page => {
   if(await page.locator('.quick-files>li').count())throw Error('Another teacher can see the previous teacher draft.');
   if(await page.evaluate(async id=>(await fetch('/api/model/jobs/'+id+'/result')).status,job.id)!==404)throw Error('Another teacher can read the private model result.');
   if(browserErrors.length)throw Error('Cloud runtime errors: '+browserErrors.join('; '));
+  }finally{await isolated.close();}
 }

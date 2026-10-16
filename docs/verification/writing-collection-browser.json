@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-16T13:48:13.784990+00:00",
+  "syntheticOnly": true,
+  "realCameraVerified": false,
+  "checks": [
+    {
+      "script": "scripts/qa/writing-collection.cjs",
+      "scriptSha256": "2469d8b609b15ff4681199290ab4057b0427e2d782cd3859c4690c5ed090a160",
+      "result": {
+        "passed": true,
+        "offlinePhotoRecovered": true,
+        "lostReceiptReused": true,
+        "multiPageComplete": true,
+        "rescanDeduplicated": true,
+        "replacementHistoryPreserved": true,
+        "sameNameSeparated": true,
+        "manualIdentityReviewed": true,
+        "multiplePapersBlocked": true,
+        "cameraStopsOnClose": true,
+        "logoutClearsPhotosAcrossTabs": true
+      }
+    },
+    {
+      "script": "scripts/qa/collection-shortcut.cjs",
+      "scriptSha256": "eacb8120f62a35d14a2237e5619e4a6e3e4e2411e3ed6c3d174a25a7eb4d714e",
+      "result": {
+        "passed": true,
+        "loadedTaskOpensCollectionDirectly": true,
+        "currentReceiptsPreserved": true,
+        "originalPhotoDimensionsPreserved": true
+      }
+    },
+    {
+      "script": "scripts/qa/scan-outbox.cjs",
+      "scriptSha256": "444cd8ad4560e255e404e0a3ac7d2542d2682e82f1ae371d9b679930bd7e5f73",
+      "result": {
+        "passed": true,
+        "workspaceIsolation": true,
+        "blobsPersisted": true,
+        "staleWritesAfterLogoutRejected": true,
+        "newSessionCanSave": true
+      }
+    },
+    {
+      "script": "scripts/qa/scan-prepare-recovery.cjs",
+      "scriptSha256": "bd3f9b85b0df597094f24364f17c98c1ee4dfc70fbf795c8b1bbd456f63fffed",
+      "result": {
+        "passed": true,
+        "interruptedPreparationRecovered": true,
+        "originalBytesPreserved": true,
+        "thumbnailLongEdge": 1100,
+        "identityStillRequiresConfirmation": true
+      }
+    },
+    {
+      "script": "scripts/qa/logout-migration.cjs",
+      "scriptSha256": "f22f82c4aa035125fda48479f2e33dbaa4f75ad8507504c886ce7ac874f7fb4a",
+      "result": {
+        "passed": true,
+        "logoutClearsMigrationGateAcrossTabs": true
+      }
+    },
+    {
+      "script": "scripts/qa/teacher-workflow.cjs",
+      "scriptSha256": "5b107bdcc41bde85b73ac598e382aa76909dfb7c698cc3b50d7013554bc09f54",
+      "completedWithoutError": true
+    },
+    {
+      "script": "scripts/qa/quick-grading.cjs",
+      "scriptSha256": "b63a1c495029d35d511aed093514789bf3fb03608eb8a56736ba9c5e7f95cea8",
+      "completedWithoutError": true
+    },
+    {
+      "script": "scripts/qa/batch-grading.cjs",
+      "scriptSha256": "7908499d8fc4515a95b8a8f319df6360dc5c703c02b2181073f022fedc0d2db3",
+      "completedWithoutError": true
+    },
+    {
+      "script": "scripts/qa/cloud-grading.cjs",
+      "scriptSha256": "4b6a2381391fc0f5257e5f275c8e6d8645b6ae02db4142ca0c43d774a52fdf02",
+      "completedWithoutError": true
+    }
+  ]
+}

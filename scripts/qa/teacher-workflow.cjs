@@ -1,4 +1,6 @@
-async page => {
+async rootPage => {
+  const isolated=await rootPage.context().browser().newContext(),page=await isolated.newPage();
+  try{
   const fixture=await (await page.request.get('http://127.0.0.1:5186/scripts/qa/fixtures/teacher-workflow.json')).json();
   await page.addInitScript(seed=>{
     localStorage.clear();
@@ -35,4 +37,5 @@ async page => {
   if(size.scroll>size.viewport)throw Error('Teacher mobile screen overflows: '+JSON.stringify(size));
   const paper=await page.locator('.teacher-grading-detail .a4-wrapper').evaluate(e=>({width:e.getBoundingClientRect().width,parent:e.parentElement.getBoundingClientRect().width}));
   if(paper.width>paper.parent+1)throw Error('Report is clipped inside the mobile card.');
+  }finally{await isolated.close();}
 }

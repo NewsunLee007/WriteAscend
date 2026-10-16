@@ -55,9 +55,9 @@ test('a repeated or concurrently retried task creation creates exactly one task 
 });
 test('draft changes use immutable rubric versions and concurrent device updates do not overwrite a newer version',async()=>{
   const h=sandbox();try{
-    const task=await h.create(),a=h.payload({expectedRevision:1,title:'设备 A'}),b=h.payload({expectedRevision:1,title:'设备 B'});a.rubric.gradeLevel='九年级';
+    const task=await h.create(),a=h.payload({expectedRevision:1,title:'设备 A'}),b=h.payload({expectedRevision:1,title:'设备 B'});a.rubric.gradeLevel='九年级';b.rubric.gradeLevel='八年级';
     const updates=await Promise.all([h.request('/api/tasks/'+task.id,a,'PUT'),h.request('/api/tasks/'+task.id,b,'PUT')]);assert.deepEqual(updates.map(r=>r.status).sort(),[200,409]);
-    const read=await h.request('/api/tasks/'+task.id),old=await h.request('/api/tasks/'+task.id+'?version=1');assert.equal(read.body.task.version,2);assert.equal(read.body.document.rubric.gradeLevel,'九年级');assert.equal(old.body.document.rubric.gradeLevel,'七年级');assert.notEqual(old.body.task.rubricHash,read.body.task.rubricHash);
+    const read=await h.request('/api/tasks/'+task.id),old=await h.request('/api/tasks/'+task.id+'?version=1');assert.equal(read.body.task.version,2);assert.equal(read.body.document.rubric.gradeLevel,updates[0].status===200?a.rubric.gradeLevel:b.rubric.gradeLevel);assert.equal(old.body.document.rubric.gradeLevel,'七年级');assert.notEqual(old.body.task.rubricHash,read.body.task.rubricHash);
     assert.equal((await h.request('/api/tasks/'+task.id+'/versions')).body.versions.length,2);
   }finally{h.close();}
 });

@@ -2,3 +2,5 @@
 @media(max-width:640px){.teacher-tasks-bar{margin:0 16px;padding:0 10px}.teacher-tasks-overlay{padding:12px}.teacher-tasks-dialog{max-height:94dvh;border-radius:17px}.teacher-tasks-dialog>header{padding:20px}.teacher-tasks-content{padding:12px 16px 18px}.teacher-tasks-content article{flex-direction:column;align-items:stretch;gap:12px}.teacher-tasks-content article nav{justify-content:flex-start}.task-create{padding:4px 14px 16px}}
 
 .task-member-search{width:100%;min-height:44px;border:1px solid #e1e6ef;background:white;border-radius:9px;padding:10px 12px;font-size:16px}
+
+.teacher-tasks-bar>span{min-width:0;overflow-wrap:anywhere}.teacher-task-actions{display:flex;gap:8px;flex-shrink:0}

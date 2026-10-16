@@ -1,4 +1,6 @@
-async page => {
+async rootPage => {
+  const isolated=await rootPage.context().browser().newContext(),page=await isolated.newPage();
+  try{
   const fixture=await (await page.request.get('http://127.0.0.1:5186/scripts/qa/fixtures/teacher-workflow.json')).json();
   await page.addInitScript(seed=>{
     localStorage.clear();
@@ -42,4 +44,5 @@ async page => {
   await page.getByRole('button',{name:'完整工作台',exact:true}).click();
   await page.getByRole('heading',{name:'1 评分标准',exact:true}).waitFor();
   if(errors.length)throw Error('Runtime errors: '+errors.join('; '));
+  }finally{await isolated.close();}
 }

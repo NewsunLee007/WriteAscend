@@ -38,9 +38,9 @@ test('reissue requires the exact previous sheet set, revokes old codes atomicall
     const first=h.input(1),issued=await h.request(path,first),stale=h.input(1);assert.equal((await h.request(path,stale)).status,409);assert.equal((await h.request(path+'/resolve',{code:first.members[0].tokens[0]})).status,200);
     const again=h.input(1);again.members.forEach((m,i)=>m.expectedSetId=issued.body.sets[i].id);
     const concurrent=h.input(1);concurrent.members.forEach((m,i)=>m.expectedSetId=issued.body.sets[i].id);
-    const result=await Promise.all([h.request(path,again),h.request(path,concurrent)]);assert.deepEqual(result.map(r=>r.status).sort(),[201,409]);
-    assert.equal((await h.request(path+'/resolve',{code:first.members[0].tokens[0]})).status,410);assert.equal((await h.request(path+'/resolve',{code:again.members[0].tokens[0]})).status,200);
-    const second=h.input(2);second.draftNumber=2;assert.equal((await h.request(path,second)).status,201);assert.equal((await h.request(path+'/resolve',{code:again.members[0].tokens[0]})).status,200);
+    const result=await Promise.all([h.request(path,again),h.request(path,concurrent)]);assert.deepEqual(result.map(r=>r.status).sort(),[201,409]);const winner=result[0].status===201?again:concurrent;
+    assert.equal((await h.request(path+'/resolve',{code:first.members[0].tokens[0]})).status,410);assert.equal((await h.request(path+'/resolve',{code:winner.members[0].tokens[0]})).status,200);
+    const second=h.input(2);second.draftNumber=2;assert.equal((await h.request(path,second)).status,201);assert.equal((await h.request(path+'/resolve',{code:winner.members[0].tokens[0]})).status,200);
     assert.equal(h.db.prepare("SELECT COUNT(*) n FROM writing_sheet_sets WHERE status='active'").get()!.n,4);
   }finally{h.close();}
 });

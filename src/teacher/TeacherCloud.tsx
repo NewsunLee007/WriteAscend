@@ -23,10 +23,10 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
       setMode('cloud');
       if(!body.loginConfigured){setStatus('unconfigured');setMessage('统一登录正在接入，请稍后再来。');return;}
       const response=await fetch('/api/me',{cache:'no-store'});
-      if(response.status===401){setStatus('anonymous');return;}
+      if(response.status===401){setIdentity(null);setProfiles([]);setMigration(false);setStatus('anonymous');return;}
       const me=await response.json();
       if(!response.ok)throw Error(me.error?.message||'暂时无法确认登录账号。');
-      if(!['teacher','admin'].includes(me.role)){setIdentity(null);setStatus('forbidden');return;}
+      if(!['teacher','admin'].includes(me.role)){setIdentity(null);setProfiles([]);setMigration(false);setStatus('forbidden');return;}
       if(typeof me.workspaceId!=='string'||!/^[a-f0-9]{64}$/.test(me.workspaceId))throw Error('登录工作区信息不完整。');
       const namespace=workspaceStorage(me.workspaceId);
       try{
@@ -48,12 +48,20 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
   }
   useEffect(()=>{void refresh();},[]);
   const setProfileId=(id:string)=>{selectProfile(id);try{storage.setItem('cloud_profile',id);}catch{}};
+  useEffect(()=>{
+    const onStorage=(event:StorageEvent)=>{if(event.key!=='wa_signed_out'||!event.newValue||!identity)return;try{if(JSON.parse(event.newValue).workspaceId===identity.workspaceId){setIdentity(null);setProfiles([]);setMigration(false);setStatus('anonymous');setMessage('当前账号已在另一页面退出。');}}catch{}};
+    window.addEventListener('storage',onStorage);return()=>window.removeEventListener('storage',onStorage);
+  },[identity?.workspaceId]);
   async function logout(){
     try{
+      const scans=await import('./scan-outbox');
+      if(identity){const pending=(await scans.readScanItems(identity.workspaceId)).filter(i=>i.stage!=='received');if(pending.length&&!window.confirm('本机还有 '+pending.length+' 张扫描照片尚未确认收取。退出会清除这些本机照片，需保留原图或重新拍摄。是否退出并清理？'))return;}
       const response=await fetch('/api/auth/logout',{method:'POST'});
       if(!response.ok)throw Error();
       try{for(const key of Object.keys(sessionStorage))if(key.startsWith('wa_sheet_pending:'))sessionStorage.removeItem(key);}catch{}
-      setIdentity(null);setProfiles([]);setStatus('anonymous');setMessage('');
+      let cleanupMessage='';
+      if(identity){try{localStorage.setItem('wa_signed_out',JSON.stringify({workspaceId:identity.workspaceId,nonce:crypto.randomUUID()}));}catch{}try{await scans.clearScanWorkspace(identity.workspaceId);}catch{cleanupMessage='已退出，但本机扫描缓存未能清理；共享设备请在浏览器中清除此网站的数据。';}}
+      setIdentity(null);setProfiles([]);setMigration(false);setStatus('anonymous');setMessage(cleanupMessage);
     }catch{setMessage('退出暂未完成，请检查网络后重试。');}
   }
   function decideMigration(importData:boolean){
@@ -72,7 +80,7 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
   return <context.Provider value={value}>{mounted?<React.Fragment key={(identity?.workspaceId||'local')+':'+generation}>{children}</React.Fragment>:<main className="teacher-cloud-gate">
     <section><img src="/favicon.svg" alt=""/><p className="cloud-eyebrow">教师作文工作区</p><h1>英语作文，一键批阅。</h1><p>设置或复用题目与评分标准，批量上传作文，借助大模型批阅，再核对、编辑和导出。</p>
       {migration?<><h2>保留这台设备上的原有数据</h2><p>发现旧版批改设置或历史记录。可将它们带入当前教师工作区，原数据会继续保留。模型密钥不会带入云端模式。</p><button onClick={()=>decideMigration(true)}>带入本机原有数据</button><button className="secondary" onClick={()=>decideMigration(false)}>新建空工作区</button></>:<>
-        <p role="status">{status==='loading'?'正在连接教师工作区…':status==='forbidden'?'当前登录的是学生账号，请切换教师或管理员账号。':status==='unconfigured'||status==='error'?message:'使用 Daily 教师账号登录后开始批改。'}</p>
+        <p role="status">{status==='loading'?'正在连接教师工作区…':status==='forbidden'?'当前登录的是学生账号，请切换教师或管理员账号。':status==='unconfigured'||status==='error'?message:message||'使用 Daily 教师账号登录后开始批改。'}</p>
         {['anonymous','forbidden'].includes(status)&&<a className="cloud-primary" href="/api/auth/start">使用 Daily 登录</a>}
         {status==='forbidden'&&<button className="secondary" onClick={()=>void logout()}>退出当前账号</button>}
         {['error','unconfigured'].includes(status)&&<button onClick={()=>void refresh()}>重新连接</button>}

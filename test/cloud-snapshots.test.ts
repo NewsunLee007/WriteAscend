@@ -63,10 +63,10 @@ test('saved cloud reports retain original sections, teacher scores, rubric and u
 test('concurrent devices cannot overwrite each other; immutable versions retain past rubric and manual changes',async()=>{
   const h=sandbox();try{
     const first=document(),initial=await(await h.save(first)).json() as any,id=initial.cloud.id;
-    const a=structuredClone(first),b=structuredClone(first);a.data.files[0].result.brief_comment='教师 A 核对';a.data.files[0].result.total_score=14.5;a.data.rubric.gradeLevel='九年级';b.data.files[0].result.brief_comment='教师 B 核对';
+    const a=structuredClone(first),b=structuredClone(first);a.data.files[0].result.brief_comment='教师 A 核对';a.data.files[0].result.total_score=14.5;a.data.rubric.gradeLevel='九年级';b.data.files[0].result.brief_comment='教师 B 核对';b.data.rubric.gradeLevel='八年级';
     const responses=await Promise.all([h.save(a,1,'synthetic-concurrent-A-0001'),h.save(b,1,'synthetic-concurrent-B-0001')]);assert.deepEqual(responses.map(r=>r.status).sort(),[200,409]);
     const latest=await(await h.request('/api/snapshots/'+id)).json() as any;
-    assert.equal(latest.cloud.revision,2);assert.equal(latest.snapshot.data.files[0].result.brief_comment,'教师 A 核对');assert.equal(latest.snapshot.data.files[0].result.total_score,14.5);
+    const winner=responses[0].status===200?a:b;assert.equal(latest.cloud.revision,2);assert.equal(latest.snapshot.data.files[0].result.brief_comment,winner.data.files[0].result.brief_comment);assert.equal(latest.snapshot.data.files[0].result.total_score,winner.data.files[0].result.total_score);
     const previous=await(await h.request('/api/snapshots/'+id+'?revision=1')).json() as any;
     assert.equal(previous.snapshot.data.files[0].result.total_score,15.5);assert.equal(previous.snapshot.data.rubric.gradeLevel,'七年级');assert.equal(previous.cloud.latestRevision,2);assert.notEqual(previous.cloud.rubricHash,latest.cloud.rubricHash);
     const replay=await(await h.save(first)).json() as any;assert.equal(replay.cloud.revision,1);assert.equal(replay.cloud.latestRevision,2);
