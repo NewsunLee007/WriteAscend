@@ -176,7 +176,7 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
         if (body.after !== undefined && (typeof body.after !== 'string' || body.after.length > 200)) fail(400, '分页位置无效。');
         const result = await readRoster({classId:classroom.id,after:body.after || '',limit:100});
         // The adapter supplies authority-filtered rows; no client-chosen columns.
-        send(res,200,{classId:classroom.id,version:classroom.version,students:result.students.map(s=>({provider:'wordup',subject:s.subject,name:s.name,grade:s.grade,classId:classroom.id,status:'active'})),next:result.next || null});return true;
+        send(res,200,{classId:classroom.id,version:classroom.version,snapshotHash:typeof result.snapshotHash==='string'?result.snapshotHash:null,students:result.students.map(s=>({provider:'wordup',subject:s.subject,name:s.name,grade:s.grade,classId:classroom.id,status:'active'})),next:result.next || null});return true;
       }
       fail(404, '接口不存在。');
     } catch (error) {send(res,error.status || 500,{error:{message:error.status?error.message:'作文登录服务暂时不可用。'}});}

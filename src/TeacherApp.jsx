@@ -6,6 +6,8 @@ import {createCloudModelTransport} from './teacher/cloud-model';
 import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
 import {useCloudSnapshots} from './teacher/useCloudSnapshots';
 import {CloudSnapshotsPanel} from './teacher/CloudSnapshotsPanel';
+import {TeacherTasksPanel} from './teacher/TeacherTasksPanel';
+import {taskClasses,uniqueStudent} from './teacher/task-roster';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -754,6 +756,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [rubricDesignAppliedAt, setRubricDesignAppliedAt] = useState('');
             const [languageDifficulty, setLanguageDifficulty] = useState({ enabled: true, capRatio: 1.0, autoRewrite: true });
             const [activeCloudSnapshot, setActiveCloudSnapshot] = useState(null);
+            const [sourceTask,setSourceTask] = useState(null);
             const [saveToCurrentCloud, setSaveToCurrentCloud] = useState(false);
             const lastSavedLocalIdRef = useRef('');
             const lastSavedAtRef = useRef('');
@@ -772,9 +775,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             });
             const draftError = useWorkspaceDraft({
                 workspaceId: cloud.mode === 'cloud' ? cloud.identity.workspaceId : null,
-                draft: { files, selectedFileId, step, activeCloudSnapshot },
+                draft: { files, selectedFileId, step, activeCloudSnapshot, sourceTask },
                 restore: saved => {
                     setActiveCloudSnapshot(saved.activeCloudSnapshot || null);
+                    setSourceTask(saved.sourceTask || null);
                     if(saved.activeCloudSnapshot){lastSavedLocalIdRef.current=saved.activeCloudSnapshot.localId||'';lastSavedAtRef.current=saved.activeCloudSnapshot.localSavedAt||'';}
                     setFiles(saved.files);
                     setSelectedFileId(saved.files.some(f => f.id === saved.selectedFileId) ? saved.selectedFileId : saved.files[0]?.id || null);
@@ -2020,6 +2024,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         pdfConfig,
                         csvExportConfig,
                         studentProfiles,
+                        sourceTask,
                         files: (Array.isArray(files) ? files : []).map(f => ({ ...(f || {}), file: null, url: null }))
                     }
                 };
@@ -2055,6 +2060,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 if (!item || !item.data) return;
                 if (isBatchProcessing) return alert('请先暂停当前批改，再恢复历史结果。');
                 const d = item.data || {};
+                setSourceTask(d.sourceTask || null);
                 if (d.assignment) setAssignment(d.assignment);
                 if (item.cloud && d.rubric) {
                     setRubric(JSON.parse(JSON.stringify(d.rubric)));
@@ -2912,7 +2918,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const findStudentByNoInClass = (clsObj, noStr) => {
                     if (!clsObj || !noStr) return null;
                     const students = Array.isArray(clsObj.students) ? clsObj.students : [];
-                    const hit = students.find(s => normalizeNo(s && s.no) === normalizeNo(noStr));
+                    const hit = uniqueStudent(students,s => normalizeNo(s && s.no) === normalizeNo(noStr));
                     return hit ? { classObj: clsObj, studentObj: hit } : null;
                 };
                 const findUniqueStudentByNoAcrossClasses = (noStr) => {
@@ -2920,9 +2926,11 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     const list = Array.isArray(classes) ? classes : [];
                     const hits = [];
                     for (const c of list) {
-                        const h = findStudentByNoInClass(c, noStr);
-                        if (h) hits.push(h);
-                        if (hits.length > 1) break;
+                        const students=Array.isArray(c?.students)?c.students:[];
+                        for(const studentObj of students){
+                            if(normalizeNo(studentObj?.no)===normalizeNo(noStr))hits.push({classObj:c,studentObj});
+                            if(hits.length>1)return null;
+                        }
                     }
                     return hits.length === 1 ? hits[0] : null;
                 };
@@ -2986,7 +2994,13 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         next.identity_score = 0;
                         next.identity_method = 'no';
                     } else {
-                        const studentObj = (classObj.students || []).find(s => s && normalizeName(s.name) === normalizeName(finalStudentName)) || null;
+                        const nameMatches=(classObj.students || []).filter(s => s && normalizeName(s.name) === normalizeName(finalStudentName));
+                        if(nameMatches.length>1){
+                            next.student_id='';next.student_name=finalStudentName;next.identity_status='ambiguous';next.identity_method='name';
+                            next.identity_candidates=nameMatches.map(s=>({class_name:classObj.name,student_name:s.name,student_id:s.id,short_id:String(s.authority?.subject||s.id).slice(-8),score:0}));
+                            return next;
+                        }
+                        const studentObj = nameMatches[0] || null;
                         if (studentObj) {
                             next.student_id = String(studentObj.id);
                             const no = (studentObj && studentObj.no !== undefined && studentObj.no !== null) ? String(studentObj.no).trim() : '';
@@ -3069,7 +3083,15 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const oldStudentId = (prev.student_id || '').toString();
                 const studentId = (r0.student_id || '').toString();
                 const classId = (r0.class_id || '').toString();
-                if (!studentId || !classId) return r0;
+                if (!studentId || !classId) {
+                    const oldArchiveId=String(prev.archive_id||'');
+                    if(oldStudentId&&oldArchiveId)setStudentProfiles(previous=>{
+                        const profile=previous?.[oldStudentId];
+                        if(!profile||!Array.isArray(profile.records))return previous;
+                        return {...previous,[oldStudentId]:{...profile,records:profile.records.filter(record=>String(record?.id)!==oldArchiveId)}};
+                    });
+                    return {...r0,archive_id:''};
+                }
 
                 const archiveId = (r0.archive_id || prev.archive_id || '').toString() || createId();
                 const r = { ...r0, archive_id: archiveId };
@@ -4917,6 +4939,20 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         
                         <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
                             <CloudConnection busy={isBatchProcessing}/>
+                            {cloud.mode === 'cloud' && <TeacherTasksPanel assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} busy={isBatchProcessing} sourceTask={sourceTask} onApply={(value,members) => {
+                                if(isBatchProcessing)return;
+                                if(files.length)throw new Error('当前批次已有作文。请先保存结果，再到完整工作台的“导入作文”中清空重选，然后载入任务，避免旧报告套用新标准。');
+                                setAssignment(value.document.assignment);setRubric(value.document.rubric);setSourceTask(value.task);
+                                const settings=value.document.settings||{};
+                                if(settings.pdfConfig)setPdfConfig(settings.pdfConfig);
+                                if(settings.csvExportConfig)setCsvExportConfig(settings.csvExportConfig);
+                                if(settings.languageDifficulty)setLanguageDifficulty(settings.languageDifficulty);
+                                if(members.length){
+                                    const imported=taskClasses(value,members,classes),ids=imported.map(c=>c.id);
+                                    setClasses(previous=>[...previous.filter(c=>!ids.includes(c.id)),...imported]);setCurrentClassId(ids[0]);setActiveClassIds(ids);
+                                } else setClasses(previous=>previous.map(c=>String(c.id)===String(currentClassId)?{...c,gradeLevel:value.document.rubric.gradeLevel}:c));
+                                setStep(0);
+                            }}/>}
                             {cloud.mode === 'cloud' && <CloudSnapshotsPanel sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value => {
                                 applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});
                                 if(!isBatchProcessing){setStep(2);setMaxStep(previous => Math.max(previous,2));}

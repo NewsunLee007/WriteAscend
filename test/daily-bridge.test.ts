@@ -131,6 +131,9 @@ test('teacher class grants are explicit and revocation is checked live for roste
     assert.equal(first.students.length,1);assert.equal(first.next,'s1');
     const second=readRoster({classId:'c1',after:first.next!,limit:1});
     assert.equal(second.students[0].subject,'s2');assert.equal(second.next,null);
+    assert.match(first.snapshotHash,/^[a-f0-9]{64}$/);assert.equal(first.snapshotHash,second.snapshotHash);
+    const changed=new DatabaseSync(sourceFile);changed.prepare('UPDATE students SET name=? WHERE id=?').run('合成改名','s2');changed.close();
+    assert.notEqual(readRoster({classId:'c1',limit:1}).snapshotHash,first.snapshotHash);
     assert(!JSON.stringify(first).includes('pin_hash'));assert(!JSON.stringify(first).includes('never-export'));
     assert.equal((await h.request('roster',{grantId:identity.grantId,classId:'c2'},h.machine)).status,403);
     h.db.exec("UPDATE writing_teacher_class_grants SET revoked=1,version=version+1 WHERE class_id='c1'");

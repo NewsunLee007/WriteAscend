@@ -42,9 +42,10 @@ export function createWritingRoster({db,sourceFile=process.env.WORDUP_REPORT_DB 
       // confirmed source class and grade must all agree with the membership.
       const rows = source.prepare("SELECT id,name,grade,class_name,status FROM students WHERE status='active' AND is_guest=0 AND source_key NOT LIKE 'public:%' AND class_name=? AND grade=?").all(classroom.source_name,classroom.grade);
       const members = new Set(db.prepare("SELECT subject FROM writing_memberships WHERE class_id=? AND provider='wordup' AND status='active' AND ended IS NULL").all(classId).map(r=>r.subject));
-      const ordered = rows.filter(r=>members.has(r.id) && r.id>after).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
-      const page = ordered.slice(0,limit);
-      return {students:page.map(r=>({subject:r.id,name:r.name,grade:r.grade})),next:ordered.length>limit?page.at(-1).id:null};
+      const ordered = rows.filter(r=>members.has(r.id)).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
+      const snapshotHash = digest(JSON.stringify({classId,version:classroom.version,students:ordered.map(r=>({subject:r.id,name:r.name,grade:r.grade}))}));
+      const remaining=ordered.filter(r=>r.id>after),page = remaining.slice(0,limit);
+      return {students:page.map(r=>({subject:r.id,name:r.name,grade:r.grade})),snapshotHash,next:remaining.length>limit?page.at(-1).id:null};
     } finally {source.close();}
   };
 }

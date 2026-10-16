@@ -62,6 +62,8 @@ test('Worker and Daily exchange actual authorization code over HTTP and create o
     assert.deepEqual(await (await h.request('/api/classes',logged.cookie)).json(),{classes:[]});
     assert.equal((await h.request('/api/assets',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/snapshots',logged.cookie,'POST')).status,403);
+    assert.equal((await h.request('/api/tasks',logged.cookie,'POST')).status,403);
+    assert.equal((await h.request('/api/tasks/synthetic',logged.cookie,'PUT')).status,403);
     assert.equal((await h.request('/api/auth/logout',logged.cookie,'POST','https://foreign.test')).status,403);
     assert.equal((await h.request('/api/me',logged.cookie)).status,200);
     assert.equal((await h.request('/api/auth/logout',logged.cookie,'POST')).status,200);

@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 
-type Draft={files:any[];selectedFileId:string|null;step:number;activeCloudSnapshot?:unknown};
+type Draft={files:any[];selectedFileId:string|null;step:number;activeCloudSnapshot?:unknown;sourceTask?:unknown};
 type Options={workspaceId:string|null;draft:Draft;restore:(draft:Draft)=>void};
 function openDatabase(){return new Promise<IDBDatabase>((resolve,reject)=>{
   const request=indexedDB.open('writeascend-private-drafts',1);
@@ -55,6 +55,6 @@ export function useWorkspaceDraft({workspaceId,draft,restore}:Options){
       transaction.objectStore('drafts').put({...draft,files},workspaceId);
       void done(transaction).then(()=>{knownImages.current=next;setError('');},()=>setError('临时作文未能保存在这台设备上，请保留原图并及时保存结果。'));
     }catch{setError('临时作文未能保存在这台设备上，请保留原图并及时保存结果。');}
-  },[workspaceId,ready,draft.files,draft.selectedFileId,draft.step,draft.activeCloudSnapshot]);
+  },[workspaceId,ready,draft.files,draft.selectedFileId,draft.step,draft.activeCloudSnapshot,draft.sourceTask]);
   return error;
 }

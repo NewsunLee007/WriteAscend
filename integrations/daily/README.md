@@ -42,10 +42,12 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 
 当前还没有学校目录初始化与授权管理界面，正式目录尚未写入。学校及学年由管理员在后续预检中确认，不能按日期自动猜测，不能通过姓名自动授予班级权限。
 
+只读名册现在返回完整过滤名册的 `snapshotHash`，各页使用同一摘要。WriteAscend 建立班级任务时要求该摘要，分页期间发生改名、停用、转班或成员变化会拒绝拼接不一致的名单；确认时还会重新比较预览内容。本次模块升级已经过安装摘要检查并保留快照，没有启用正式桥接或重启运行进程。
+
 ## 已验证与未完成
 
 - WriteAscend 的 `npm test` 包含桥接、来源身份适配、名册权限和 Worker/Daily HTTP 协议测试。
 - Daily 原有回归加新增登录返回测试共 14 项通过。
 - 实际 Wrangler 本地 D1/Worker + 合成 Daily 来源 + 390px 浏览器完成跨域登录、会话核验和退出验证，见 `scripts/qa/cloud-login.cjs`。
 - 合成来源不代表真实账号登录、正式 Cloudflare 防护、真实名册初始化已经通过。
-- 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`；正式目录、名册投影同步与结果发布仍在开发范围内。
+- 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；正式目录初始化、教师授权管理、真实名册对账与结果发布仍在开发范围内。
