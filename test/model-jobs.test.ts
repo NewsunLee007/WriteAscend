@@ -12,7 +12,7 @@ const teacher={principal:'wordup:teacher-1',grant_id:'grant-1',role:'teacher'};
 const authorized=async()=>({active:true,provider:'wordup',subject:'teacher-1',role:'teacher',scopes:['writing.personal']});
 const fixture=JSON.parse(fs.readFileSync(new URL('../scripts/qa/fixtures/teacher-workflow.json',import.meta.url),'utf8'));
 function sandbox(){
-  const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync(new URL('../migrations/0002_model_jobs.sql',import.meta.url),'utf8'));
+  const db=new DatabaseSync(':memory:');for(const migration of fs.readdirSync('migrations').filter(f=>f.endsWith('.sql')).sort())db.exec(fs.readFileSync('migrations/'+migration,'utf8'));
   const objects=new Map<string,string>(),sent:any[]=[];
   let brokerDown=false,outputStorageDown=false;
   const env={DB:sqlD1(db),PUBLIC_ORIGIN:'https://writeascend.test',MODEL_API_URL:'https://model.invalid/v1/chat/completions',MODEL_NAME:'server-test-model',MODEL_API_KEY:'synthetic-server-model-key',MODEL_JOBS:{send:async(body:any)=>{if(brokerDown)throw Error('synthetic broker failure');sent.push(body);}},FILES:{put:async(key:string,value:string)=>{if(outputStorageDown&&key.startsWith('model-output/'))throw Error('synthetic R2 failure');objects.set(key,value);},get:async(key:string)=>{const value=objects.get(key);if(value===undefined)return null;return {body:new Response(value).body,json:async()=>JSON.parse(value)};}}} as unknown as Env;

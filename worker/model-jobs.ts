@@ -2,8 +2,9 @@ import type {MessageBatch,Queue} from '@cloudflare/workers-types';
 import type {Env} from './index';
 import {HttpError} from './errors';
 import {hydrateAssetImages} from './assets';
+import type {GradingBinding} from './grading-types';
 
-export type ModelJobMessage={jobId:string};
+export type ModelJobMessage={jobId:string;runId?:never}|{runId:string;jobId?:never};
 export interface ModelBindings {
   MODEL_JOBS?:Queue<ModelJobMessage>;
   MODEL_PROFILES?:string;
@@ -15,12 +16,12 @@ export interface ModelBindings {
   [key:`MODEL_KEY_${string}`]:string|undefined;
 }
 type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string};
-type Principal={principal:string;grant_id:string;role:string};
+type Principal={principal:string;grant_id:string;role:string;classes?:Array<{id:string;scopes:string[]}>};
 type Job={id:string;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('');
-function fail(status:number,message:string):never{throw new HttpError(status,message);}
+function fail(status:number,message:string,code?:string):never{throw new HttpError(status,message,code);}
 
 function profiles(env:Env):Profile[]{
   let raw:unknown=[];
@@ -99,46 +100,14 @@ export async function handleModelApi(req:Request,env:Env,session:Principal,readI
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
   if(path==='/api/model/profiles'&&req.method==='GET')return json({profiles:modelCatalog(env)});
   if(path==='/api/model/jobs'&&req.method==='POST'){
-    if(!env.MODEL_JOBS)fail(503,'云端批改队列尚未配置。');
-    const input=await readInput(req,20*1024*1024) as any;
-    if(!input||typeof input.profileId!=='string'||typeof input.requestId!=='string'||!/^[-a-zA-Z0-9_]{16,128}$/.test(input.requestId))fail(400,'请提供有效的模型和请求编号。');
-    const profile=profiles(env).find(p=>p.id===input.profileId);
-    if(!profile||!keyFor(env,profile))fail(400,'此云端模型尚未配置，请重新选择。');
-    const payload=validateModelPayload(input.payload);
-    validateImageCapability(profile,payload);
-    const dailyLimit=Number(env.MODEL_DAILY_LIMIT??1200),pendingLimit=Number(env.MODEL_PENDING_LIMIT??20);
-    if(!Number.isInteger(dailyLimit)||dailyLimit<0||dailyLimit>1000000||!Number.isInteger(pendingLimit)||pendingLimit<1||pendingLimit>200)fail(503,'云端任务额度配置不正确，请联系管理员。');
-    const profileRevision=await revision(profile),requestHash=await sha(JSON.stringify({payload,profileRevision}));
-    const existing=await env.DB.prepare('SELECT * FROM model_jobs WHERE owner=? AND request_id=?').bind(session.principal,input.requestId).first<Job>();
-    if(existing){
-      if(existing.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的作文或模型设置。');
-      return json(safeJob(existing),202);
-    }
-    const id=crypto.randomUUID(),created=Date.now(),requestKey='model-input/'+await sha(session.principal)+'/'+id+'.json';
-    // Atomic per-owner intake limit; clients cannot bypass it with concurrent POSTs.
-    const inserted=await env.DB.prepare("INSERT OR IGNORE INTO model_jobs(id,owner,grant_id,profile_id,request_id,request_hash,state,request_key,created,updated) SELECT ?,?,?,?,?,?,'staging',?,?,? WHERE (?=0 OR (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND created>?)<?) AND (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending'))<?")
-      .bind(id,session.principal,session.grant_id,profile.id,input.requestId,requestHash,requestKey,created,created,dailyLimit,session.principal,created-86400000,dailyLimit,session.principal,pendingLimit).run();
-    if(!inserted.meta.changes){
-      const raced=await env.DB.prepare('SELECT * FROM model_jobs WHERE owner=? AND request_id=?').bind(session.principal,input.requestId).first<Job>();
-      if(raced){if(raced.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的内容。');return json(safeJob(raced),202);}
-      const active=await env.DB.prepare("SELECT COUNT(*) AS count FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending')").bind(session.principal).first<{count:number}>();
-      fail(429,(active?.count||0)>=pendingLimit?'当前批改任务较多，请等待已提交的任务完成后再试。':'今日云端使用次数已达限额，请联系管理员调整额度或稍后再试。');
-    }
-    try{
-      await env.FILES.put(requestKey,JSON.stringify({payload,profileRevision}),{httpMetadata:{contentType:'application/json'}});
-      await env.DB.prepare("UPDATE model_jobs SET state='queued',updated=? WHERE id=? AND state='staging'").bind(Date.now(),id).run();
-    }catch{
-      await env.DB.prepare("UPDATE model_jobs SET state='failed',error_status=503,error_message='作文请求未能保存，请重新提交。',updated=? WHERE id=? AND state='staging'").bind(Date.now(),id).run();
-      fail(503,'作文请求未能保存，请重新提交。');
-    }
-    // The outbox sweep will deliver a persisted job if the broker is temporarily unavailable.
-    try{await deliver(env,id);}catch{}
-    return json(safeJob((await getJob(env,id))!),202);
+    const modelInput=await readInput(req,20*1024*1024);
+    return enqueueModelJob(env,session,modelInput);
   }
   const match=path.match(/^\/api\/model\/jobs\/([a-f0-9-]{36})(\/result)?$/);
   if(match&&req.method==='GET'){
     const row=await env.DB.prepare('SELECT * FROM model_jobs WHERE id=? AND owner=?').bind(match[1],session.principal).first<Job>();
     if(!row)fail(404,'批改任务不存在。');
+    await requireJobClass(env,row.id,session.classes||[]);
     if(!match[2])return json(safeJob(row));
     if(row.state==='succeeded'&&row.result_key){
       const result=await env.FILES.get(row.result_key);
@@ -180,6 +149,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
     try{
       const authority=await verify(env,'introspect',{grantId:row.grant_id});
       if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
+      await requireJobClass(env,id,authority.classes||[],true);
       const profile=profiles(env).find(p=>p.id===row!.profile_id);
       if(!profile||!keyFor(env,profile))fail(503,'所选云端模型暂不可用。');
       const stored=await env.FILES.get(row.request_key);
@@ -248,4 +218,59 @@ export async function recoverModelOutbox(env:Env){
   ]);
   const pending=await env.DB.prepare("SELECT id FROM model_jobs WHERE state='queued' AND dispatched_at<? ORDER BY created LIMIT 50").bind(now-60000).all<{id:string}>();
   for(const job of pending.results){try{await deliver(env,job.id);}catch{break;}}
+}
+
+export async function configuredGradingModel(env:Env,id:string){const p=profiles(env).find(p=>p.id===id&&p.supportsImages&&p.purposes.includes('grading'));if(!p||!keyFor(env,p))fail(400,'请选择已配置且支持作文图片的批改模型。');return {id:p!.id,model:p!.model,revision:await revision(p!)};}
+export async function enqueueModelJob(env:Env,session:Principal,value:unknown,binding?:GradingBinding):Promise<Response>{
+  if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
+  const input=value as any;
+  if(binding){
+    if(!session.classes?.some(c=>c.id===binding.classId&&['roster.read','writing.grade'].every(scope=>c.scopes.includes(scope))))fail(403,'当前没有此班级的批改权限。');
+    const linked=await env.DB.prepare("SELECT g.id FROM grading_runs g JOIN grading_steps s ON s.run_id=g.id WHERE g.id=? AND g.owner=? AND g.class_id=? AND g.current_step_id=s.id AND s.id=? AND g.state='running' AND s.state='queued'").bind(binding.runId,session.principal,binding.classId,binding.stepId).first();
+    if(!linked)fail(409,'班级批阅运行或步骤已改变。');
+  }
+    if(!env.MODEL_JOBS)fail(503,'云端批改队列尚未配置。');
+    if(!input||typeof input.profileId!=='string'||typeof input.requestId!=='string'||!/^[-a-zA-Z0-9_]{16,128}$/.test(input.requestId))fail(400,'请提供有效的模型和请求编号。');
+    const profile=profiles(env).find(p=>p.id===input.profileId);
+    if(!profile||!keyFor(env,profile))fail(400,'此云端模型尚未配置，请重新选择。');
+    if(input.requestId.startsWith('wa-grade-')&&!binding)fail(400,'此请求编号由班级批阅服务保留。');
+    const payload=validateModelPayload(input.payload);
+    validateImageCapability(profile,payload);
+    const dailyLimit=Number(env.MODEL_DAILY_LIMIT??1200),pendingLimit=Number(env.MODEL_PENDING_LIMIT??20);
+    if(!Number.isInteger(dailyLimit)||dailyLimit<0||dailyLimit>1000000||!Number.isInteger(pendingLimit)||pendingLimit<1||pendingLimit>200)fail(503,'云端任务额度配置不正确，请联系管理员。');
+    const profileRevision=await revision(profile),requestHash=await sha(JSON.stringify({payload,profileRevision}));
+    const existing=await env.DB.prepare('SELECT * FROM model_jobs WHERE owner=? AND request_id=?').bind(session.principal,input.requestId).first<Job>();
+    if(existing){
+      if(existing.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的作文或模型设置。');
+      return json(safeJob(existing),202);
+    }
+    const id=crypto.randomUUID(),created=Date.now(),requestKey='model-input/'+await sha(session.principal)+'/'+id+'.json';
+    // Atomic per-owner intake limit; clients cannot bypass it with concurrent POSTs.
+    const insert=env.DB.prepare("INSERT OR IGNORE INTO model_jobs(id,owner,grant_id,profile_id,request_id,request_hash,state,request_key,created,updated) SELECT ?,?,?,?,?,?,'staging',?,?,? WHERE (?=0 OR (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND created>?)<?) AND (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending'))<?")
+      .bind(id,session.principal,session.grant_id,profile.id,input.requestId,requestHash,requestKey,created,created,dailyLimit,session.principal,created-86400000,dailyLimit,session.principal,pendingLimit);
+    const statements=[insert];
+    if(binding)statements.push(env.DB.prepare('INSERT OR IGNORE INTO model_job_bindings(job_id,run_id,step_id,owner,class_id) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM model_jobs WHERE id=? AND owner=?)').bind(id,binding.runId,binding.stepId,session.principal,binding.classId,id,session.principal));
+    const inserted=(await env.DB.batch(statements))[0];
+    if(!inserted.meta.changes){
+      const raced=await env.DB.prepare('SELECT * FROM model_jobs WHERE owner=? AND request_id=?').bind(session.principal,input.requestId).first<Job>();
+      if(raced){if(raced.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的内容。');return json(safeJob(raced),202);}
+      const active=await env.DB.prepare("SELECT COUNT(*) AS count FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending')").bind(session.principal).first<{count:number}>();
+      const pending=(active?.count||0)>=pendingLimit;fail(429,pending?'当前批改任务较多，请等待已提交的任务完成后再试。':'今日云端使用次数已达限额，请联系管理员调整额度或稍后再试。',pending?'model_pending_limit':'model_daily_limit');
+    }
+    try{
+      await env.FILES.put(requestKey,JSON.stringify({payload,profileRevision}),{httpMetadata:{contentType:'application/json'}});
+      await env.DB.prepare("UPDATE model_jobs SET state='queued',updated=? WHERE id=? AND state='staging'").bind(Date.now(),id).run();
+    }catch{
+      await env.DB.prepare("UPDATE model_jobs SET state='failed',error_status=503,error_message='作文请求未能保存，请重新提交。',updated=? WHERE id=? AND state='staging'").bind(Date.now(),id).run();
+      fail(503,'作文请求未能保存，请重新提交。');
+    }
+    // The outbox sweep will deliver a persisted job if the broker is temporarily unavailable.
+    try{await deliver(env,id);}catch{}
+    return json(safeJob((await getJob(env,id))!),202);
+}
+
+async function requireJobClass(env:Env,id:string,classes:Array<{id:string;scopes:string[]}>,dispatch=false){
+ const binding=await env.DB.prepare('SELECT b.class_id,b.step_id,g.current_step_id,g.state FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=?').bind(id).first<{class_id:string;step_id:string;current_step_id:string;state:string}>();
+ if(binding&&!classes.some(c=>c.id===binding.class_id&&['roster.read','writing.grade'].every(scope=>c.scopes.includes(scope))))fail(403,'此班级的作文批改权限已变化。');
+ if(binding&&dispatch&&(!['queued','running'].includes(binding.state)||binding.current_step_id!==binding.step_id))fail(409,'班级批阅运行已暂停或步骤已改变。');
 }

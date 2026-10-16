@@ -7,6 +7,7 @@ import {handleSnapshots} from './snapshots';
 import {handleTasks} from './tasks';
 import {handleSheets} from './sheets';
 import {handleCollection} from './collection';
+import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns} from './grading';
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
@@ -107,7 +108,7 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
+      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
         if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
       }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
@@ -122,7 +123,7 @@ export default {
       }
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
-      if(/^\/api\/tasks(?:\/|$)/.test(path)){teacher(session);const response=await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
+      if(/^\/api\/(?:tasks|grading|writing-reports)(?:\/|$)/.test(path)){teacher(session);const response=await handleGrading(req,env,session,bridge,input)||await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
       const modelResponse=await handleModelApi(req,env,session,input);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){
@@ -189,6 +190,15 @@ export default {
       return json({error:{message:e instanceof HttpError?e.message:'服务暂时无法处理请求，请稍后重试。',...(e instanceof HttpError&&e.code?{code:e.code}:{})}},e instanceof HttpError?e.status:500);
     }
   },
-  async queue(batch:MessageBatch<ModelJobMessage>,env:Env){await consumeModelJobs(batch,env,bridge);},
-  async scheduled(_controller:unknown,env:Env){await recoverModelOutbox(env);},
+  async queue(batch:MessageBatch<ModelJobMessage>,env:Env){
+    // Run coordination and paid provider jobs share a queue, but have separate receipts.
+    for(const message of batch.messages.filter(m=>m.body?.runId)){
+      try{await advanceGradingRun(env,message.body.runId!,bridge);message.ack();}catch{message.retry();}
+    }
+    const jobs=batch.messages.filter(m=>m.body?.jobId);
+    if(jobs.length)await consumeModelJobs({...batch,messages:jobs},env,bridge);
+    for(const message of jobs)try{await advanceRunForModelJob(env,message.body.jobId!,bridge);}catch{/* Scheduled recovery resumes saved provider responses. */}
+    for(const message of batch.messages.filter(m=>!m.body?.runId&&!m.body?.jobId))message.ack();
+  },
+  async scheduled(_controller:unknown,env:Env){await recoverModelOutbox(env);await recoverGradingRuns(env,bridge);},
 };
