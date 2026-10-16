@@ -10,3 +10,5 @@ test('writing bridge keeps the same-origin login return and all PKCE state, with
 });
 
 test('writing feedback returns to the same-origin student history without opening external redirects',()=>{for(const role of ['student','teacher','admin'])assert.equal(loginDestination(new URLSearchParams({next:'/writing-feedback.html'}),'https://daily.example',role),'/writing-feedback.html');});
+
+test('independent peer login preserves its same-origin return without external callback redirects',()=>{const origin='https://daily.example',next='/writing-peer-connect.html?'+new URLSearchParams({client_id:'writing-peer',redirect_uri:'https://peer.example/api/auth/callback',state:'synthetic-peer-state',code_challenge:'synthetic-peer-challenge',code_challenge_method:'S256'});for(const role of ['student','teacher','admin'])assert.equal(loginDestination(new URLSearchParams({next}),origin,role),next);for(const next of ['https://peer.example/writing-peer-connect.html','//peer.example/writing-peer-connect.html','/writing-peer-connect.html/extra'])assert.equal(loginDestination(new URLSearchParams({next}),origin,'student'),'/');});

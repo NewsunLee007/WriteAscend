@@ -1,7 +1,23 @@
 {
   "compilerOptions": {
-    "target":"ES2022", "lib":["ES2022","DOM"], "module":"ESNext", "moduleResolution":"Bundler",
-    "strict":true, "noEmit":true, "skipLibCheck":true, "types":["node"]
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "jsx": "react-jsx"
   },
-  "include":["src","test"]
+  "include": [
+    "src",
+    "test"
+  ]
 }

@@ -32,5 +32,8 @@ try{
  const fresh=cycle('original Daily source');
  for(const name of ['src/server.mjs','public/login-routing.mjs'])execFileSync('git',['-C',fixture,'apply','--include='+name,path.join(root,'integrations/daily/daily.patch')]);
  execFileSync('git',['-C',fixture,'apply','--reverse','--include=public/login-routing.mjs',path.join(root,'integrations/daily/daily-upgrade.patch')]);
- const upgrade=cycle('previous installed bridge');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade],realSourceUntouched:true}));
+ const upgrade=cycle('previous installed bridge');
+ execFileSync('git',['-C',fixture,'apply','--include=public/login-routing.mjs',path.join(root,'integrations/daily/daily-upgrade.patch')]);
+ execFileSync('git',['-C',fixture,'apply','--reverse',path.join(root,'integrations/daily/daily-peer-upgrade.patch')]);
+ const peerUpgrade=cycle('previous full source before peer login');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade,peerUpgrade],realSourceUntouched:true}));
 }finally{fs.rmSync(fixture,{recursive:true,force:true});for(const snapshot of snapshots)fs.rmSync(snapshot,{recursive:true,force:true});}

@@ -1,13 +1,17 @@
 {
   "src/server.mjs": {
     "before": "e00fafded28c7e959b75f66887f1c8d7d13f2bc367b936e9b9cbe34fa0edfcd0",
-    "after": "477693e92f69e2c768d0cdd727383a28fa7a28007fa738a99c9dac9ee5644743"
+    "after": "8db69fe3c8edb6a47ed902c4d8360f56bbc7e6fac0f27057e80f3b33f0daea01",
+    "upgrades": {
+      "477693e92f69e2c768d0cdd727383a28fa7a28007fa738a99c9dac9ee5644743": "daily-peer-upgrade.patch"
+    }
   },
   "public/login-routing.mjs": {
     "before": "7609d80750346ea4bfc2484a8692e9419929bd5d87d6de23a397eff199b70485",
-    "after": "b250f6f3c85de14dffa7c5c7919624670a6710cf9462ea053b43fa66992e977c",
+    "after": "d17da771723ec3fec86eb6224f2ed037feb32f4f02b84b65785e14c4003616ac",
     "upgrades": {
-      "280194b8bbb5a7bf4160121e88e1df6cab1480669077b16bc66870e008e18929": "daily-upgrade.patch"
+      "280194b8bbb5a7bf4160121e88e1df6cab1480669077b16bc66870e008e18929": "daily-upgrade.patch",
+      "b250f6f3c85de14dffa7c5c7919624670a6710cf9462ea053b43fa66992e977c": "daily-peer-upgrade.patch"
     }
   },
   "public/daily.html": {

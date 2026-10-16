@@ -1,6 +1,6 @@
 # Daily 作文登录桥接
 
-本目录是可版本追踪的 Daily 集成包。保留 Daily/WordUp 既有登录验证器；新增模块只使用验证后的不可变身份和当前班级授权。学生互批仍是后续的独立项目，本包不增加学生互批产品入口。
+本目录是可版本追踪的 Daily 集成包。保留 Daily/WordUp 既有登录验证器；新增模块只使用验证后的不可变身份和当前班级授权。学生互批是独立应用，本包增加默认关闭的独立授权交接页，不在 Daily 导航或教师默认批阅流程加入互批入口。
 
 ## 安装与回滚
 
@@ -11,7 +11,7 @@ node scripts/install-daily-bridge.mjs /absolute/path/to/Daily
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily --apply
 ```
 
-安装器仅修改清单中的 18 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
+安装器仅修改清单中的 21 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
 
 ```sh
 node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot
@@ -51,7 +51,7 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 ## 已验证与未完成
 
 - WriteAscend 的 `npm test` 包含桥接、来源身份适配、名册权限和 Worker/Daily HTTP 协议测试。
-- 实际 Daily 当前完整回归共 204 项通过（含学校学生返回作文反馈页的登录路由检查）。
+- 实际 Daily 当前完整回归共 205 项通过（含学校学生返回作文反馈页和互批授权页的登录路由检查）。
 - 实际 Wrangler 本地 D1/Worker + 合成 Daily 来源 + 390px 浏览器完成跨域登录、会话核验和退出验证，见 `scripts/qa/cloud-login.cjs`。
 - 合成来源不代表真实账号登录、正式 Cloudflare 防护、真实名册初始化已经通过。
 - 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；目录管理和真实名册核对见 [验证记录](../../docs/verification/school-directory.md)；正式目录写入及结果发布尚未启用。
@@ -62,7 +62,19 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 
 交接页现支持已经验证的学校学生账号进入“我的作文”；教师入口保持原批阅路径。学生来源仍由同一 Daily/WordUp 验证器核验，不接受浏览器自报身份。Worker 的学生反馈接口仅提供本人已发布快照和关联原稿，教师编辑和发布分开，撤回和原稿更正会停止旧反馈访问。
 
-当前 18 文件版本已通过摘要预检安装，最新回滚快照为 `audit/private/daily-bridge-2026-10-16T18-33-28-609Z`。正式桥接仍关闭，未改环境配置、未重启服务。此前各次快照保留，可逐次恢复相应版本；回滚只恢复源码，不删除数据库中的发布事件。
+此前 18 文件版本通过摘要预检安装，其回滚快照为 `audit/private/daily-bridge-2026-10-16T18-33-28-609Z`。正式桥接仍关闭，未改环境配置、未重启服务。此前各次快照保留，可逐次恢复相应版本；回滚只恢复源码，不删除数据库中的发布事件。
+
+## 独立互批授权补充（21 文件版本）
+
+新增 `src/writing-peer-bridge.mjs`、`public/writing-peer-connect.html` 和 `.mjs`；同步更新服务器接入与登录返回白名单，原 `writing-bridge.mjs` 未修改。21 文件版本已按 SHA 预检安装到本机 Daily 源码，最新回滚快照为 `audit/private/daily-bridge-2026-10-16T20-50-12-849Z`。旧快照继续保留；未修改正式 `.env`、重启服务或写入正式目录。
+
+| Daily 可选变量 | 用途 |
+| --- | --- |
+| `WRITING_PEER_SERVICE_TOKEN` | 至少 32 字符，与教师机器凭据不同；仅独立互批 Worker 使用 |
+| `WRITING_PEER_STORAGE_KEY` | 至少 32 字符，只存 Daily，加密互批来源会话引用 |
+| `WRITING_PEER_ALLOWED_CALLBACKS` | 互批完整回调白名单，路径固定 `/api/auth/callback` |
+
+不配置则仅互批桥接关闭，不创建 `writing_peer_*` 表。独立机器只能兑换、核验和撤销本客户端授权，不能调用教师目录、名册、模型或报告事件。来源注销/角色切换使旧授权失效，当前班级权限每次核验；互批退出仅撤销本会话。详细配置、权限派生及未完成范围见 [独立登录](../../docs/peer-review-auth.md)。
 
 ## 发布摘要同步与 Daily 入口
 

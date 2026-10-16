@@ -5,7 +5,7 @@
    try {
      const url=new URL(wanted,origin);
 -    if(url.origin===origin&&/^\/(?:$|(?:daily|units|recite|explore|learn|sentence|study|history|leaderboard|lucky|admin|writing-connect)\.html$|wordup\/?$|teaching\/?$)/.test(url.pathname))return url.pathname+url.search+url.hash;
-+    if(url.origin===origin&&/^\/(?:$|(?:daily|units|recite|explore|learn|sentence|study|history|leaderboard|lucky|admin|writing-connect|writing-feedback)\.html$|wordup\/?$|teaching\/?$)/.test(url.pathname))return url.pathname+url.search+url.hash;
++    if(url.origin===origin&&/^\/(?:$|(?:daily|units|recite|explore|learn|sentence|study|history|leaderboard|lucky|admin|writing-connect|writing-feedback|writing-peer-connect)\.html$|wordup\/?$|teaching\/?$)/.test(url.pathname))return url.pathname+url.search+url.hash;
    }catch{}
    return fallback;
  }
