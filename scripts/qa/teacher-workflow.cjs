@@ -30,9 +30,9 @@ async rootPage => {
   }
   const snapshot=await page.evaluate(()=>JSON.parse(localStorage.getItem('smart_grader_saved_results_v1')||'[]'));
   if(snapshot.length!==1||snapshot[0].gradedCount!==1)throw Error('Graded result snapshot was not saved.');
-  await page.screenshot({path:'output/teacher-grading-desktop.png',fullPage:true});
+  await page.screenshot({path:'output/teacher-grading-desktop.png',fullPage:false});
   await page.setViewportSize({width:390,height:844});
-  await page.screenshot({path:'output/teacher-grading-mobile.png',fullPage:true});
+  await page.screenshot({path:'output/teacher-grading-mobile.png',fullPage:false});
   const size=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth}));
   if(size.scroll>size.viewport)throw Error('Teacher mobile screen overflows: '+JSON.stringify(size));
   const paper=await page.locator('.teacher-grading-detail .a4-wrapper').evaluate(e=>({width:e.getBoundingClientRect().width,parent:e.parentElement.getBoundingClientRect().width}));
