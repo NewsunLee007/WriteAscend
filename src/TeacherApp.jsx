@@ -1,6 +1,9 @@
 // Full teacher workflow retained from original GitHub baseline 2def1d2.
 import React from "react";
 import QuickGrading from './teacher/QuickGrading.jsx';
+import {useTeacherCloud,CloudConnection,CloudModelSettings} from './teacher/TeacherCloud';
+import {createCloudModelTransport} from './teacher/cloud-model';
+import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -60,7 +63,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
         const Stepper = ({ currentStep, maxStep, steps, onStepClick, onHelp, onConfig }) => (
             <div className="teacher-stepper w-full glass-iso px-8 py-3 flex items-center justify-between fixed inset-x-0 top-0 z-30 shadow-sm no-print">
                 <div className="flex items-center gap-3">
-                    <img src="https://p.ipic.vip/lhgb6n.png" alt="Logo" className="h-10 w-auto" />
+                    <img src="/brand-logo.png" alt="学校标识" className="h-10 w-auto" />
                     <div>
                         <div className="font-bold text-lg text-slate-800 leading-none mb-1 tracking-tight">智能英语作文批改</div>
                         <div className="text-xs text-slate-400 font-cursive leading-none mt-1">Designed by Newsun Lee</div>
@@ -659,11 +662,14 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
         // --- Main App ---
         const App = () => {
+            const cloud = useTeacherCloud();
+            const teacherStorage = cloud.storage;
+            const modelReady = cloud.mode === 'cloud' ? cloud.status === 'ready' && !!cloud.profileId : null;
             const [workflowMode, setWorkflowMode] = useState(() => {
-                try { return localStorage.getItem('writeascend_teacher_mode') === 'full' ? 'full' : 'quick'; }
+                try { return teacherStorage.getItem('writeascend_teacher_mode') === 'full' ? 'full' : 'quick'; }
                 catch { return 'quick'; }
             });
-            useEffect(() => { try { localStorage.setItem('writeascend_teacher_mode', workflowMode); } catch {} }, [workflowMode]);
+            useEffect(() => { try { teacherStorage.setItem('writeascend_teacher_mode', workflowMode); } catch {} }, [workflowMode]);
             const [step, setStep] = useState(0);
             const [maxStep, setMaxStep] = useState(0);
             const [config, setConfig] = useState({ apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', apiKey: '', model: 'qwen3-omni-flash', temperature: 0.3, preset: 'aliyun-dashscope' });
@@ -745,6 +751,19 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [saveDraftName, setSaveDraftName] = useState('');
             const [rubricDesignAppliedAt, setRubricDesignAppliedAt] = useState('');
             const [languageDifficulty, setLanguageDifficulty] = useState({ enabled: true, capRatio: 1.0, autoRewrite: true });
+            const draftError = useWorkspaceDraft({
+                workspaceId: cloud.mode === 'cloud' ? cloud.identity.workspaceId : null,
+                draft: { files, selectedFileId, step },
+                restore: saved => {
+                    setFiles(saved.files);
+                    setSelectedFileId(saved.files.some(f => f.id === saved.selectedFileId) ? saved.selectedFileId : saved.files[0]?.id || null);
+                    if (saved.files.length) {
+                        const targetStep = saved.step === 0 ? 0 : 2;
+                        setStep(targetStep); setMaxStep(prev => Math.max(prev, targetStep));
+                        if (saved.files.some(f => f.status === 'idle')) { setIsPaused(true); setPauseBanner('已恢复上次作文。点击“继续批改”可核对并接收已有云端任务的结果。'); }
+                    }
+                }
+            });
 
             const normalizeRubricForSystem = (loadedRubric) => {
                 if (!loadedRubric) return null;
@@ -806,12 +825,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 };
 
                 const loadV5 = () => {
-                    const saved = localStorage.getItem(STORAGE_KEY_V5);
+                    const saved = teacherStorage.getItem(STORAGE_KEY_V5);
                     if (!saved) return null;
                     try { return JSON.parse(saved); } catch (e) { return null; }
                 };
                 const loadV4 = () => {
-                    const saved = localStorage.getItem(STORAGE_KEY_V4);
+                    const saved = teacherStorage.getItem(STORAGE_KEY_V4);
                     if (!saved) return null;
                     try { return JSON.parse(saved); } catch (e) { return null; }
                 };
@@ -856,27 +875,27 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     }
                 }
 
-                const profilesSaved = localStorage.getItem(STORAGE_KEY_PROFILES);
+                const profilesSaved = teacherStorage.getItem(STORAGE_KEY_PROFILES);
                 if (profilesSaved) {
                     try { setStudentProfiles(JSON.parse(profilesSaved) || {}); } catch (e) { setStudentProfiles({}); }
                 }
 
-                const csvSaved = localStorage.getItem('smart_grader_csv_exports_v1');
+                const csvSaved = teacherStorage.getItem('smart_grader_csv_exports_v1');
                 if (csvSaved) {
                     try { setCsvExportHistory(JSON.parse(csvSaved) || []); } catch (e) { setCsvExportHistory([]); }
                 }
 
-                const savedResults = localStorage.getItem('smart_grader_saved_results_v1');
+                const savedResults = teacherStorage.getItem('smart_grader_saved_results_v1');
                 if (savedResults) {
                     try { setSavedGradingResults(JSON.parse(savedResults) || []); } catch (e) { setSavedGradingResults([]); }
                 }
 
-                const rubricHistorySaved = localStorage.getItem('smart_grader_rubric_history_v1');
+                const rubricHistorySaved = teacherStorage.getItem('smart_grader_rubric_history_v1');
                 if (rubricHistorySaved) {
                     try { setRubricHistory(JSON.parse(rubricHistorySaved) || []); } catch (e) { setRubricHistory([]); }
                 }
 
-                const analysisHistorySaved = localStorage.getItem('smart_grader_class_analysis_history_v1');
+                const analysisHistorySaved = teacherStorage.getItem('smart_grader_class_analysis_history_v1');
                 if (analysisHistorySaved) {
                     try { setAnalysisHistory(JSON.parse(analysisHistorySaved) || []); } catch (e) { setAnalysisHistory([]); }
                 }
@@ -887,7 +906,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 if (coreDataStorageSkipUntilRef.current && now < coreDataStorageSkipUntilRef.current) return;
                 const data = { config, assignment, rubric, classes, currentClassId, activeClassIds, languageDifficulty, pdfConfig, csvExportConfig };
                 try {
-                    localStorage.setItem('smart_grader_data_v5_0', JSON.stringify(data));
+                    teacherStorage.setItem('smart_grader_data_v5_0', JSON.stringify(data));
                     coreDataStorageWarnedRef.current = false;
                     coreDataStorageSkipUntilRef.current = 0;
                 } catch (e) {
@@ -944,7 +963,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     return next;
                 };
                 try {
-                    localStorage.setItem('smart_grader_student_profiles_v1', JSON.stringify(studentProfiles || {}));
+                    teacherStorage.setItem('smart_grader_student_profiles_v1', JSON.stringify(studentProfiles || {}));
                     studentProfilesStorageWarnedRef.current = false;
                     studentProfilesShrinkStageRef.current = 0;
                 } catch (e) {
@@ -1022,12 +1041,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             };
 
             useEffect(() => {
-                try { localStorage.setItem('smart_grader_csv_exports_v1', JSON.stringify(csvExportHistory)); } catch (e) {}
+                try { teacherStorage.setItem('smart_grader_csv_exports_v1', JSON.stringify(csvExportHistory)); } catch (e) {}
             }, [csvExportHistory]);
 
             useEffect(() => {
                 try {
-                    localStorage.setItem('smart_grader_saved_results_v1', JSON.stringify(savedGradingResults));
+                    teacherStorage.setItem('smart_grader_saved_results_v1', JSON.stringify(savedGradingResults));
                     savedResultsStorageWarnedRef.current = false;
                 } catch (e) {
                     const list = Array.isArray(savedGradingResults) ? savedGradingResults : [];
@@ -1042,11 +1061,11 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             }, [savedGradingResults]);
 
             useEffect(() => {
-                try { localStorage.setItem('smart_grader_rubric_history_v1', JSON.stringify(rubricHistory)); } catch (e) {}
+                try { teacherStorage.setItem('smart_grader_rubric_history_v1', JSON.stringify(rubricHistory)); } catch (e) {}
             }, [rubricHistory]);
 
             useEffect(() => {
-                try { localStorage.setItem('smart_grader_class_analysis_history_v1', JSON.stringify(analysisHistory)); } catch (e) {}
+                try { teacherStorage.setItem('smart_grader_class_analysis_history_v1', JSON.stringify(analysisHistory)); } catch (e) {}
             }, [analysisHistory]);
 
             useEffect(() => {
@@ -1090,6 +1109,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const callAI = async (messages, responseJson = true, options) => {
                 const opts = options && typeof options === 'object' ? options : {};
+                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: cloud.profileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired }) : null;
+                const apiHeaders = cloudTransport ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };
                 const classifyErrorKind = (msg) => {
                     const m = (msg || '').toString();
                     if (/Failed to fetch/i.test(m) || /请求超时/.test(m) || /被浏览器拦截/.test(m) || /跨域|CORS/i.test(m) || /opaqueredirect/i.test(m) || /NETWORK_CHANGED/i.test(m) || /net::/i.test(m)) return 'network';
@@ -1098,8 +1119,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     if (/HTTP\s*4\d\d/.test(m)) return 'client';
                     return 'other';
                 };
-                if (!config.apiKey) {
-                    const msg = '请先点击右上角设置 API Key';
+                if (cloud.mode === 'cloud' ? !modelReady : !config.apiKey) {
+                    const msg = cloud.mode === 'cloud' ? (cloud.status === 'expired' ? '请先重新使用 Daily 登录。' : '请先在设置中选择已配置的云端模型。') : '请先点击右上角设置 API Key';
                     if (opts.returnMeta) return { ok: false, error: { kind: 'config', message: msg } };
                     alert(msg);
                     return null;
@@ -1133,8 +1154,9 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     }
                 };
 
-                const apiUrl = resolveApiUrl(config.apiUrl);
+                const apiUrl = cloudTransport ? '/api/model/jobs' : resolveApiUrl(config.apiUrl);
                 const shouldFallbackToDefault = (url) => {
+                    if (cloudTransport) return false;
                     try {
                         const host = new URL(url).hostname.toLowerCase();
                         if (/generativelanguage\.googleapis\.com/i.test(host)) return true;
@@ -1145,6 +1167,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     }
                 };
                 const getTimeoutMsForUrl = (url) => {
+                    if (cloudTransport) return 600000;
                     try {
                         const host = new URL(url).hostname.toLowerCase();
                         if (/dashscope\.aliyuncs\.com/i.test(host)) return 300000;
@@ -1156,7 +1179,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     const timeoutMs = getTimeoutMsForUrl(url);
                     const id = setTimeout(() => controller.abort(), timeoutMs);
                     try {
-                        const res = await fetch(url, { ...(options || {}), signal: controller.signal, redirect: 'manual' });
+                        const res = cloudTransport ? await cloudTransport(options.body, controller.signal) : await fetch(url, { ...(options || {}), signal: controller.signal, redirect: 'manual' });
                         const rawText = await res.text().catch(() => '');
                         let data = null;
                         try {
@@ -1171,6 +1194,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 };
 
                 const buildFailedToFetchHint = (url) => {
+                    if (cloudTransport) return '请检查网络后点击继续，系统会核对已有云端任务，避免重复提交。';
                     const tips = [];
                     if (typeof location !== 'undefined' && location && location.protocol === 'file:') {
                         tips.push('当前页面从本地文件(file://)打开，浏览器可能会拦截跨域请求；建议用本地服务器方式打开（http://localhost/...）。');
@@ -1521,7 +1545,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     try {
                         const r = await fetchJsonWithTimeout(apiUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                            headers: apiHeaders,
                             body: JSON.stringify(payload)
                         });
                         res = r.res;
@@ -1536,7 +1560,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 usedUrl = DEFAULT_API_URL;
                                 const r2 = await fetchJsonWithTimeout(DEFAULT_API_URL, {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                                    headers: apiHeaders,
                                     body: JSON.stringify(payload)
                                 });
                                 res = r2.res;
@@ -1584,7 +1608,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         try {
                             const r = await fetchJsonWithTimeout(apiUrl, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                                headers: apiHeaders,
                                 body: JSON.stringify(payload)
                             });
                             res = r.res;
@@ -1599,7 +1623,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     usedUrl = DEFAULT_API_URL;
                                     const r2 = await fetchJsonWithTimeout(DEFAULT_API_URL, {
                                         method: 'POST',
-                                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                                        headers: apiHeaders,
                                         body: JSON.stringify(payload)
                                     });
                                     res = r2.res;
@@ -3300,7 +3324,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 }
                 if (!String(assignment.topic || '').trim()) return alert('请先填写或识别写作要求。');
                 if (!Number.isFinite(Number(rubric.total)) || Number(rubric.total) <= 0) return alert('请设置有效的作文满分。');
-                if (!config.apiKey) { setShowConfig(true); return; }
+                if (cloud.mode === 'cloud' ? !modelReady : !config.apiKey) { setShowConfig(true); return; }
                 setStep(2);
                 setMaxStep(prev => Math.max(prev, 2));
                 void startBatchGrading();
@@ -4851,13 +4875,15 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         )}
                         
                         <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
+                            <CloudConnection busy={isBatchProcessing}/>
+                            {draftError && <p className="mx-auto max-w-3xl px-4 py-2 text-xs text-amber-700" role="status">{draftError}</p>}
                             {workflowMode === 'full' && <div className="teacher-mode-bar"><div>完整工作台</div><button onClick={() => { setWorkflowMode('quick'); setStep(0); }}>切换到快速批改</button></div>}
                             {step === 0 && (workflowMode === 'full' ? renderStep1() : <QuickGrading
                                 assignment={assignment} setAssignment={setAssignment} rubric={rubric}
                                 setRubric={updater => setRubric(prev => { const next = typeof updater === 'function' ? updater(prev) : updater; return next.total !== prev.total ? { ...next, items: redistributeItemScoresToTotal(next.items, next.total) } : next; })}
                                 classes={classes} currentClassId={currentClassId} activeClassIds={activeClassIds} setCurrentClassId={setCurrentClassId} setActiveClassIds={setActiveClassIds}
                                 onGradeChange={gradeLevel => { setRubric(prev => ({ ...prev, gradeLevel })); if (activeClassIds.length <= 1) setClasses(prev => prev.map(c => String(c.id) === String(currentClassId) ? { ...c, gradeLevel } : c)); }}
-                                files={files} isBatchProcessing={isBatchProcessing} configReady={!!config.apiKey}
+                                files={files} isBatchProcessing={isBatchProcessing} configReady={cloud.mode === 'cloud' ? modelReady : !!config.apiKey}
                                 onPromptUpload={handlePromptImageUpload} onRecognizePrompt={extractPromptTextFromImage}
                                 onUpload={handleStudentUpload} onManageStudents={() => setShowStudentMgmt(true)} onModelSettings={() => setShowConfig(true)}
                                 onAdvanced={() => { setWorkflowMode('full'); setStep(0); }} onImportRubric={() => setShowRubricImportModal(true)}
@@ -4890,7 +4916,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     {/* Modals - Same as previous version, ensuring consistency */}
                     <Modal isOpen={showConfig} onClose={() => setShowConfig(false)} title="系统设置" footer={<button onClick={() => setShowConfig(false)} className="btn-pure active px-6 py-2.5 rounded-full text-sm font-bold">完成</button>}>
                          <div className="space-y-6 py-2">
-                            <div className="space-y-3">
+                            {cloud.mode === 'cloud' ? <CloudModelSettings temperature={config.temperature} onTemperatureChange={temperature => setConfig(prev => ({...prev,temperature}))}/> : <div className="space-y-3">
                                 <h3 className="font-bold text-slate-700 text-sm">API 设置</h3>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">模型预设</label>
@@ -4937,7 +4963,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     <input type="range" min="0" max="1" step="0.05" value={typeof config.temperature === 'number' && !Number.isNaN(config.temperature) ? config.temperature : 0.3} onChange={e=>setConfig({...config, temperature: parseFloat(e.target.value)})} className="w-full" />
                                     <div className="mt-1 text-[11px] text-slate-400 ml-1">数值越低越稳定，推荐 0.3 以减少幻觉。</div>
                                 </div>
-                            </div>
+                            </div>}
                             <hr className="border-slate-100"/>
                             <div className="space-y-3">
                                 <h3 className="font-bold text-slate-700 text-sm">数据管理</h3>

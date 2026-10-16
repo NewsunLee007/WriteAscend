@@ -48,4 +48,4 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 - Daily 原有回归加新增登录返回测试共 14 项通过。
 - 实际 Wrangler 本地 D1/Worker + 合成 Daily 来源 + 390px 浏览器完成跨域登录、会话核验和退出验证，见 `scripts/qa/cloud-login.cjs`。
 - 合成来源不代表真实账号登录、正式 Cloudflare 防护、真实名册初始化已经通过。
-- 教师界面尚未显示云端登录状态，服务端模型调用、队列、名册投影同步和结果发布仍在后续开发范围内。
+- 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`；正式目录、名册投影同步与结果发布仍在开发范围内。

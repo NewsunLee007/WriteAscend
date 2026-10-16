@@ -1,13 +1,14 @@
-import type {D1Database, Fetcher, R2Bucket} from '@cloudflare/workers-types';
+import type {D1Database, Fetcher, R2Bucket, MessageBatch} from '@cloudflare/workers-types';
 import {importLegacy, sanitizeLegacy} from '../src/report/legacy-import';
+import {HttpError} from './errors';
+import {handleModelApi,consumeModelJobs,recoverModelOutbox,type ModelBindings,type ModelJobMessage} from './model-jobs';
 
-export interface Env {
+export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
 }
 type Session = {token_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;display_name:string;expires:number};
 type ClassGrant = {id:string;schoolId:string;academicYear:string;name:string;grade:string;version:number;grantVersion:number;scopes:string[]};
-class HttpError extends Error {constructor(public status:number,message:string){super(message);}}
 const json=(value:unknown,status=200,headers:Record<string,string>={})=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 const random=()=>[...crypto.getRandomValues(new Uint8Array(32))].map(v=>v.toString(16).padStart(2,'0')).join('');
 const sha=async(text:string)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(v=>v.toString(16).padStart(2,'0')).join('');
@@ -60,7 +61,7 @@ export default {
         headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
         return new Response(response.body as any,{status:response.status,headers});
       }
-      if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2});
+      if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN});
       if(path==='/api/auth/start'&&req.method==='GET'){
         if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');
         const id=random(),state=random(),verifier=random(),challenge=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
@@ -96,7 +97,9 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,name:session.display_name,role:session.role,scopes:session.scopes});
+      if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
+      const modelResponse=await handleModelApi(req,env,session,input);
+      if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){
         teacher(session);return json({classes:session.classes});
       }
@@ -156,6 +159,11 @@ export default {
         return json({ok:true,revision:body.revision+1});
       }
       throw new HttpError(404,'接口不存在。');
-    }catch(e){return json({error:{message:e instanceof HttpError?e.message:'服务暂时无法处理请求，请稍后重试。'}},e instanceof HttpError?e.status:500);}
+    }catch(e){
+      if(!(e instanceof HttpError)&&env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:'))console.warn('Local Worker failure:',e instanceof Error?e.message:'unknown');
+      return json({error:{message:e instanceof HttpError?e.message:'服务暂时无法处理请求，请稍后重试。'}},e instanceof HttpError?e.status:500);
+    }
   },
+  async queue(batch:MessageBatch<ModelJobMessage>,env:Env){await consumeModelJobs(batch,env,bridge);},
+  async scheduled(_controller:unknown,env:Env){await recoverModelOutbox(env);},
 };
