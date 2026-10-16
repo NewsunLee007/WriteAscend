@@ -41,6 +41,10 @@
           {
             "binding": "MODEL_JOBS",
             "queue": "writeascend-development-model-jobs"
+          },
+          {
+            "binding": "FEEDBACK_EVENTS",
+            "queue": "writeascend-development-feedback-events"
           }
         ],
         "consumers": [
@@ -50,6 +54,13 @@
             "max_batch_timeout": 1,
             "max_retries": 3,
             "max_concurrency": 2
+          },
+          {
+            "queue": "writeascend-development-feedback-events",
+            "max_batch_size": 5,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "max_concurrency": 3
           }
         ]
       },
@@ -86,6 +97,10 @@
           {
             "binding": "MODEL_JOBS",
             "queue": "writeascend-staging-model-jobs"
+          },
+          {
+            "binding": "FEEDBACK_EVENTS",
+            "queue": "writeascend-staging-feedback-events"
           }
         ],
         "consumers": [
@@ -95,6 +110,13 @@
             "max_batch_timeout": 1,
             "max_retries": 3,
             "max_concurrency": 2
+          },
+          {
+            "queue": "writeascend-staging-feedback-events",
+            "max_batch_size": 5,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "max_concurrency": 3
           }
         ]
       },

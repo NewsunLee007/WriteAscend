@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 const snapshot=process.argv[2]&&path.resolve(process.argv[2]);
 if(!snapshot)throw Error('Usage: node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot [--apply]');
 const record=JSON.parse(fs.readFileSync(path.join(snapshot,'snapshot.json'),'utf8'));
-const allowed=new Set(['src/server.mjs','public/login-routing.mjs','src/writing-bridge.mjs','src/writing-authority.mjs','src/writing-directory.mjs','src/writing-school-config.mjs','public/writing-connect.html','public/writing-connect.mjs','public/writing-connect.css','test/writing-login-routing.test.mjs']);
+const allowed=new Set(['public/daily.html','public/history.html','src/server.mjs','public/login-routing.mjs','src/writing-feedback.mjs','src/writing-bridge.mjs','src/writing-authority.mjs','src/writing-directory.mjs','src/writing-school-config.mjs','public/writing-feedback.html','public/writing-feedback.css','public/writing-feedback.mjs','public/writing-entry.mjs','public/writing-connect.html','public/writing-connect.mjs','public/writing-connect.css','test/writing-login-routing.test.mjs']);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 for(const file of record.files){
   if(!allowed.has(file.name))throw Error('Unexpected snapshot file.');

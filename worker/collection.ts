@@ -1,3 +1,4 @@
+import {notifyDailyDraft} from './daily-feedback';
 import {invalidatePublication} from './publication-invalidation';
 import type {Env} from './index';
 import type {TaskSession} from './tasks';
@@ -96,5 +97,5 @@ export async function handleCollection(req:Request,env:Env,session:TaskSession,b
   if(page){statements.push(env.DB.prepare(`INSERT INTO writing_page_claims SELECT ?,?,?,? WHERE ${claimed}`).bind(session.principal,assetHash,c.draftId,pageNumber,...binds),env.DB.prepare(`INSERT INTO submission_page_versions SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? WHERE ${claimed}`).bind(page.id,session.principal,c.draftId,pageNumber,page.revision,page.assetId,page.sha256,page.sheetId,page.detectedSheetId,page.identityMethod,page.identityNote,page.fileName,page.confirmedBy,page.created,...binds));}
   statements.push(env.DB.prepare(`INSERT INTO writing_draft_inputs SELECT ?,?,?,?,? WHERE ${claimed}`).bind(c.draftId,revision,inputHash,JSON.stringify(manifest),now,...binds),env.DB.prepare(`UPDATE writing_drafts SET page_count=?,revision=?,state=?,input_hash=?,updated=? WHERE id=? AND ${claimed}`).bind(pageCount,revision,manifest.pages.length===pageCount?'received':'collecting',inputHash,now,c.draftId,...binds),...invalidatePublication(env,c.draftId,session.principal,session.grant_id,inputHash,claimed,binds),env.DB.prepare('UPDATE writing_collection_operations SET committed=1 WHERE owner=? AND request_id=? AND request_hash=? AND committed=0').bind(...binds));
   try{await env.DB.batch(statements);}catch(e){const conflict=await env.DB.prepare('SELECT draft_id,page_number FROM writing_page_claims WHERE owner=? AND sha256=?').bind(session.principal,assetHash).first();if(conflict)fail(409,'照片归属或页面已有变化，请重新核对。','collection_changed');throw e;}
-  const accepted=await replay(env,session.principal,body.requestId,requestHash);if(!accepted)fail(409,'页面或写作单已在其他设备改变，请刷新后重试。','collection_changed');return json(accepted,201);
+  const accepted=await replay(env,session.principal,body.requestId,requestHash);if(!accepted)fail(409,'页面或写作单已在其他设备改变，请刷新后重试。','collection_changed');await notifyDailyDraft(env,c.draftId);return json(accepted,201);
 }

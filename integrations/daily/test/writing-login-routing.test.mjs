@@ -8,3 +8,5 @@ test('writing bridge keeps the same-origin login return and all PKCE state, with
   for(const role of ['teacher','admin','student'])assert.equal(loginDestination(new URLSearchParams({next}),origin,role),next);
   for(const invalid of ['https://other.example/writing-connect.html','//other.example/writing-connect.html','/\\other.example/writing-connect.html','/writing-connect.html/extra'])assert.equal(loginDestination(new URLSearchParams({next:invalid}),origin,'teacher'),'/lucky.html');
 });
+
+test('writing feedback returns to the same-origin student history without opening external redirects',()=>{for(const role of ['student','teacher','admin'])assert.equal(loginDestination(new URLSearchParams({next:'/writing-feedback.html'}),'https://daily.example',role),'/writing-feedback.html');});

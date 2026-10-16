@@ -4,7 +4,7 @@ import {HttpError} from './errors';
 import {hydrateAssetImages} from './assets';
 import type {GradingBinding} from './grading-types';
 
-export type ModelJobMessage={jobId:string;runId?:never}|{runId:string;jobId?:never};
+export type ModelJobMessage={jobId:string;runId?:never;eventId?:never}|{runId:string;jobId?:never;eventId?:never}|{eventId:string;jobId?:never;runId?:never};
 export interface ModelBindings {
   MODEL_JOBS?:Queue<ModelJobMessage>;
   MODEL_PROFILES?:string;

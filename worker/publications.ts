@@ -4,6 +4,7 @@ import {HttpError} from './errors';
 import {digest} from '../src/report/legacy-import';
 import {readBoundReport} from './grading';
 import {readPrivateAsset} from './assets';
+import {notifyDailyDraft,reconcileDailyFeedback} from './daily-feedback';
 import {studentReport} from './publication-projection';
 export type PublicationSession=TaskSession&{scopes?:string[];display_name?:string};
 type Bridge=(env:Env,path:string,body:Record<string,unknown>)=>Promise<Record<string,any>>;
@@ -27,16 +28,18 @@ async function status(env:Env,session:PublicationSession,reportId:string){
  const report=await reportContext(env,session,reportId),p=await head(env,report.draft_id);
  if(!p)return {publication:null,canPublish:session.classes.some(c=>c.id===report.class_id&&c.scopes.includes('writing.publish'))};
  if(p.owner!==session.principal)fail(404,'发布记录不存在。');
+ const q=await env.DB.prepare('SELECT remote_version,reason FROM writing_integration_quarantine WHERE draft_id=?').bind(p.draft_id).first();
  const current=await env.DB.prepare('SELECT input_hash FROM writing_drafts WHERE id=?').bind(p.draft_id).first<{input_hash:string}>();
  const viewed=await env.DB.prepare('SELECT first_read,last_read FROM writing_publication_reads WHERE draft_id=? AND version=? AND student_provider=? AND student_subject=?').bind(p.draft_id,p.version,p.student_provider,p.student_subject).first();
- const sync=await env.DB.prepare('SELECT state,last_error,updated FROM writing_integration_outbox WHERE draft_id=? AND version=?').bind(p.draft_id,p.version).first();
- return {publication:{draftId:p.draft_id,version:p.version,state:p.state,reportId:p.report_id,reportRevision:p.report_revision,inputHash:p.input_hash,publishedAt:p.published_at,updated:p.updated,outdated:current?.input_hash!==p.input_hash,isThisReport:p.report_id===reportId,viewed,sync},canPublish:session.classes.some(c=>c.id===report.class_id&&c.scopes.includes('writing.publish'))};
+ const sync=await env.DB.prepare('SELECT state,last_error,error_code,updated FROM writing_integration_outbox WHERE draft_id=? AND version=?').bind(p.draft_id,p.version).first();
+ return {publication:{draftId:p.draft_id,version:p.version,state:p.state,reportId:p.report_id,reportRevision:p.report_revision,inputHash:p.input_hash,publishedAt:p.published_at,updated:p.updated,outdated:current?.input_hash!==p.input_hash,isThisReport:p.report_id===reportId,viewed,sync,quarantined:q},canPublish:session.classes.some(c=>c.id===report.class_id&&c.scopes.includes('writing.publish'))};
 }
 async function replay(env:Env,owner:string,requestId:string,hash:string){const row=await env.DB.prepare('SELECT request_hash FROM writing_publication_operations WHERE owner=? AND request_id=?').bind(owner,requestId).first<{request_hash:string}>();if(!row)return false;if(row.request_hash!==hash)fail(409,'同一发布操作编号不能提交不同内容。');return true;}
 function mutationBody(body:any){if(!body||!token.test(body.requestId)||!Number.isSafeInteger(body.expectedPublicationVersion)||body.expectedPublicationVersion<0)fail(400,'请提供当前发布版本和操作编号。');}
 async function publish(env:Env,session:PublicationSession,id:string,body:any,bridge:Bridge){
  mutationBody(body);const report=await reportContext(env,session,id);await livePublish(env,session,report.class_id,bridge);
  const hash=await digest({action:'publish',id,body});if(await replay(env,session.principal,body.requestId,hash))return status(env,session,id);
+ if(await env.DB.prepare('SELECT 1 FROM writing_integration_quarantine WHERE draft_id=?').bind(report.draft_id).first())fail(409,'两端发布记录需要管理员对账，请先核对同步状态。');
  if(body.teacherConfirmed!==true||!Number.isSafeInteger(body.expectedReportRevision)||typeof body.inputHash!=='string')fail(400,'请核对原稿、学生归属、评分和反馈，并明确确认本次发布。');
  const current=await readBoundReport(env,session,id);
  if(current.report.outdated||current.document.provenance.inputHash!==body.inputHash)fail(409,'原稿已更新，请重新批阅和核对后发布。','publication_input_changed');
@@ -56,13 +59,13 @@ async function publish(env:Env,session:PublicationSession,id:string,body:any,bri
  const own='EXISTS(SELECT 1 FROM writing_publication_operations WHERE owner=? AND request_id=? AND request_hash=? AND event_id=?)';
  await livePublish(env,session,report.class_id,bridge);
  await env.DB.batch([
-  env.DB.prepare("INSERT OR IGNORE INTO writing_publication_operations SELECT ?,?,?,?,?,?,'publish',? WHERE COALESCE((SELECT version FROM writing_publications WHERE draft_id=?),0)=? AND EXISTS(SELECT 1 FROM writing_reports WHERE id=? AND owner=? AND current_revision=?) AND EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND state='received' AND input_hash=?) AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND status='active')").bind(session.principal,body.requestId,hash,report.draft_id,version,eventId,now,report.draft_id,expected,id,session.principal,body.expectedReportRevision,report.draft_id,body.inputHash,report.member_id),
+  env.DB.prepare("INSERT OR IGNORE INTO writing_publication_operations SELECT ?,?,?,?,?,?,'publish',? WHERE COALESCE((SELECT version FROM writing_publications WHERE draft_id=?),0)=? AND EXISTS(SELECT 1 FROM writing_reports WHERE id=? AND owner=? AND current_revision=?) AND EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND state='received' AND input_hash=?) AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND status='active') AND NOT EXISTS(SELECT 1 FROM writing_integration_quarantine WHERE draft_id=?)").bind(session.principal,body.requestId,hash,report.draft_id,version,eventId,now,report.draft_id,expected,id,session.principal,body.expectedReportRevision,report.draft_id,body.inputHash,report.member_id,report.draft_id),
   env.DB.prepare(`INSERT INTO writing_publications SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? WHERE ${own} ON CONFLICT(draft_id) DO UPDATE SET version=excluded.version,state=excluded.state,report_id=excluded.report_id,report_revision=excluded.report_revision,input_hash=excluded.input_hash,object_key=excluded.object_key,content_hash=excluded.content_hash,summary_json=excluded.summary_json,published_at=excluded.published_at,updated=excluded.updated WHERE writing_publications.owner=excluded.owner AND writing_publications.version=?`).bind(report.draft_id,session.principal,report.task_id,report.member_id,report.class_id,current.document.identity.provider,current.document.identity.subject,version,'published',id,body.expectedReportRevision,body.inputHash,key,contentHash,JSON.stringify(summary),now,now,...binds,expected),
   env.DB.prepare(`INSERT INTO writing_publication_versions SELECT draft_id,version,state,report_id,report_revision,input_hash,object_key,content_hash,?,'教师核对并确认发布',?,? FROM writing_publications WHERE draft_id=? AND version=? AND ${own}`).bind(session.principal,eventId,now,report.draft_id,version,...binds),
   env.DB.prepare(`INSERT INTO writing_integration_outbox(id,draft_id,version,owner,grant_id,payload_json,state,created,updated) SELECT ?,?,?,?,?,?,'pending',?,? WHERE ${own}`).bind(eventId,report.draft_id,version,session.principal,session.grant_id,JSON.stringify(payload),now,now,...binds),
  ]);
  if(!await replay(env,session.principal,body.requestId,hash))fail(409,'报告、原稿或发布版本已变化，请刷新后核对。','publication_conflict');
- return status(env,session,id);
+ await notifyDailyDraft(env,report.draft_id);return status(env,session,id);
 }
 async function withdraw(env:Env,session:PublicationSession,id:string,body:any,bridge:Bridge){
  mutationBody(body);const report=await reportContext(env,session,id);await livePublish(env,session,report.class_id,bridge);
@@ -80,10 +83,10 @@ async function withdraw(env:Env,session:PublicationSession,id:string,body:any,br
   env.DB.prepare(`INSERT INTO writing_publication_versions SELECT draft_id,version,state,report_id,report_revision,input_hash,object_key,content_hash,?,?,?,? FROM writing_publications WHERE draft_id=? AND version=? AND ${own}`).bind(session.principal,body.reason.trim(),eventId,now,p.draft_id,version,...binds),
   env.DB.prepare(`INSERT INTO writing_integration_outbox(id,draft_id,version,owner,grant_id,payload_json,state,created,updated) SELECT ?,?,?,?,?,?,'pending',?,? WHERE ${own}`).bind(eventId,p.draft_id,version,session.principal,session.grant_id,JSON.stringify(payload),now,now,...binds),
  ]);
- if(!await replay(env,session.principal,body.requestId,hash))fail(409,'发布状态已变化，请刷新后再撤回。','publication_conflict');return status(env,session,id);
+ if(!await replay(env,session.principal,body.requestId,hash))fail(409,'发布状态已变化，请刷新后再撤回。','publication_conflict');await notifyDailyDraft(env,p.draft_id);return status(env,session,id);
 }
 function student(session:PublicationSession){if(session.role!=='student'||session.provider!=='wordup'||!session.scopes?.includes('writing.own'))fail(403,'请使用学校学生账号查看自己的反馈。');}
-const readable="p.state='published' AND d.input_hash=p.input_hash AND d.state='received' AND m.status='active'";
+const readable="p.state='published' AND d.input_hash=p.input_hash AND d.state='received' AND m.status='active' AND NOT EXISTS(SELECT 1 FROM writing_integration_quarantine q WHERE q.draft_id=p.draft_id)";
 async function studentHead(env:Env,session:PublicationSession,id:string,version?:number){
  student(session);const p=await env.DB.prepare(`SELECT p.* FROM writing_publications p JOIN writing_drafts d ON d.id=p.draft_id JOIN task_members m ON m.id=p.member_id WHERE p.draft_id=? AND p.student_provider=? AND p.student_subject=? AND ${readable}`).bind(id,session.provider,session.subject).first<Publication>();
  if(!p||version!==undefined&&p.version!==version)fail(404,'这份反馈尚未发布、已更新或已撤回。');return p!;
@@ -95,8 +98,8 @@ async function released(env:Env,session:PublicationSession,id:string,version?:nu
  await studentHead(env,session,id,p.version);return {p,document};
 }
 export async function handlePublications(req:Request,env:Env,session:PublicationSession,bridge:Bridge,input:Input):Promise<Response|null>{
- const url=new URL(req.url),teacherMatch=url.pathname.match(/^\/api\/writing-reports\/([a-f0-9-]{36})\/publication(?:\/(withdraw))?$/),studentMatch=url.pathname.match(/^\/api\/student\/reports(?:\/([a-f0-9-]{36})(?:\/(read)|\/assets\/([a-f0-9-]{36}))?)?$/);
- if(teacherMatch){if(req.method==='GET'&&!teacherMatch[2])return json(await status(env,session,teacherMatch[1]));if(req.method==='POST'){const body=await input(req,8192);return json(await(teacherMatch[2]?withdraw(env,session,teacherMatch[1],body,bridge):publish(env,session,teacherMatch[1],body,bridge)));}fail(405,'发布请求方式不支持。');}
+ const url=new URL(req.url),teacherMatch=url.pathname.match(/^\/api\/writing-reports\/([a-f0-9-]{36})\/publication(?:\/(withdraw|sync))?$/),studentMatch=url.pathname.match(/^\/api\/student\/reports(?:\/([a-f0-9-]{36})(?:\/(read)|\/assets\/([a-f0-9-]{36}))?)?$/);
+ if(teacherMatch){if(req.method==='GET'&&!teacherMatch[2])return json(await status(env,session,teacherMatch[1]));if(req.method==='POST'){const body=await input(req,8192) as any;if(teacherMatch[2]==='sync'){const report=await reportContext(env,session,teacherMatch[1]);if(!Number.isSafeInteger(body?.expectedPublicationVersion))fail(400,'请选择当前发布版本。');await reconcileDailyFeedback(env,report.draft_id,session.principal,body.expectedPublicationVersion,bridge);return json(await status(env,session,teacherMatch[1]));}return json(await(teacherMatch[2]?withdraw(env,session,teacherMatch[1],body,bridge):publish(env,session,teacherMatch[1],body,bridge)));}fail(405,'发布请求方式不支持。');}
  if(!studentMatch)return null;student(session);
  if(!studentMatch[1]){
   if(req.method!=='GET')fail(405,'反馈列表请求方式不支持。');let before=Number.MAX_SAFE_INTEGER,after='~';const cursor=url.searchParams.get('cursor');

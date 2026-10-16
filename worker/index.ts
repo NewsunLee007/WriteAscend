@@ -1,4 +1,4 @@
-import type {D1Database, Fetcher, R2Bucket, MessageBatch} from '@cloudflare/workers-types';
+import type {D1Database, Fetcher, R2Bucket, MessageBatch, Queue} from '@cloudflare/workers-types';
 import {importLegacy, sanitizeLegacy} from '../src/report/legacy-import';
 import {HttpError} from './errors';
 import {handleModelApi,consumeModelJobs,recoverModelOutbox,type ModelBindings,type ModelJobMessage} from './model-jobs';
@@ -7,11 +7,13 @@ import {handleSnapshots} from './snapshots';
 import {handleTasks} from './tasks';
 import {handleSheets} from './sheets';
 import {handleCollection} from './collection';
+import {dispatchDailyEvent,recoverDailyFeedback} from './daily-feedback';
 import {handlePublications} from './publications';
 import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns} from './grading';
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
+  FEEDBACK_EVENTS?: Queue<{eventId:string}>;
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
 }
 type Session = {token_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;display_name:string;expires:number};
@@ -200,7 +202,8 @@ export default {
     const jobs=batch.messages.filter(m=>m.body?.jobId);
     if(jobs.length)await consumeModelJobs({...batch,messages:jobs},env,bridge);
     for(const message of jobs)try{await advanceRunForModelJob(env,message.body.jobId!,bridge);}catch{/* Scheduled recovery resumes saved provider responses. */}
-    for(const message of batch.messages.filter(m=>!m.body?.runId&&!m.body?.jobId))message.ack();
+    for(const message of batch.messages.filter(m=>m.body?.eventId)){try{await dispatchDailyEvent(env,message.body.eventId!,bridge);message.ack();}catch{message.retry();}}
+    for(const message of batch.messages.filter(m=>!m.body?.runId&&!m.body?.jobId&&!m.body?.eventId))message.ack();
   },
-  async scheduled(_controller:unknown,env:Env){await recoverModelOutbox(env);await recoverGradingRuns(env,bridge);},
+  async scheduled(_controller:unknown,env:Env){await recoverModelOutbox(env);await recoverGradingRuns(env,bridge);await recoverDailyFeedback(env);},
 };

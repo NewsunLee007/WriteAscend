@@ -10,7 +10,7 @@ import {createWritingDirectory} from '../../integrations/daily/src/writing-direc
 
 const origin='http://127.0.0.1:8890',db=new DatabaseSync(':memory:');
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/teacher-workflow.json',import.meta.url),'utf8'));
-let modelCalls=0;
+let modelCalls=0;let feedbackUnavailable=false,dropNextFeedbackResponse=false;
 const source=async req=>{
   const cookies=req.headers.cookie?.split(';').map(s=>s.trim()) || [];
   const mode=['student0','student1','admin','other','teacher'].find(value=>cookies.includes('wordup_session=synthetic-browser-'+value));
@@ -40,7 +40,16 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('X-Test-Sandbox','synthetic-only');
   res.setHeader('Cache-Control','no-store');
   res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'");
-  if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls}));return;}
+  if(url.pathname==='/sandbox/feedback-control'&&req.method==='POST'){
+    let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>2048){res.writeHead(413).end();return;}}
+    const value=JSON.parse(raw||'{}');feedbackUnavailable=value.unavailable===true;dropNextFeedbackResponse=value.dropNextResponse===true;
+    if(value.resetFeedback)for(const table of ['writing_feedback_heads','writing_feedback_events'])if(db.prepare("SELECT 1 FROM sqlite_schema WHERE name=?").get(table))db.exec('DELETE FROM '+table);
+    res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({ok:true}));return;
+  }
+  if(url.pathname==='/sandbox/home'){res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script type="module" src="/writing-entry.mjs"></script></head><body><h1>既有 Daily 页面</h1><a data-writing-entry hidden style="display:none" href="/writing-feedback.html">作文反馈</a></body></html>');return;}
+  if(url.pathname.startsWith('/api/integrations/writeascend/report-events')&&feedbackUnavailable){res.writeHead(503,{'Content-Type':'application/json'}).end(JSON.stringify({error:{message:'合成同步中断'}}));return;}
+  if(url.pathname==='/api/integrations/writeascend/report-events'&&dropNextFeedbackResponse){dropNextFeedbackResponse=false;await bridge.handle(req,{writeHead(){},end(){res.destroy();}},url);return;}
+  if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls,feedbackEvents:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_feedback_events'").get()?db.prepare('SELECT COUNT(*) n FROM writing_feedback_events WHERE (? IS NULL OR draft_id=?)').get(url.searchParams.get('draftId'),url.searchParams.get('draftId')).n:0}));return;}
   if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher','/sandbox/use-student0','/sandbox/use-student1'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
   if(url.pathname==='/v1/chat/completions'&&req.method==='POST'){
     if(req.headers.authorization!=='Bearer synthetic-local-model-key'){res.writeHead(401).end();return;}
@@ -56,7 +65,7 @@ const server=http.createServer(async(req,res)=>{
     res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(response));return;
   }
   if(await bridge.handle(req,res,url))return;
-  const assets={'/writing-connect.html':['writing-connect.html','text/html; charset=utf-8'],'/writing-connect.mjs':['writing-connect.mjs','text/javascript'],'/writing-connect.css':['writing-connect.css','text/css']};
+  const assets={'/writing-feedback.html':['writing-feedback.html','text/html; charset=utf-8'],'/writing-feedback.mjs':['writing-feedback.mjs','text/javascript'],'/writing-feedback.css':['writing-feedback.css','text/css'],'/writing-entry.mjs':['writing-entry.mjs','text/javascript'],'/writing-connect.html':['writing-connect.html','text/html; charset=utf-8'],'/writing-connect.mjs':['writing-connect.mjs','text/javascript'],'/writing-connect.css':['writing-connect.css','text/css']};
   const asset=assets[url.pathname];
   if(!asset){res.writeHead(404).end();return;}
   if(url.pathname==='/writing-connect.html'&&!req.headers.cookie?.includes('wordup_session='))res.setHeader('Set-Cookie','wordup_session=synthetic-browser-teacher; Path=/; HttpOnly; SameSite=Lax');

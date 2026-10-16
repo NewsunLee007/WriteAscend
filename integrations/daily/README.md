@@ -4,14 +4,14 @@
 
 ## 安装与回滚
 
-先运行以下预检，再使用 `--apply` 安装源码。预检核对原有 `server.mjs` 和登录返回白名单的 SHA-256，发现其他人的改动时停止。新增模块只有在匹配当前集成包或本工具先前安装快照时才可覆盖。
+先运行以下预检，再使用 `--apply` 安装源码。预检核对原有 `server.mjs`、登录返回白名单、Daily 首页和学习记录页的 SHA-256，发现其他人的改动时停止。新增模块只有在匹配当前集成包或本工具先前安装快照时才可覆盖。
 
 ```sh
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily --apply
 ```
 
-安装器仅修改清单中的 10 个源码/测试文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
+安装器仅修改清单中的 17 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
 
 ```sh
 node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot
@@ -30,7 +30,7 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 | `WRITING_BRIDGE_STORAGE_KEY` | Daily 本机独立随机加密密钥，至少 32 字符，绝不传到 Worker 或浏览器 |
 | `WRITING_ALLOWED_CALLBACKS` | 逗号分隔的完整回调白名单；测试环境为 `https://writeascend-staging.317792050.workers.dev/api/auth/callback` |
 
-机器凭据保护 `token/introspect/revoke/roster` 及 `directory/*`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
+机器凭据保护 `token/introspect/revoke/roster`、`directory/*` 及 `report-events[/receipt]`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
 
 缺少任何必需配置时桥接关闭，桥接路由返回 503；不会创建 `writing_*` 表，也不会改变既有模块行为。公网机器接口还需核对 Cloudflare 防护是否允许服务端受认证请求，不能直接假定本地通过就能公网使用。
 
@@ -51,15 +51,35 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 ## 已验证与未完成
 
 - WriteAscend 的 `npm test` 包含桥接、来源身份适配、名册权限和 Worker/Daily HTTP 协议测试。
-- Daily 原有回归加新增登录返回测试共 14 项通过。
+- 实际 Daily 当前完整回归共 204 项通过（含学校学生返回作文反馈页的登录路由检查）。
 - 实际 Wrangler 本地 D1/Worker + 合成 Daily 来源 + 390px 浏览器完成跨域登录、会话核验和退出验证，见 `scripts/qa/cloud-login.cjs`。
 - 合成来源不代表真实账号登录、正式 Cloudflare 防护、真实名册初始化已经通过。
 - 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；目录管理和真实名册核对见 [验证记录](../../docs/verification/school-directory.md)；正式目录写入及结果发布尚未启用。
 
-本轮 10 文件集成源码已安装，回滚快照为 `audit/private/daily-bridge-2026-10-16T12-07-42-796Z`；仍保持正式桥接关闭，没有重启服务。
+安装器支持已安装的旧版集成升级，也支持从原始 Daily 源码安装；未知文件改动会中止，不能跳过摘要检查。
 
 ## 学生反馈交接补充（2026-10-17）
 
 交接页现支持已经验证的学校学生账号进入“我的作文”；教师入口保持原批阅路径。学生来源仍由同一 Daily/WordUp 验证器核验，不接受浏览器自报身份。Worker 的学生反馈接口仅提供本人已发布快照和关联原稿，教师编辑和发布分开，撤回和原稿更正会停止旧反馈访问。
 
-新版交接静态文件已通过摘要预检更新，安装快照为 `audit/private/daily-bridge-2026-10-16T16-13-54-392Z`。正式桥接仍关闭，未改环境配置、未重启服务。本次实际 Daily 项目 203 项测试通过。发布摘要尚在 Worker outbox 待同步，Daily 接收端与个人入口下一阶段实现；不能将登录接通称为摘要同步已完成。
+当前 17 文件版本已通过摘要预检安装，最新回滚快照为 `audit/private/daily-bridge-2026-10-16T17-09-13-095Z`。正式桥接仍关闭，未改环境配置、未重启服务。此前各次快照保留，可逐次恢复相应版本；回滚只恢复源码，不删除数据库中的发布事件。
+
+## 发布摘要同步与 Daily 入口
+
+- 教师在 WriteAscend 核对并发布后，同一事务写入不可变发布快照和 outbox。独立 `FEEDBACK_EVENTS` 队列投递事件，模型任务仍使用原队列；Daily 连接故障不占用模型队列。
+- Daily 仅保存题目、班级、学期、稿次、分数、教师名称、发布版本与报告链接；原稿、全文、逐句批注、模型原始响应和密钥继续保留在 WriteAscend 私有存储。链接从服务器登记的回调白名单生成，浏览器或事件不能指定任意外站地址。
+- `POST report-events` 接受经过机器认证的 WriteAscend 作为已审批事件的可信签发方。异步交付不是新的发布，不依赖已过期的交互登录授权；教师发布动作仍在 WriteAscend 当场验证当前班级权限、原稿和报告版本。
+- 事件 ID 和投影内容摘要幂等，同稿次不能改绑学生、教师或任务；版本单调递增，撤回保留墓碑，旧发布即使后到也不会覆盖新撤回。
+- `GET feedback` 每次核验 Daily/WordUp 当前学校学生账号，只返回本人的已发布摘要，每页 25 条。`GET portal` 给已验证的教师/学生返回相应入口；访客、停用账号和匿名访问不会显示首页入口。
+- Daily 学习页和学习记录页增加默认隐藏的入口，桥接关闭或连接失败时原页面继续可用。学生进入 `writing-feedback.html`，从摘要打开 WriteAscend 的本人完整反馈；教师入口指向 WriteAscend 登录。
+- 连接的第一条 `WRITING_ALLOWED_CALLBACKS` 是教师入口。正式环境只能登记明确选择的正式目标，不能把测试实例作为第一条回调；测试与正式实例应使用各自的机器凭据与数据库。
+
+## 同步修复与发布版本冲突
+
+网络/5xx 失败保留事件并退避重试，机器认证或接口配置失败显示管理员检查提示，不把老师当前登录误报为过期。丢失回执时重发同一事件 ID，Daily 不重复创建记录。老师可点击“核对 Daily 同步”，先查机器回执；缺失的记录补发，已有的记录确认成功，整个过程不重新调用模型。
+
+定时任务还会重新投递至少一天未核对的当前成功事件，每次至多 25 条，以修复 Daily 数据库恢复后缺失的摘要。恢复正确的完整 WriteAscend 备份后也要核对两端版本，不能把发布计数归零。如果 Daily 已有更高版本或同版本内容不同，WriteAscend 暂停该稿学生访问和再次发布，保留冲突记录供管理员对账；恢复一致的源记录并核对回执后才解除暂停。
+
+老师撤回或替换原稿时，WriteAscend 的完整反馈和原图立即停止访问。Daily 摘要异步更新，断网期间旧摘要可能短暂保留，但链接不能绕过完整报告的实时权限检查。同步恢复后摘要撤回。不能把摘要投递成功等同于学生已经查看、阅读或理解反馈。
+
+Cloudflare 新增迁移 `0009_integration_delivery.sql` 和每环境独立的 `FEEDBACK_EVENTS` 生产/消费队列；远程测试队列已创建，远程 Worker 和迁移尚未部署。启用前应先保留可恢复备份、应用 0001–0009 迁移、核对机器凭据/回调与队列，再进行真实学校账号和网络验收。详见 [同步验证](../../docs/verification/daily-feedback.md)。

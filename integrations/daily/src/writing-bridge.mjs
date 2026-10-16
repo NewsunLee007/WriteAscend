@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {createWritingFeedback} from './writing-feedback.mjs';
 import {createWritingDirectory} from './writing-directory.mjs';
 
 const prefix = '/api/integrations/writeascend/';
@@ -29,6 +30,7 @@ async function input(req) {
 // existing session verifier; only the resulting source reference is sealed locally.
 export function createWritingBridge({db, publicOrigin, serviceToken = '', storageKey = '', callbacks = /** @type {string[]} */ ([]), resolveIdentity, verifySource, readRoster = /** @type {Function | null} */ (null), directory=createWritingDirectory({db}), now = Date.now}) {
   const allowed = new Set(callbacks);
+  const feedback=createWritingFeedback({db,callbacks,now});
   const enabled = serviceToken.length >= 32 && storageKey.length >= 32 && allowed.size > 0;
   const key = crypto.createHash('sha256').update('writing-bridge-source-v1:' + storageKey).digest();
   let initialized = false;
@@ -132,9 +134,15 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
         const identity = validateIdentity(await resolveIdentity(req));
         send(res,200,{authenticated:true,name:identity.name || '',role:identity.role}); return true;
       }
+      if(['feedback','portal'].includes(endpoint)&&req.method==='GET'){
+        const identity=validateIdentity(await resolveIdentity(req));
+        send(res,200,endpoint==='portal'?feedback.portal(identity):feedback.list(identity,url.searchParams.get('cursor')));return true;
+      }
       if (req.method !== 'POST') fail(405, '请求方式不支持。');
       if (endpoint === 'authorize') sameOrigin(req); else machine(req);
       const body = await input(req);
+      if(endpoint==='report-events'){send(res,200,feedback.accept(body));return true;}
+      if(endpoint==='report-events/receipt'){if(typeof body.eventId!=='string'||!/^[a-f0-9-]{36}$/.test(body.eventId))fail(400,'事件编号不正确。');send(res,200,feedback.receipt(body.eventId));return true;}
       if (endpoint === 'authorize') {
         const parameters = authorizeParameters(body), identity = validateIdentity(await resolveIdentity(req));
         if (!identity.source?.cookie) fail(401, '无法建立登录来源，请重新登录。');
