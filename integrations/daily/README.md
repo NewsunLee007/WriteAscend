@@ -11,7 +11,7 @@ node scripts/install-daily-bridge.mjs /absolute/path/to/Daily
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily --apply
 ```
 
-安装器仅修改清单中的 21 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
+安装器仅修改清单中的 22 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
 
 ```sh
 node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot
@@ -103,3 +103,7 @@ Cloudflare 新增迁移 `0009_integration_delivery.sql` 和每环境独立的 `F
 学校批阅授权绑定运行、任务、成员、班级、稿次、输入摘要、模型输入摘要、模型配置版本和管线版本；普通模型任务授权绑定单个任务与完整请求摘要。授权最长 24 小时，且不超过来源会话到期时间；不授予报告发布、名册浏览或任意新任务的权限。班级/教师授权版本变化会使旧授权失效，重新授予权限不自动恢复旧工作。
 
 交互授权到期或被常规清理不取消已确认工作，关闭浏览器也不取消。主动退出则撤销同来源/同会话范围的工作；Worker 还在本地 D1 记录退出，Daily 连接失败时也能阻止后续模型发送。暂停后的继续处理需要当前教师登录重新授权，结果不明的请求仍需明确确认后才可重试。已发出的供应商请求不能撤销，保存返回结果不会再次计费。详细边界见 [后台工作设计](../../docs/background-work.md) 与 [验证记录](../../docs/verification/background-work.md)。
+
+## 独立互批轮次补充（22 文件版本）
+
+新增 `src/writing-peer-rounds.mjs`，提供冻结轮次的教师授权、当前有效成员与最小身份投影；仅互批独立机器客户端可调用。活动登录滚动续期仍核验原来源，最长 24 小时；普通教师的课堂轮次持续授权独立于教师短时交互会话。实际本机源码已安装，最新快照 `audit/private/daily-bridge-2026-10-16T22-22-02-553Z`，原快照保留，正式配置与运行进程未变。原版、旧桥接、18 文件版和 21 文件版四条安装/回滚路径已验证。实现与边界见 [互批轮次](../../docs/peer-rounds.md)。

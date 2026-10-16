@@ -1,0 +1,315 @@
+{
+  "checkedAt": "2026-10-16T22:57:37.560819+00:00",
+  "syntheticAccountsOnly": true,
+  "remoteDeployment": false,
+  "formalDirectoryWrites": false,
+  "actualDailyRestarted": false,
+  "tests": {
+    "root": {
+      "tests": 177,
+      "pass": 177,
+      "fail": 0,
+      "sha256": "03000a78785c255ac6ff6477eb915f6cc8086c17cb0fe6cac084189e92a094dc"
+    },
+    "peerCore": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "sha256": "0dda71536c72a28db5d61608f13bee0c1a70fd898f8483b2ef7c122d8bdbb3f4"
+    },
+    "actualDaily": {
+      "tests": 205,
+      "pass": 205,
+      "fail": 0,
+      "sha256": "9f1f14fbac260b2a630a613ad29b32d695d92f8e64df3e24ce6af5957394154d"
+    }
+  },
+  "browser": {
+    "peer-rounds": {
+      "passed": true,
+      "scriptSha256": "9c2bff2be0f52f691c2e5b1816969dce989790e476b140ae5c9684caa17ea828",
+      "checkedAt": "2026-10-16T22:57:18.797705+00:00",
+      "result": {
+        "passed": true,
+        "teacherOriginalRubricAndCustomPrompt": true,
+        "handwritingTeacherOnly": true,
+        "balancedNoSelfReview": true,
+        "sameNameAccountsIsolated": true,
+        "exampleTraining": true,
+        "mobileSentenceEvidence": true,
+        "automaticDraftAndReload": true,
+        "transientAccountFailureHidesContentAndKeepsEdits": true,
+        "studentCannotSeeUnpublishedFeedback": true,
+        "explicitTeacherPublication": true,
+        "authorAdoptionAndPlan": true,
+        "hideStopsAuthorAccess": true,
+        "teacherReturnAndResubmission": true,
+        "changedFeedbackRequiresNewResponse": true,
+        "sourceMemberRemovalStopsAccess": true,
+        "noModelCalls": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    "peer-auth": {
+      "passed": true,
+      "scriptSha256": "a05de3dbe7bd50b53e30c6b23db319832160941413a2285b222417b9ae90de62",
+      "checkedAt": "2026-10-16T22:52:30.330308+00:00",
+      "result": {
+        "passed": true,
+        "independentWorkerAndCookie": true,
+        "realDailyConsentCodeFlow": true,
+        "teacherClassScope": true,
+        "studentOwnClassScope": true,
+        "sameNameAccountsIsolated": true,
+        "noBrowserReadableSecrets": true,
+        "refreshKeepsSession": true,
+        "peerLogoutPreservesTeacherAndOtherDevice": true,
+        "currentClassRevocation": true,
+        "sourceOutageHidesStaleAccount": true,
+        "peerOutagePreservesTeacher": true,
+        "sourceLogoutRevokesBothApps": true,
+        "schoolGuestDenied": true,
+        "interactiveExpiry": true,
+        "callbackFailureHasRecovery": true,
+        "noTeacherModelOrDirectoryEndpoints": true,
+        "noModelCalls": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    "peer-materials": {
+      "passed": true,
+      "scriptSha256": "46e8316cd28be7a8f0f01d487e47a39bf3298211553d23a3b8707bde28f7a021",
+      "checkedAt": "2026-10-16T22:52:35.069059+00:00",
+      "result": {
+        "passed": true,
+        "originalTeacherTaskAndCollectedPhotos": true,
+        "pinyinInitialSearch": true,
+        "sameNameIdentitySeparated": true,
+        "manualOriginalWithoutPriorAI": true,
+        "teacherOriginalAndPrivacyConfirmation": true,
+        "nextOriginalKeepsConfirmedText": true,
+        "candidateIdentityLinesSeparate": true,
+        "independentTeacherImport": true,
+        "sourceRubricPreserved": true,
+        "noBrowserIdentityMapping": true,
+        "durableSingleImportAndReceipt": true,
+        "refreshRevalidatesSource": true,
+        "studentCannotReadTeacherImports": true,
+        "withdrawalHidesSource": true,
+        "noModelCalls": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-16T22:53:05.512547+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "background-work": {
+      "passed": true,
+      "scriptSha256": "fca5dbbc2de0109c0cf39798560cde6f3d3ed546d9cf547f820d08522e1218ed",
+      "checkedAt": "2026-10-16T22:53:42.595742+00:00",
+      "result": {
+        "passed": true,
+        "boundWorkAfterPrimaryExpiry": true,
+        "boundWorkAfterClosingPage": true,
+        "multiplePipelineStages": true,
+        "freshLoginKeepsOriginalRun": true,
+        "classRevocationBlocksDispatch": true,
+        "explicitResumeRenewsOnlyExistingRun": true,
+        "standaloneModelJobWorkAfterExpiry": true,
+        "localLogoutStopsWorkWhenRemoteRevokeFails": true,
+        "noDuplicateModelCalls": true,
+        "totalSyntheticModelCalls": 4
+      }
+    },
+    "student-revisions": {
+      "passed": true,
+      "scriptSha256": "1bab10f1d15a14a1a9dd185851e09da368f34803332a1265382db9852fa336c0",
+      "checkedAt": "2026-10-16T22:54:09.872258+00:00",
+      "result": {
+        "passed": true,
+        "studentOwnRevision": true,
+        "sameTeacherRubric": true,
+        "offlinePhotoCached": true,
+        "refreshRestoresLocalPhotoAndEvidence": true,
+        "crossDeviceConflictExplicit": true,
+        "photoOrdering": true,
+        "teacherReturnAndResubmit": true,
+        "teacherAcceptanceCreatesNextDraft": true,
+        "originalOneClickGrading": true,
+        "firstFeedbackPreserved": true,
+        "studentAuthorshipVisible": true,
+        "noAutoModelOrPublication": true,
+        "studentAndTeacherIsolation": true,
+        "logoutClearsCache": true,
+        "logoutFencesDelayedWrites": true,
+        "syntheticModelCalls": 2,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    "grading-history": {
+      "passed": true,
+      "scriptSha256": "3a7d674ef1847af6cfda012ab21a31dfd84c1946aea331a83c09d70475fe1433",
+      "checkedAt": "2026-10-16T22:54:41.986005+00:00",
+      "result": {
+        "passed": true,
+        "reportRevisionHistory": true,
+        "readOnlyHistory": true,
+        "historyComparison": true,
+        "restoreCreatesNewRevision": true,
+        "historyDoesNotInvokeAI": true,
+        "regradeExplicitlyInvokesOneModel": true,
+        "regradePreservesPublishedVersion": true,
+        "oldReportAccessibleDuringRegrade": true,
+        "dailyPublishedSummary": true,
+        "dailyOwnAccountLink": true,
+        "dailyDatabaseRestoreRepaired": true,
+        "lostAcknowledgmentReconciled": true,
+        "syncAndHistoryHaveNoAdditionalModelCalls": true,
+        "withdrawalClearsDaily": true,
+        "disabledEntryLeavesExistingPage": true,
+        "teacherDailyEntry": true,
+        "studentLogin": true,
+        "unpublishedHidden": true,
+        "teacherConfirmation": true,
+        "readOnlyFeedback": true,
+        "stableOwnReportLink": true,
+        "studentPdfRendered": true,
+        "studentOwnOriginal": true,
+        "sameNameIsolated": true,
+        "teacherEditsAwaitRepublish": true,
+        "versionedRepublish": true,
+        "withdrawalBlocksReportAndImage": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    }
+  },
+  "installLifecycle": {
+    "passed": true,
+    "syntheticFixtureOnly": true,
+    "checks": [
+      {
+        "label": "original Daily source",
+        "installed": true,
+        "idempotent": true,
+        "unrelatedChangesProtected": true,
+        "rollbackExact": true
+      },
+      {
+        "label": "previous installed bridge",
+        "installed": true,
+        "idempotent": true,
+        "unrelatedChangesProtected": true,
+        "rollbackExact": true
+      },
+      {
+        "label": "previous full source before peer login",
+        "installed": true,
+        "idempotent": true,
+        "unrelatedChangesProtected": true,
+        "rollbackExact": true
+      },
+      {
+        "label": "previous 21-file peer login bundle",
+        "installed": true,
+        "idempotent": true,
+        "unrelatedChangesProtected": true,
+        "rollbackExact": true
+      }
+    ],
+    "realSourceUntouched": true
+  },
+  "buildChecks": {
+    "output/peer-rounds-root-build.txt": {
+      "sha256": "2d0a2dcb2bd2c2340d05982771e23e749bc1df4250a60b87f6853cdb09f51e30",
+      "dryRunOnly": false
+    },
+    "output/peer-rounds-root-worker-check.txt": {
+      "sha256": "1a0f54f9d28d6c245ab1d6a03282eaa842abc55d081fc13753ae220103cf6a4f",
+      "dryRunOnly": true
+    },
+    "output/peer-rounds-worker-check.txt": {
+      "sha256": "8caa7f12d0257f3fbd68c5c80a5e9f675f673841b1fae10e98092d55a5dd1902",
+      "dryRunOnly": true
+    }
+  },
+  "sourceSha256": {
+    "apps/peer-review/migrations/0003_peer_rounds.sql": "458273467b087d14878daf583c5dcfb4515927775b90736c968aa5e9b227354c",
+    "apps/peer-review/src/ImportMaterials.tsx": "2f72f7a1d2d5a7a3a9d34f343ba692b5bfbd8ed43671db08b6ce405bd021ac53",
+    "apps/peer-review/src/RoundSetup.tsx": "c0eef9fdc5e254914bc1a0cd8327e03813f0a9b90d2ba489c36e087d0b8e36f5",
+    "apps/peer-review/src/RoundWorkspace.tsx": "24b50b47be4407dbac617fceda5cabbc9342350c7b93b6706dd98dd6d181d9ee",
+    "apps/peer-review/src/core/feedback.ts": "3cab2201d8cf134184ce6620c9dacc5aceeb5c579c6b66d6deac371eabfcc44b",
+    "apps/peer-review/src/core/rubric.ts": "1d8721c08afd780203900ad063c87cd92821381911d5a5cc76b1cca9d2c06529",
+    "apps/peer-review/src/main.tsx": "76563b179d4d9f00177928bdfaf402d98d61e900dbe6681555939619a626b997",
+    "apps/peer-review/src/peer-api.ts": "353ae207c83bbfc36dd0a2852a47c30333c471286d2fd2cb04c3bc3fdc1f2993",
+    "apps/peer-review/src/style.css": "f480be40910cda993349dca6c36079ba05d9762cb64a98d85e4d9dc444b31727",
+    "apps/peer-review/test/core.test.ts": "4e9b857eafec3f27dc31ad3046012a8866318ae7ff7e80fe653359f20138bf43",
+    "apps/peer-review/worker/auth.ts": "3cc052f412a2c2395af8e07cd7d3ec2bea39d14dd627042ceb355deccba3b7d8",
+    "apps/peer-review/worker/imports.ts": "b879b0a77cb8d6ca222e7e38b7df2e040bcbcea13daa67c3276f746438da4b9a",
+    "apps/peer-review/worker/index.ts": "fc9b15533779ba1fd51cc78f73a753f2f034d2638fbeba20e3fd5b269eccc352",
+    "apps/peer-review/worker/rounds.ts": "dc42cde6cb7e001ab2ee4163be2dc519fc18c689b1d1ae0ad29932b5f915c4d1",
+    "integrations/daily/src/writing-peer-bridge.mjs": "93742cbb211657466d848a52c620d29ada0393728b154223828f4cb4e0fa6503",
+    "integrations/daily/src/writing-peer-rounds.mjs": "b4096127df2e2b741ce9f1fada3236701b116ad1e19715f5fdfbd84ffa855c74",
+    "scripts/install-daily-bridge.mjs": "8e3aeb7fbbc06e49b979e7c5659bb44792abcf04fd74002f2264605c0136208a",
+    "scripts/qa/daily-bridge-sandbox.mjs": "f1d23123c28f3377552d1c19137dc66db129304f640a1784f669221f7df0b13d",
+    "scripts/qa/daily-install-lifecycle.mjs": "a6e406b2707398588fa9e7a2c69a2541e6fbd64c16675fee8e6f59aecc571523",
+    "scripts/qa/peer-rounds.cjs": "9c2bff2be0f52f691c2e5b1816969dce989790e476b140ae5c9684caa17ea828",
+    "scripts/rollback-daily-bridge.mjs": "955caf25b110f63f2337d343af22dafb1343f66311c9f6edbc67e97b198e5c11",
+    "test/helpers/peer-round-sandbox.ts": "f7fd462b5a20915e0ce0d37b3cf2feaa02243748c1b2ccb2704a5ab6b5c75cf3",
+    "test/peer-bridge.test.ts": "18e5092fc997707f1cbbe88218c87a300b8f724ec431b6c48bf8c39b2ca1e70e",
+    "test/peer-exports.test.ts": "40b62bba8d26d5afeb4da31b46b99eb3737effdd38e6ba59711335f77bf10abb",
+    "test/peer-imports.test.ts": "a6eb16d72405847cedf5202d9c7c3ab8048b5ac411f752b0ea21815a4461f7fe",
+    "test/peer-round-authority.test.ts": "b8a121208b10fd4b5fe31e481f91c37c2c6538ac577b247f4bbbf09b81bc56fe",
+    "test/peer-rounds.test.ts": "358f5a6fcfe36dfaf1acf562a0d4751d6b627c8d8c8d9fb0607378d42de25f46",
+    "test/peer-worker-auth.test.ts": "9a39bd65f750fbdde5900ea0a305be568cf137fa54668008af396ebacbeda053",
+    "worker/peer-exports.ts": "cd299d8f4e7869a28d50fc36f3a7581d20cfc22e8ab5c95368bacac265f07341"
+  },
+  "screenshotsSha256": {
+    "output/peer-rounds-author-mobile.png": "5a2fa271649ba7c1c0c07f821c0b0f33e87f06de60b53eff413f954ea70ce913",
+    "output/peer-rounds-review-desktop.png": "85742d65fef8ada9c1880c795fb683bc79e5f5ee7607185288b7c094a9019e45",
+    "output/peer-rounds-review-mobile.png": "d2a0b9a1b3350791426a2cc22d8e409bb5ddc0007fd66da8e1185ef050c305f9",
+    "output/peer-rounds-setup-desktop.png": "f191cf483aed4c2dd5b0a085631f7ebda3fca50f4fcb809b592d47a65492964f",
+    "output/peer-rounds-setup-mobile.png": "5fcc4bfcfa43129c7eceb7730e000150738f617026a7812d07347bf904b89e94"
+  },
+  "qaPeerPersistence": "/tmp/writeascend-peer-rounds-qa-20261017",
+  "dailySnapshot": "audit/private/daily-bridge-2026-10-16T22-22-02-553Z",
+  "pending": [
+    "peer-feedback-to-handwritten-revision",
+    "real-classroom-and-device-validation",
+    "real-provider-and-account-validation",
+    "remote-Cloudflare-release-and-rollback"
+  ]
+}

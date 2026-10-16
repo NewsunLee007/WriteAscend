@@ -1,9 +1,9 @@
 import type {D1Database} from '@cloudflare/workers-types';
 export interface AuthEnv{DB:D1Database;PUBLIC_ORIGIN:string;DAILY_ORIGIN:string;PEER_BRIDGE_SERVICE_TOKEN?:string;}
 export type ClassAccess={id:string;schoolId:string;academicYear:string;name:string;grade:string;version:number;grantVersion:number;scopes:('peer.manage'|'peer.own')[]};
-export type PeerIdentity={clientId:'writing-peer';principal:string;provider:'wordup'|'daily_legacy_admin';subject:string;role:'teacher'|'admin'|'student';name:string;grantId:string;expires:number;scopes:('peer.manage'|'peer.own')[];classes:ClassAccess[];sessionHash:string};
+export type PeerIdentity={clientId:'writing-peer';principal:string;provider:'wordup'|'daily_legacy_admin';subject:string;role:'teacher'|'admin'|'student';name:string;grantId:string;expires:number;scopes:('peer.manage'|'peer.own')[];classes:ClassAccess[];sessionHash:string;renewCookie?:string};
 type StoredSession={token_hash:string;login_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;expires:number};
-export class AuthError extends Error{constructor(public status:number,message:string){super(message);}}
+export class AuthError extends Error{constructor(public status:number,message:string,public code?:string){super(message);}}
 function fail(status:number,message:string):never{throw new AuthError(status,message);}
 export const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('');
 const random=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
@@ -14,10 +14,11 @@ function readCookie(req:Request,name:string){return (req.headers.get('cookie')||
 export function sameOrigin(req:Request,env:AuthEnv){if(req.headers.get('origin')!==env.PUBLIC_ORIGIN||req.headers.get('sec-fetch-site')==='cross-site')fail(403,'请从作文互批页面进行操作。');}
 function validOrigin(value:string){try{const u=new URL(value);return u.origin===value&&!u.username&&!u.password&&(u.protocol==='https:'||u.protocol==='http:'&&['127.0.0.1','localhost'].includes(u.hostname));}catch{return false;}}
 export function configured(env:AuthEnv){return validOrigin(env.PUBLIC_ORIGIN)&&validOrigin(env.DAILY_ORIGIN)&&!!env.PEER_BRIDGE_SERVICE_TOKEN&&env.PEER_BRIDGE_SERVICE_TOKEN.length>=32&&(!env.PUBLIC_ORIGIN.startsWith('https:')||env.DAILY_ORIGIN.startsWith('https:'));}
-function nextPath(value:string|null,env:AuthEnv){try{const u=new URL(value||'/',env.PUBLIC_ORIGIN);if(u.origin!==env.PUBLIC_ORIGIN||value?.includes('\\')||!/^\/(?:$|student\/?$|teacher\/?$|rounds\/[a-f0-9-]{36}$|imports\/[a-f0-9-]{36}$)/.test(u.pathname))return '/';return u.pathname+u.search+u.hash;}catch{return '/';}}
-async function bridge(env:AuthEnv,path:'token'|'introspect'|'revoke',body:unknown){
+function nextPath(value:string|null,env:AuthEnv){try{const u=new URL(value||'/',env.PUBLIC_ORIGIN);if(u.origin!==env.PUBLIC_ORIGIN||value?.includes('\\')||!/^\/(?:$|student\/?$|teacher\/?$|rounds\/[a-f0-9-]{36}$|imports\/[a-f0-9-]{36}(?:\/setup)?$)/.test(u.pathname))return '/';return u.pathname+u.search+u.hash;}catch{return '/';}}
+export async function bridge(env:AuthEnv,path:'token'|'introspect'|'renew'|'revoke'|'round/preview'|'round/authorize'|'round/check',body:unknown){
  if(!configured(env))fail(503,'作文互批登录正在接入，请稍后重试。');let response:Response;
  try{response=await fetch(new URL('/api/integrations/writing-peer/'+path,env.DAILY_ORIGIN),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.PEER_BRIDGE_SERVICE_TOKEN},body:JSON.stringify(body),redirect:'manual',signal:AbortSignal.timeout(10000)});}catch{fail(503,'Daily 暂时无法连接，请稍后重试。');}
+ if(!response!.ok&&path.startsWith('round/')&&[403,404,409].includes(response!.status))fail(response!.status,'本轮名单或学校权限已改变，请老师核对。');
  if(!response!.ok)fail([401,403,429].includes(response!.status)?response!.status:503,response!.status===401?'学校登录已过期，请重新登录。':response!.status===403?'当前学校账号暂不可用。':response!.status===429?'登录较频繁，请稍后重试。':'Daily 暂时无法完成核验，请稍后重试。');
  try{return await response!.json() as any;}catch{fail(503,'Daily 登录回执暂时无法读取，请重新进入。');}
 }
@@ -29,8 +30,8 @@ function identity(value:any):Omit<PeerIdentity,'sessionHash'>{
 }
 export async function authenticate(req:Request,env:AuthEnv):Promise<PeerIdentity>{
  const token=readCookie(req,sessionCookie);if(!/^[a-f0-9]{64}$/.test(token))fail(401,'请先登录学校账号。');const key=await sha(token),row=await env.DB.prepare('SELECT * FROM peer_app_sessions WHERE token_hash=? AND expires>?').bind(key,Date.now()).first<StoredSession>();if(!row)fail(401,'互评登录已过期，请重新登录。');
- const verified=identity(await bridge(env,'introspect',{grantId:row!.grant_id}));if(verified.principal!==row!.principal||verified.provider!==row!.provider||verified.subject!==row!.subject||verified.role!==row!.role||verified.grantId!==row!.grant_id)fail(401,'账号身份已变化，请重新登录。');
- if(!await env.DB.prepare('SELECT 1 FROM peer_app_sessions WHERE token_hash=? AND expires>?').bind(key,Date.now()).first())fail(401,'此互评登录已退出，请重新进入。');return {...verified,expires:Math.min(verified.expires,row!.expires),sessionHash:key};
+ const renew=req.headers.get('X-Peer-Activity')==='1'&&req.headers.get('sec-fetch-site')!=='cross-site'&&(req.method==='GET'||req.headers.get('origin')===env.PUBLIC_ORIGIN),verified=identity(await bridge(env,renew?'renew':'introspect',{grantId:row!.grant_id}));if(verified.principal!==row!.principal||verified.provider!==row!.provider||verified.subject!==row!.subject||verified.role!==row!.role||verified.grantId!==row!.grant_id)fail(401,'账号身份已变化，请重新登录。');
+ if(!await env.DB.prepare('SELECT 1 FROM peer_app_sessions WHERE token_hash=? AND expires>?').bind(key,Date.now()).first())fail(401,'此互评登录已退出，请重新进入。');if(renew){const updated=await env.DB.prepare('UPDATE peer_app_sessions SET expires=? WHERE token_hash=? AND principal=? AND expires>?').bind(verified.expires,key,row!.principal,Date.now()).run();if(!updated.meta.changes)fail(401,'此互评登录已退出，请重新进入。');}return {...verified,expires:renew?verified.expires:Math.min(verified.expires,row!.expires),sessionHash:key,...(renew?{renewCookie:cookie(sessionCookie,token,Math.max(0,Math.floor((verified.expires-Date.now())/1000)))}:{})};
 }
 export async function requireWorkspace(req:Request,env:AuthEnv,who:PeerIdentity){sameOrigin(req,env);if(req.headers.get('X-Peer-Workspace')!==await sha('writing-peer|'+who.principal))fail(403,'当前互评账号已变化，请刷新后再操作。');}
 export async function handleAuth(req:Request,env:AuthEnv):Promise<Response|null>{

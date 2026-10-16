@@ -19,7 +19,7 @@ const scaffolds:Record<Category,{prompt:string;descriptors:PeerCriterion['descri
  custom:{prompt:'按老师对这一项的具体要求，引用原文说明表现和下一步修改。',descriptors:{secure:'已经达到老师对这一项的要求，请给出具体依据。',partial:'部分达到老师要求，请指出还需补充的位置。',needs_work:'还需要按老师要求修改，请说明具体问题和做法。'}}
 };
 export function suggestedMapping(item:{id:string;label:string}):Mapping{
- const label=item.label;const category:Category=/书写|卷面|字迹/.test(label)?'presentation':/字数|词数/.test(label)?'length':/语法|语言|词汇|拼写/.test(label)?'language':/结构|组织|衔接|连贯|逻辑/.test(label)?'organisation':/得体|语气|交际|读者/.test(label)?'communicative':/内容|要点|任务/.test(label)?'content':'custom';
+ const label=item.label;const category:Category=/书写|卷面|字迹|handwriting|legibility/i.test(label)?'presentation':/字数|词数/.test(label)?'length':/语法|语言|词汇|拼写/.test(label)?'language':/结构|组织|衔接|连贯|逻辑/.test(label)?'organisation':/得体|语气|交际|读者/.test(label)?'communicative':/内容|要点|任务/.test(label)?'content':'custom';
  return {criterionId:item.id,category,peerEnabled:category!=='presentation'};
 }
 export function scaffold(category:Category,level:Level){const value=structuredClone(scaffolds[category]);if(level==='developing'&&category==='organisation')value.prompt='检查本篇段落和观点的联系，引用一处顺畅的衔接，并指出需要补充原因或调整顺序的位置。';if(level==='developing'&&category==='language'){value.prompt='在意思清楚的基础上，看看常用词句是否准确、有适当变化；拿不准时请老师核对。';value.descriptors={secure:'常用表达准确，词句有适当变化，意思清楚。',partial:'意思基本清楚，但有重复表达或一处词句需要调整。',needs_work:'多处词句让我难以理解，请指出位置和修改方向。'};}return value;}
@@ -27,15 +27,15 @@ export async function compileRubric(source:SourceReference,rubric:TeacherRubric,
  requireThat(options.teacherConfirmed===true,'teacher_confirmation_required','请由当前有权限的老师核对本篇标准后确认。');
  requireThat(['foundation','developing'].includes(options.level)&&options.mode==='text','invalid_level','请选择本轮能力支持方式与材料形式。');
  requireThat(source&&/^[a-f0-9]{64}$/.test(source.rubricHash),'invalid_source','缺少本篇教师标准版本。');const reference={taskId:id(source.taskId),taskVersion:integer(source.taskVersion,1,100000,'标准版本'),rubricHash:source.rubricHash};
- requireThat(rubric&&Array.isArray(rubric.items)&&rubric.items.length>0&&rubric.items.length<=30&&Number.isFinite(rubric.total)&&rubric.total>0&&rubric.total<=1000,'invalid_rubric','本篇教师评分标准不完整。');
+ requireThat(rubric&&Array.isArray(rubric.items)&&rubric.items.length>0&&rubric.items.length<=64&&Number.isFinite(rubric.total)&&rubric.total>0&&rubric.total<=1000,'invalid_rubric','本篇教师评分标准不完整。');
  requireThat(rubric.items.every(i=>i&&typeof i==='object'&&!Array.isArray(i)),'invalid_rubric','教师评价维度不完整。');
  requireThat(new Set(rubric.items.map(i=>i.id)).size===rubric.items.length,'duplicate_criterion','教师评价维度编号不能重复。');
  requireThat(Array.isArray(mappings)&&mappings.every(m=>m&&typeof m==='object'&&!Array.isArray(m))&&mappings.length===rubric.items.length&&new Set(mappings.map(m=>m.criterionId)).size===mappings.length,'incomplete_mapping','请逐项核对本篇所有教师评价维度。');
  const criteria=rubric.items.map(item=>{
   const criterionId=id(item.id),mapping=mappings.find(m=>m.criterionId===criterionId);requireThat(mapping&&categories.includes(mapping.category)&&typeof mapping.peerEnabled==='boolean','incomplete_mapping','请核对每一项维度的映射与可评价范围。');
   requireThat(Number.isFinite(item.score)&&item.score>=0,'invalid_rubric','教师分项分值不正确。');
-  requireThat(!(options.mode==='text'&&mapping.category==='presentation'&&mapping.peerEnabled),'unobservable_criterion','文字材料无法核对书写卷面，请将这一项保留给老师。');
-  const defaults=scaffold(mapping.category,options.level),d=mapping.descriptors?record(mapping.descriptors,['secure','partial','needs_work']):defaults.descriptors;
+  requireThat(!(options.mode==='text'&&(mapping.category==='presentation'||suggestedMapping(item).category==='presentation')&&mapping.peerEnabled),'unobservable_criterion','文字材料无法核对书写卷面，请将这一项保留给老师。');
+  const defaults=scaffold(mapping.category,options.level),d=mapping.peerEnabled&&mapping.descriptors?record(mapping.descriptors,['secure','partial','needs_work']):defaults.descriptors;
   if(mapping.category==='custom'&&mapping.peerEnabled)requireThat(!!mapping.prompt&&!!mapping.descriptors,'custom_descriptors_required','自定义维度需要老师填写学生可理解的提示与分档描述。');
   return {id:criterionId,label:text(item.label,'教师维度名称',1,120),teacherPoints:item.score,teacherDescription:text(item.desc||'','教师标准说明',0,6000),category:mapping.category,peerEnabled:mapping.peerEnabled,prompt:text(mapping.prompt||defaults.prompt,'学生评价提示',5,1500),descriptors:{secure:text(d.secure,'达到要求的描述',5,1500),partial:text(d.partial,'部分达到的描述',5,1500),needs_work:text(d.needs_work,'待改进的描述',5,1500)}};
  });

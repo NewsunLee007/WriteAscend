@@ -20,7 +20,7 @@ try{
   rejected=false;try{execFileSync(process.execPath,[path.join(root,'scripts/rollback-daily-bridge.mjs'),result.snapshot,'--apply'],{stdio:'pipe'});}catch{rejected=true;}if(!rejected)throw Error('Rollback overwrote unrelated user edit');
   fs.writeFileSync(edit,installed);execFileSync(process.execPath,[path.join(root,'scripts/rollback-daily-bridge.mjs'),result.snapshot,'--apply'],{stdio:'pipe'});
   for(const [name,bytes] of before){const file=path.join(fixture,name);if(bytes===null?fs.existsSync(file):!fs.existsSync(file)||!fs.readFileSync(file).equals(bytes))throw Error('Rollback did not restore '+name);}
-  if(fs.existsSync(path.join(fixture,'src/writing-feedback.mjs')))throw Error('Rollback left a newly installed source file');return {label,installed:true,idempotent:true,unrelatedChangesProtected:true,rollbackExact:true};
+  if(before.get('src/writing-feedback.mjs')===null&&fs.existsSync(path.join(fixture,'src/writing-feedback.mjs')))throw Error('Rollback left a newly installed source file');return {label,installed:true,idempotent:true,unrelatedChangesProtected:true,rollbackExact:true};
  }
  // Normalize the four copied source files, accepting only manifest states.
  for(const [name,entry] of Object.entries(manifest)){
@@ -35,5 +35,10 @@ try{
  const upgrade=cycle('previous installed bridge');
  execFileSync('git',['-C',fixture,'apply','--include=public/login-routing.mjs',path.join(root,'integrations/daily/daily-upgrade.patch')]);
  execFileSync('git',['-C',fixture,'apply','--reverse',path.join(root,'integrations/daily/daily-peer-upgrade.patch')]);
- const peerUpgrade=cycle('previous full source before peer login');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade,peerUpgrade],realSourceUntouched:true}));
+ const peerUpgrade=cycle('previous full source before peer login');
+ for(const [name,entry] of Object.entries(manifest)){const current=hash(fs.readFileSync(path.join(fixture,name)));if(current!==entry.after)execFileSync('git',['-C',fixture,'apply','--include='+name,path.join(root,'integrations/daily',current===entry.before?'daily.patch':entry.upgrades[current])]);}
+ const priorFiles=JSON.parse(command('install-daily-bridge.mjs')).changes.filter(name=>!Object.hasOwn(manifest,name)&&name!=='src/writing-peer-rounds.mjs');
+ for(const name of priorFiles)fs.writeFileSync(path.join(fixture,name),execFileSync('git',['-C',root,'show','HEAD:integrations/daily/'+name]));
+ const provenance=fs.mkdtempSync(path.join(root,'audit/private/daily-bridge-qa-prior-'));snapshots.push(provenance);fs.writeFileSync(path.join(provenance,'snapshot.json'),JSON.stringify({target:fixture,files:priorFiles.map(name=>({name,after:hash(fs.readFileSync(path.join(fixture,name)))}))}));
+ const roundsUpgrade=cycle('previous 21-file peer login bundle');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade,peerUpgrade,roundsUpgrade],realSourceUntouched:true}));
 }finally{fs.rmSync(fixture,{recursive:true,force:true});for(const snapshot of snapshots)fs.rmSync(snapshot,{recursive:true,force:true});}

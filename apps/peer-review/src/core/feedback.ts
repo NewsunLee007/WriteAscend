@@ -11,7 +11,7 @@ export async function validateReview(value:unknown,rubric:PeerRubric,material:{t
  const v=record(submitted,['rubricHash','materialHash','ratings','comments']);requireThat(v.rubricHash===rubric.hash&&v.materialHash===material.hash,'review_version_changed','评价标准或稿件版本已变化，请先刷新。');
  const enabled=rubric.criteria.filter(c=>c.peerEnabled),ids=new Set(enabled.map(c=>c.id));requireThat(Array.isArray(v.ratings)&&v.ratings.length===enabled.length,'ratings_incomplete','请逐项回应本轮可评价的维度；拿不准可以选择请老师核对。');
  const seen=new Set<string>(),ratings=v.ratings.map(raw=>{const r=record(raw,['criterionId','rating']),criterionId=id(r.criterionId);requireThat(ids.has(criterionId)&&!seen.has(criterionId)&&['secure','partial','needs_work','unsure'].includes(String(r.rating)),'invalid_rating','评价维度、档位或重复记录不正确。');seen.add(criterionId);return {criterionId,rating:r.rating as Rating};});
- requireThat(Array.isArray(v.comments)&&v.comments.length>=2&&v.comments.length<=60,'comments_incomplete','请至少写出一处具体优点和一条可操作的修改建议。');
+ requireThat(Array.isArray(v.comments)&&v.comments.length>=2&&v.comments.length<=128,'comments_incomplete','请至少写出一处具体优点和一条可操作的修改建议。');
  const commentIds=new Set<string>(),comments=v.comments.map(raw=>{
   const c=record(raw,['id','criterionId','kind','anchor','explanation','suggestion']),commentId=id(c.id),criterionId=id(c.criterionId);requireThat(!commentIds.has(commentId)&&ids.has(criterionId)&&['strength','improvement','question'].includes(String(c.kind)),'invalid_comment','反馈编号、维度或类型不正确。');commentIds.add(commentId);
   const a=record(c.anchor,['kind','start','end','quote']);let anchor:ReviewComment['anchor'];
