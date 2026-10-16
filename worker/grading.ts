@@ -1,3 +1,4 @@
+import {issueWork,inspectWork,assertWorkNotRevoked,revokeWork,runWorkScope,stableWorkId} from './work-permits';
 import type {Env} from './index';
 import type {TaskSession} from './tasks';
 import type {GradingRun,GradingStep} from './grading-types';
@@ -25,6 +26,7 @@ async function authority(env:Env,owner:string,grantId:string,classId:string,brid
  if(!Array.isArray(verified.classes)||!verified.scopes?.includes('writing.personal'))fail(403,'当前没有教师批改权限。');
  allowClass(verified.classes,classId);return verified;
 }
+async function runAuthority(env:Env,run:GradingRun,bridge:Bridge){await assertWorkNotRevoked(env,run.grant_id);return run.work_permit_id?inspectWork(env,run.owner,run.work_permit_id,runWorkScope(run),bridge):authority(env,run.owner,run.grant_id,run.class_id,bridge);}
 async function objectJson(env:Env,key:string){const object=await env.FILES.get(key);if(!object)fail(503,'批改所需的已保存内容暂时无法读取。');return object!.json() as Promise<any>;}
 async function saveJson(env:Env,key:string,value:unknown){const text=JSON.stringify(value);if(new TextEncoder().encode(text).length>4*1024*1024)fail(422,'批改结果内容过长，请检查模型输出。');await env.FILES.put(key,text,{httpMetadata:{contentType:'application/json'}});return key;}
 const gradeLevel=(value:string,fallback:string)=>({'6':'六年级','7':'七年级','8':'八年级','9':'九年级'} as Record<string,string>)[value]||value||fallback;
@@ -55,7 +57,7 @@ async function context(env:Env,owner:string,taskId:string,memberId:string,draftI
 }
 async function runRow(env:Env,id:string){return env.DB.prepare('SELECT * FROM grading_runs WHERE id=?').bind(id).first<GradingRun>();}
 async function ownerRun(env:Env,session:TaskSession,id:string){const run=await runRow(env,id);if(!run||run.owner!==session.principal)fail(404,'批阅运行不存在。');allowClass(session.classes,run!.class_id);return run!;}
-function summary(run:GradingRun,currentHash?:string){return {id:run.id,taskId:run.task_id,memberId:run.member_id,draftId:run.draft_id,inputRevision:run.input_revision,inputHash:run.input_hash,taskVersion:run.task_version,rubricHash:run.rubric_hash,profileId:run.profile_id,model:run.model_name,pipelineVersion:run.pipeline_version,generation:run.generation,state:run.state,reportId:run.report_id,created:run.created,updated:run.updated,...(currentHash?{outdated:currentHash!==run.input_hash}:{}),canUseSavedResult:!!run.result_key&&['failed','uncertain','cancelled'].includes(run.state),error:run.error_message?{status:run.error_status,message:run.error_message}:null};}
+function summary(run:GradingRun,currentHash?:string){return {id:run.id,taskId:run.task_id,memberId:run.member_id,draftId:run.draft_id,inputRevision:run.input_revision,inputHash:run.input_hash,taskVersion:run.task_version,rubricHash:run.rubric_hash,profileId:run.profile_id,workExpires:run.work_expires||null,model:run.model_name,pipelineVersion:run.pipeline_version,generation:run.generation,state:run.state,reportId:run.report_id,created:run.created,updated:run.updated,...(currentHash?{outdated:currentHash!==run.input_hash}:{}),canUseSavedResult:!!run.result_key&&['failed','uncertain','cancelled'].includes(run.state),error:run.error_message?{status:run.error_status,message:run.error_message}:null};}
 async function deliver(env:Env,id:string){if(!env.MODEL_JOBS)fail(503,'后台批改队列尚未配置。');await env.MODEL_JOBS!.send({runId:id});await env.DB.prepare("UPDATE grading_runs SET dispatched_at=? WHERE id=? AND state IN ('queued','running')").bind(Date.now(),id).run();}
 async function operation(env:Env,owner:string,requestId:string,requestHash:string){const op=await env.DB.prepare('SELECT * FROM grading_operations WHERE owner=? AND request_id=?').bind(owner,requestId).first<{request_hash:string;run_id:string}>();if(!op)return null;if(op.request_hash!==requestHash)fail(409,'同一操作编号不能提交不同稿件或设置。');return (await runRow(env,op.run_id))!;}
 async function createRun(env:Env,session:TaskSession,taskId:string,body:any,bridge:Bridge){
@@ -82,11 +84,12 @@ async function createRun(env:Env,session:TaskSession,taskId:string,body:any,brid
   await env.DB.prepare("INSERT OR IGNORE INTO grading_operations(owner,request_id,request_hash,run_id,action,created) VALUES(?,?,?,?,'create',?)").bind(session.principal,body.requestId,requestHash,latest.id,Date.now()).run();
   return (await operation(env,session.principal,body.requestId,requestHash))!;
  }
- const id=crypto.randomUUID(),now=Math.max(Date.now(),(latest?.created||0)+1);
+ const id=await stableWorkId(session.principal,body.requestId,'grading-run'),now=Math.max(Date.now(),(latest?.created||0)+1);
+ const workScope=runWorkScope({id,task_id:taskId,member_id:c.member.id,draft_id:c.draft.id,class_id:c.member.class_id,input_hash:body.inputHash,model_input_hash:c.modelInputHash,profile_id:model.id,profile_revision:model.revision,pipeline_version:GRADING_PIPELINE_VERSION}),permit=await issueWork(env,session.principal,session.grant_id,body.requestId,workScope,bridge);
  const latestGuard=latest?'AND (SELECT id FROM grading_runs WHERE owner=? AND draft_id=? ORDER BY created DESC,id DESC LIMIT 1)=?':'AND NOT EXISTS(SELECT 1 FROM grading_runs WHERE owner=? AND draft_id=?)',latestBinds=latest?[session.principal,c.draft.id,latest.id]:[session.principal,c.draft.id];
  await env.DB.batch([
-  env.DB.prepare(`INSERT OR IGNORE INTO grading_runs(id,owner,grant_id,task_id,member_id,submission_id,draft_id,input_revision,input_hash,task_version,rubric_hash,class_id,student_provider,student_subject,profile_id,profile_revision,model_name,model_images_json,model_input_hash,pipeline_version,temperature,run_key,generation,previous_run_id,reason,state,created,updated) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'queued',?,? WHERE EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND revision=? AND input_hash=? AND state='received') AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND task_id=? AND status='active') ${latestGuard}`)
-   .bind(id,session.principal,session.grant_id,taskId,c.member.id,c.draft.submission_id,c.draft.id,body.inputRevision,body.inputHash,c.manifest.taskVersion,c.manifest.rubricHash,c.member.class_id,c.member.provider,c.member.subject,model.id,model.revision,model.model,JSON.stringify(c.modelImages),c.modelInputHash,GRADING_PIPELINE_VERSION,effectiveTemperature,key,generation,prior?.id||null,reason,now,now,c.draft.id,body.inputRevision,body.inputHash,c.member.id,taskId,...latestBinds),
+  env.DB.prepare(`INSERT OR IGNORE INTO grading_runs(id,owner,grant_id,task_id,member_id,submission_id,draft_id,input_revision,input_hash,task_version,rubric_hash,class_id,student_provider,student_subject,profile_id,profile_revision,model_name,model_images_json,model_input_hash,pipeline_version,temperature,run_key,generation,previous_run_id,reason,work_permit_id,work_expires,state,created,updated) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'queued',?,? WHERE EXISTS(SELECT 1 FROM writing_drafts WHERE id=? AND revision=? AND input_hash=? AND state='received') AND EXISTS(SELECT 1 FROM task_members WHERE id=? AND task_id=? AND status='active') ${latestGuard}`)
+   .bind(id,session.principal,session.grant_id,taskId,c.member.id,c.draft.submission_id,c.draft.id,body.inputRevision,body.inputHash,c.manifest.taskVersion,c.manifest.rubricHash,c.member.class_id,c.member.provider,c.member.subject,model.id,model.revision,model.model,JSON.stringify(c.modelImages),c.modelInputHash,GRADING_PIPELINE_VERSION,effectiveTemperature,key,generation,prior?.id||null,reason,permit.permitId,permit.expires,now,now,c.draft.id,body.inputRevision,body.inputHash,c.member.id,taskId,...latestBinds),
   env.DB.prepare("INSERT OR IGNORE INTO grading_operations(owner,request_id,request_hash,run_id,action,created) SELECT ?,?,?,id,'create',? FROM grading_runs WHERE owner=? AND run_key=? AND generation=? AND id=(SELECT id FROM grading_runs WHERE owner=? AND draft_id=? ORDER BY created DESC,id DESC LIMIT 1)").bind(session.principal,body.requestId,requestHash,now,session.principal,key,generation,session.principal,c.draft.id),
  ]);
  const accepted=await operation(env,session.principal,body.requestId,requestHash);if(!accepted)fail(409,'原稿或运行状态已改变，请重新读取。','grading_input_changed');
@@ -123,7 +126,7 @@ export async function advanceGradingRun(env:Env,id:string,bridge:Bridge){
  const acquired=await env.DB.prepare("UPDATE grading_runs SET state='running',lease_token=?,lease_until=?,updated=? WHERE id=? AND state IN ('queued','running') AND lease_until<=?").bind(lease,now+120000,now,id,now).run();if(!acquired.meta.changes)return;
  run=(await runRow(env,id))!;
  try{
-  const access=await authority(env,run.owner,run.grant_id,run.class_id,bridge);
+  const access=await runAuthority(env,run,bridge);
   const c=await context(env,run.owner,run.task_id,run.member_id,run.draft_id,run.input_revision,run.input_hash,JSON.parse(run.model_images_json));
   if(c.member.provider!==run.student_provider||c.member.subject!==run.student_subject||c.member.class_id!==run.class_id||c.manifest.rubricHash!==run.rubric_hash||c.manifest.taskVersion!==run.task_version||c.modelInputHash!==run.model_input_hash)fail(409,'运行输入与学生或评分标准不一致。');
   if(c.member.status!=='active'||c.task.status==='draft')fail(409,'任务或学生当前不允许继续批阅。');
@@ -193,16 +196,17 @@ async function alterRun(env:Env,session:TaskSession,id:string,action:'resume'|'p
  }else{
   if(!['failed','uncertain','cancelled'].includes(run.state))fail(409,'此运行不需要继续或重试。');
   if(run.state==='uncertain'&&(body.confirmUncertain!==true||typeof body.reason!=='string'||body.reason.trim().length<5||body.reason.length>500))fail(409,'上次模型处理结果无法确认，可能已计费；请明确确认重试并说明原因。','grading_uncertain_confirmation');
+  const permit=await issueWork(env,session.principal,session.grant_id,body.requestId,runWorkScope(run),bridge);
   const step=run.current_step_id?await env.DB.prepare('SELECT * FROM grading_steps WHERE id=? AND run_id=?').bind(run.current_step_id,id).first<GradingStep>():null;
   const job=step?.job_id?await env.DB.prepare('SELECT state FROM model_jobs WHERE id=?').bind(step.job_id).first<{state:string}>():null;
   const retry=!!step&&(job?.state==='failed'||job?.state==='uncertain'||job?.state==='succeeded'&&run.error_status===422),newStepId=retry?crypto.randomUUID():step?.id||null,now=Date.now();
   const guard='EXISTS(SELECT 1 FROM grading_operations WHERE owner=? AND request_id=? AND request_hash=?)',binds=[session.principal,body.requestId,hash];
   const statements=[env.DB.prepare("INSERT OR IGNORE INTO grading_operations SELECT ?,?,?,?,'resume',? WHERE EXISTS(SELECT 1 FROM grading_runs WHERE id=? AND updated=? AND state IN ('failed','uncertain','cancelled'))").bind(...binds,id,now,id,body.expectedUpdated)];
   if(retry)statements.push(env.DB.prepare(`INSERT OR IGNORE INTO grading_steps(id,run_id,stage,base_stage,attempt,previous_result_key,repair_content_key,state,created,updated) SELECT ?,?,?,?,?,?,?,'queued',?,? WHERE ${guard}`).bind(newStepId,id,step!.stage,step!.base_stage,step!.attempt+1,step!.previous_result_key,step!.repair_content_key,now,now,...binds));
-  statements.push(env.DB.prepare(`UPDATE grading_runs SET state='queued',grant_id=?,current_step_id=?,error_status=NULL,error_message=NULL,reason=?,lease_token=NULL,lease_until=0,updated=? WHERE id=? AND updated=? AND ${guard}`).bind(session.grant_id,newStepId,body.reason?.trim()||run.reason,now,id,body.expectedUpdated,...binds));
+  statements.push(env.DB.prepare(`UPDATE grading_runs SET state='queued',grant_id=?,work_permit_id=?,work_expires=?,current_step_id=?,error_status=NULL,error_message=NULL,reason=?,lease_token=NULL,lease_until=0,updated=? WHERE id=? AND updated=? AND ${guard}`).bind(session.grant_id,permit.permitId,permit.expires,newStepId,body.reason?.trim()||run.reason,now,id,body.expectedUpdated,...binds));
   await env.DB.batch(statements);
  }
- const accepted=await operation(env,session.principal,body.requestId,hash);if(!accepted)fail(409,'运行状态已变化，请重新读取。');if(accepted.state==='queued')try{await deliver(env,accepted.id);}catch{}return accepted;
+ const accepted=await operation(env,session.principal,body.requestId,hash);if(!accepted)fail(409,'运行状态已变化，请重新读取。');if(action==='pause')await revokeWork(env,run.work_permit_id,runWorkScope(run),bridge);if(accepted.state==='queued')try{await deliver(env,accepted.id);}catch{}return accepted;
 }
 async function acceptSavedResult(env:Env,session:TaskSession,id:string,body:any,bridge:Bridge){
  const run=await ownerRun(env,session,id);

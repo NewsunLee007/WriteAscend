@@ -9,7 +9,7 @@ import type {Env} from '../worker/index';
 
 const payload={model:'client-chosen-model-is-ignored',messages:[{role:'system',content:'Grade this synthetic essay.'},{role:'user',content:'I helped my friend.'}],temperature:0.25,response_format:{type:'json_object'},apiKey:'client-credential-must-not-be-stored',apiUrl:'https://attacker.invalid'};
 const teacher={principal:'wordup:teacher-1',grant_id:'grant-1',role:'teacher'};
-const authorized=async()=>({active:true,provider:'wordup',subject:'teacher-1',role:'teacher',scopes:['writing.personal']});
+const authorized=async(_env?:any,_path?:string,body?:any)=>({active:true,provider:'wordup',subject:'teacher-1',role:'teacher',scopes:['writing.personal'],permitId:body?.permitId||'a'.repeat(43),scope:body?.scope,expires:Date.now()+3600000});
 const fixture=JSON.parse(fs.readFileSync(new URL('../scripts/qa/fixtures/teacher-workflow.json',import.meta.url),'utf8'));
 function sandbox(){
   const db=new DatabaseSync(':memory:');for(const migration of fs.readdirSync('migrations').filter(f=>f.endsWith('.sql')).sort())db.exec(fs.readFileSync('migrations/'+migration,'utf8'));
@@ -18,7 +18,7 @@ function sandbox(){
   const env={DB:sqlD1(db),PUBLIC_ORIGIN:'https://writeascend.test',MODEL_API_URL:'https://model.invalid/v1/chat/completions',MODEL_NAME:'server-test-model',MODEL_API_KEY:'synthetic-server-model-key',MODEL_JOBS:{send:async(body:any)=>{if(brokerDown)throw Error('synthetic broker failure');sent.push(body);}},FILES:{put:async(key:string,value:string)=>{if(outputStorageDown&&key.startsWith('model-output/'))throw Error('synthetic R2 failure');objects.set(key,value);},get:async(key:string)=>{const value=objects.get(key);if(value===undefined)return null;return {body:new Response(value).body,json:async()=>JSON.parse(value)};}}} as unknown as Env;
   async function request(path='/api/model/jobs',body:any={profileId:'default',requestId:'synthetic-request-0001',payload},identity=teacher){
     const req=new Request('https://writeascend.test'+path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
-    try{return (await handleModelApi(req,env,identity,req=>req.json()))!;}catch(error){if(error instanceof HttpError)return Response.json({error:{message:error.message}},{status:error.status});throw error;}
+    try{return (await handleModelApi(req,env,identity,req=>req.json(),authorized))!;}catch(error){if(error instanceof HttpError)return Response.json({error:{message:error.message}},{status:error.status});throw error;}
   }
   function batch(id:string){const record={acks:0,retries:[] as unknown[]};return {record,message:{body:{jobId:id},ack:()=>{record.acks++;},retry:(options:unknown)=>record.retries.push(options)}};}
   const consume=async(id:string,verify=authorized)=>{const b=batch(id);await consumeModelJobs({messages:[b.message]} as any,env,verify);return b.record;};

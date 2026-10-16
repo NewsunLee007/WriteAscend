@@ -104,7 +104,11 @@ export default {
       if(path==='/api/auth/logout'&&req.method==='POST'){
         const token=getCookie(req,'wa_session');
         if(token){
-          const row=await env.DB.prepare('DELETE FROM app_sessions WHERE token_hash=? RETURNING grant_id').bind(await sha(token)).first<{grant_id:string}>();
+          const tokenHash=await sha(token),row=await env.DB.prepare('SELECT grant_id FROM app_sessions WHERE token_hash=?').bind(tokenHash).first<{grant_id:string}>();
+          await env.DB.batch([
+            env.DB.prepare("INSERT OR IGNORE INTO background_grant_revocations SELECT grant_id,?,'logout' FROM app_sessions WHERE token_hash=?").bind(Date.now(),tokenHash),
+            env.DB.prepare('DELETE FROM app_sessions WHERE token_hash=?').bind(tokenHash),
+          ]);
           // Local logout must succeed even when the source service is unavailable.
           if(row){try{await bridge(env,'revoke',{grantId:row.grant_id});}catch{}}
         }
@@ -128,7 +132,7 @@ export default {
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       if(/^\/api\/(?:tasks|grading|writing-reports)(?:\/|$)/.test(path)){teacher(session);const response=await handleGrading(req,env,session,bridge,input)||await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
-      const modelResponse=await handleModelApi(req,env,session,input);
+      const modelResponse=await handleModelApi(req,env,session,input,bridge);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){
         teacher(session);return json({classes:session.classes});

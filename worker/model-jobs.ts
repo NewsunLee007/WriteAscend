@@ -1,4 +1,6 @@
 import type {MessageBatch,Queue} from '@cloudflare/workers-types';
+import {issueWork,inspectWork,assertWorkNotRevoked,runWorkScope,stableWorkId,type WorkBridge} from './work-permits';
+import type {GradingRun} from './grading-types';
 import type {Env} from './index';
 import {HttpError} from './errors';
 import {hydrateAssetImages} from './assets';
@@ -17,7 +19,7 @@ export interface ModelBindings {
 }
 type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string};
 type Principal={principal:string;grant_id:string;role:string;classes?:Array<{id:string;scopes:string[]}>};
-type Job={id:string;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
+type Job={id:string;work_permit_id:string|null;work_expires:number|null;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('');
@@ -94,14 +96,14 @@ async function deliver(env:Env,id:string){
   await env.DB.prepare("UPDATE model_jobs SET dispatched_at=? WHERE id=? AND state='queued'").bind(Date.now(),id).run();
 }
 
-export async function handleModelApi(req:Request,env:Env,session:Principal,readInput:(req:Request,max?:number)=>Promise<unknown>):Promise<Response|null>{
+export async function handleModelApi(req:Request,env:Env,session:Principal,readInput:(req:Request,max?:number)=>Promise<unknown>,verify?:WorkBridge):Promise<Response|null>{
   const path=new URL(req.url).pathname;
   if(!path.startsWith('/api/model/'))return null;
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
   if(path==='/api/model/profiles'&&req.method==='GET')return json({profiles:modelCatalog(env)});
   if(path==='/api/model/jobs'&&req.method==='POST'){
     const modelInput=await readInput(req,20*1024*1024);
-    return enqueueModelJob(env,session,modelInput);
+    return enqueueModelJob(env,session,modelInput,undefined,verify);
   }
   const match=path.match(/^\/api\/model\/jobs\/([a-f0-9-]{36})(\/result)?$/);
   if(match&&req.method==='GET'){
@@ -147,9 +149,6 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
     if(!claimed.meta.changes){message.retry({delaySeconds:15});continue;}
     row=(await getJob(env,id))!;
     try{
-      const authority=await verify(env,'introspect',{grantId:row.grant_id});
-      if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
-      await requireJobClass(env,id,authority.classes||[],true);
       const profile=profiles(env).find(p=>p.id===row!.profile_id);
       if(!profile||!keyFor(env,profile))fail(503,'所选云端模型暂不可用。');
       const stored=await env.FILES.get(row.request_key);
@@ -157,7 +156,13 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       const envelope=await stored.json() as any;
       if(envelope.profileRevision!==await revision(profile))fail(409,'模型设置已更新，请核对后重新提交。');
       const validated=validateModelPayload(envelope.payload);validateImageCapability(profile,validated);
+      if(await sha(JSON.stringify({payload:validated,profileRevision:envelope.profileRevision}))!==row.request_hash)fail(409,'已保存的模型请求内容校验未通过，请联系管理员核对存档。');
       const payload={...await hydrateAssetImages(env,row.owner,validated),model:profile.model,max_tokens:profile.maxTokens,stream:false};
+      const linked=await env.DB.prepare('SELECT g.* FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=? AND b.owner=?').bind(id,row.owner).first<GradingRun>();
+      const authority=linked?.work_permit_id?await inspectWork(env,row.owner,linked.work_permit_id,runWorkScope(linked),verify):row.work_permit_id?await inspectWork(env,row.owner,row.work_permit_id,{type:'model-job',jobId:row.id,requestHash:row.request_hash,profileId:row.profile_id,profileRevision:envelope.profileRevision},verify):await verify(env,'introspect',{grantId:row.grant_id});
+      if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
+      await requireJobClass(env,id,authority.classes||[],true);
+      await assertWorkNotRevoked(env,linked?.grant_id||row.grant_id);
       const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?").bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now()).run();
       if(!sending.meta.changes){message.retry({delaySeconds:15});continue;}
       let response:Response;
@@ -221,7 +226,7 @@ export async function recoverModelOutbox(env:Env){
 }
 
 export async function configuredGradingModel(env:Env,id:string){const p=profiles(env).find(p=>p.id===id&&p.supportsImages&&p.purposes.includes('grading'));if(!p||!keyFor(env,p))fail(400,'请选择已配置且支持作文图片的批改模型。');return {id:p!.id,model:p!.model,revision:await revision(p!)};}
-export async function enqueueModelJob(env:Env,session:Principal,value:unknown,binding?:GradingBinding):Promise<Response>{
+export async function enqueueModelJob(env:Env,session:Principal,value:unknown,binding?:GradingBinding,verify?:WorkBridge):Promise<Response>{
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
   const input=value as any;
   if(binding){
@@ -244,10 +249,15 @@ export async function enqueueModelJob(env:Env,session:Principal,value:unknown,bi
       if(existing.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的作文或模型设置。');
       return json(safeJob(existing),202);
     }
-    const id=crypto.randomUUID(),created=Date.now(),requestKey='model-input/'+await sha(session.principal)+'/'+id+'.json';
+    if(!binding&&!verify)fail(503,'后台模型授权尚未连接，请联系管理员。');
+    const intake=await env.DB.prepare("SELECT SUM(CASE WHEN created>? THEN 1 ELSE 0 END) AS recent,SUM(CASE WHEN state IN ('staging','queued','preparing','sending') THEN 1 ELSE 0 END) AS pending FROM model_jobs WHERE owner=?").bind(Date.now()-86400000,session.principal).first<{recent:number;pending:number}>();
+    if((intake?.pending||0)>=pendingLimit)fail(429,'当前批改任务较多，请等待已提交的任务完成后再试。','model_pending_limit');
+    if(dailyLimit&&(intake?.recent||0)>=dailyLimit)fail(429,'今日云端使用次数已达限额，请联系管理员调整额度或稍后再试。','model_daily_limit');
+    const id=await stableWorkId(session.principal,input.requestId,'model-job'),created=Date.now(),requestKey='model-input/'+await sha(session.principal)+'/'+id+'.json';
+    const permit=binding?null:await issueWork(env,session.principal,session.grant_id,input.requestId,{type:'model-job',jobId:id,requestHash,profileId:profile.id,profileRevision},verify!);
     // Atomic per-owner intake limit; clients cannot bypass it with concurrent POSTs.
-    const insert=env.DB.prepare("INSERT OR IGNORE INTO model_jobs(id,owner,grant_id,profile_id,request_id,request_hash,state,request_key,created,updated) SELECT ?,?,?,?,?,?,'staging',?,?,? WHERE (?=0 OR (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND created>?)<?) AND (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending'))<?")
-      .bind(id,session.principal,session.grant_id,profile.id,input.requestId,requestHash,requestKey,created,created,dailyLimit,session.principal,created-86400000,dailyLimit,session.principal,pendingLimit);
+    const insert=env.DB.prepare("INSERT OR IGNORE INTO model_jobs(id,owner,grant_id,profile_id,request_id,request_hash,work_permit_id,work_expires,state,request_key,created,updated) SELECT ?,?,?,?,?,?,?,?,'staging',?,?,? WHERE (?=0 OR (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND created>?)<?) AND (SELECT COUNT(*) FROM model_jobs WHERE owner=? AND state IN ('staging','queued','preparing','sending'))<?")
+      .bind(id,session.principal,session.grant_id,profile.id,input.requestId,requestHash,permit?.permitId||null,permit?.expires||null,requestKey,created,created,dailyLimit,session.principal,created-86400000,dailyLimit,session.principal,pendingLimit);
     const statements=[insert];
     if(binding)statements.push(env.DB.prepare('INSERT OR IGNORE INTO model_job_bindings(job_id,run_id,step_id,owner,class_id) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM model_jobs WHERE id=? AND owner=?)').bind(id,binding.runId,binding.stepId,session.principal,binding.classId,id,session.principal));
     const inserted=(await env.DB.batch(statements))[0];

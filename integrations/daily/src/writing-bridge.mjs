@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {createWritingWork} from './writing-work.mjs';
 import {createWritingFeedback} from './writing-feedback.mjs';
 import {createWritingDirectory} from './writing-directory.mjs';
 
@@ -31,6 +32,7 @@ async function input(req) {
 export function createWritingBridge({db, publicOrigin, serviceToken = '', storageKey = '', callbacks = /** @type {string[]} */ ([]), resolveIdentity, verifySource, readRoster = /** @type {Function | null} */ (null), directory=createWritingDirectory({db}), now = Date.now}) {
   const allowed = new Set(callbacks);
   const feedback=createWritingFeedback({db,callbacks,now});
+  const work=createWritingWork({db,callbacks,inspect,verifySource,validateIdentity,projection,unseal,audit,now});
   const enabled = serviceToken.length >= 32 && storageKey.length >= 32 && allowed.size > 0;
   const key = crypto.createHash('sha256').update('writing-bridge-source-v1:' + storageKey).digest();
   let initialized = false;
@@ -99,11 +101,11 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
     let identity;
     try {identity=validateIdentity(await verifySource(unseal(row.source_sealed)));}
     catch (error) {
-      if (error.status === 401 || error.status === 403) db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE id=?').run(row.id);
+      if (error.status === 401 || error.status === 403){db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE source_hash=?').run(row.source_hash);work.revokeSource(row.source_hash);}
       throw error;
     }
     if (row.provider !== identity.provider || row.subject !== identity.subject || row.role !== identity.role) {
-      db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE id=?').run(row.id);
+      db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE source_hash=?').run(row.source_hash);work.revokeSource(row.source_hash);
       fail(401, '账号身份已变化，请重新登录。');
     }
     // A logout may finish while the upstream session verifier is in flight.
@@ -120,7 +122,7 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
     res.once('finish',()=>{
       if (res.statusCode < 200 || res.statusCode >= 300) return;
       initialize();
-      for (const cookie of cookies) db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE source_hash=? AND revoked=0').run(hash(cookie));
+      for (const cookie of cookies){db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE source_hash=? AND revoked=0').run(hash(cookie));work.revokeSource(hash(cookie));}
     });
   }
   async function handle(req,res,url) {
@@ -141,6 +143,9 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
       if (req.method !== 'POST') fail(405, '请求方式不支持。');
       if (endpoint === 'authorize') sameOrigin(req); else machine(req);
       const body = await input(req);
+      if(endpoint==='work/authorize'){send(res,200,await work.authorize(body));return true;}
+      if(endpoint==='work/introspect'){send(res,200,await work.introspect(body));return true;}
+      if(endpoint==='work/revoke'){send(res,200,work.revoke(body));return true;}
       if(endpoint==='report-events'){send(res,200,feedback.accept(body));return true;}
       if(endpoint==='report-events/receipt'){if(typeof body.eventId!=='string'||!/^[a-f0-9-]{36}$/.test(body.eventId))fail(400,'事件编号不正确。');send(res,200,feedback.receipt(body.eventId));return true;}
       if (endpoint === 'authorize') {
@@ -180,7 +185,7 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
         if (typeof body.grantId !== 'string') fail(400, '授权编号无效。');
         const row = db.prepare('SELECT * FROM writing_bridge_grants WHERE id=?').get(body.grantId);
         if (row) {db.prepare('UPDATE writing_bridge_grants SET revoked=1 WHERE id=?').run(row.id);audit(row,'revoke',row.id);}
-        send(res,200,{ok:true});return true;
+        work.revokeGrant(body.grantId);send(res,200,{ok:true});return true;
       }
       if (endpoint === 'roster') {
         const {access} = await inspect(body.grantId);

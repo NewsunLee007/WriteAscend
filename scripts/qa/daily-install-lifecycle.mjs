@@ -11,7 +11,7 @@ try{
  for(const folder of ['src','public','test'])fs.mkdirSync(path.join(fixture,folder),{recursive:true});
  for(const name of Object.keys(manifest))fs.copyFileSync(path.join(source,name),path.join(fixture,name));
  function cycle(label){
-  const before=new Map(Object.keys(manifest).map(name=>[name,fs.readFileSync(path.join(fixture,name))]));JSON.parse(command('install-daily-bridge.mjs'));
+  const plan=JSON.parse(command('install-daily-bridge.mjs')),before=new Map(plan.changes.map(name=>[name,fs.existsSync(path.join(fixture,name))?fs.readFileSync(path.join(fixture,name)):null]));
   const result=JSON.parse(command('install-daily-bridge.mjs','--apply'));snapshots.push(result.snapshot);
   for(const [name,entry] of Object.entries(manifest))if(hash(fs.readFileSync(path.join(fixture,name)))!==entry.after)throw Error('Unexpected installed source: '+name);
   if(!command('install-daily-bridge.mjs','--apply').includes('already matches'))throw Error('Repeated install rewrites files');
@@ -19,7 +19,7 @@ try{
   let rejected=false;try{command('install-daily-bridge.mjs','--apply');}catch{rejected=true;}if(!rejected)throw Error('Installer overwrote unrelated user edit');
   rejected=false;try{execFileSync(process.execPath,[path.join(root,'scripts/rollback-daily-bridge.mjs'),result.snapshot,'--apply'],{stdio:'pipe'});}catch{rejected=true;}if(!rejected)throw Error('Rollback overwrote unrelated user edit');
   fs.writeFileSync(edit,installed);execFileSync(process.execPath,[path.join(root,'scripts/rollback-daily-bridge.mjs'),result.snapshot,'--apply'],{stdio:'pipe'});
-  for(const [name,bytes] of before)if(!fs.readFileSync(path.join(fixture,name)).equals(bytes))throw Error('Rollback did not restore '+name);
+  for(const [name,bytes] of before){const file=path.join(fixture,name);if(bytes===null?fs.existsSync(file):!fs.existsSync(file)||!fs.readFileSync(file).equals(bytes))throw Error('Rollback did not restore '+name);}
   if(fs.existsSync(path.join(fixture,'src/writing-feedback.mjs')))throw Error('Rollback left a newly installed source file');return {label,installed:true,idempotent:true,unrelatedChangesProtected:true,rollbackExact:true};
  }
  // Normalize the four copied source files, accepting only manifest states.

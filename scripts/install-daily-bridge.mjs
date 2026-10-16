@@ -10,7 +10,7 @@ const apply=process.argv.includes('--apply');
 if(!target)throw Error('Usage: node scripts/install-daily-bridge.mjs /absolute/path/to/Daily [--apply]');
 const bundle=path.join(root,'integrations/daily');
 const manifest=JSON.parse(fs.readFileSync(path.join(bundle,'patch-manifest.json'),'utf8'));
-const additions=['src/writing-feedback.mjs','src/writing-bridge.mjs','src/writing-authority.mjs','src/writing-directory.mjs','src/writing-school-config.mjs','public/writing-feedback.html','public/writing-feedback.css','public/writing-feedback.mjs','public/writing-entry.mjs','public/writing-connect.html','public/writing-connect.mjs','public/writing-connect.css','test/writing-login-routing.test.mjs'];
+const additions=['src/writing-work.mjs','src/writing-feedback.mjs','src/writing-bridge.mjs','src/writing-authority.mjs','src/writing-directory.mjs','src/writing-school-config.mjs','public/writing-feedback.html','public/writing-feedback.css','public/writing-feedback.mjs','public/writing-entry.mjs','public/writing-connect.html','public/writing-connect.mjs','public/writing-connect.css','test/writing-login-routing.test.mjs'];
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const installed=new Map();
 const snapshots=path.join(root,'audit/private');

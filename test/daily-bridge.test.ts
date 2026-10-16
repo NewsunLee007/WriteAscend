@@ -167,3 +167,46 @@ test('disabled bridge makes no schema changes and does not interfere with existi
     assert.equal((await fetch(h.origin+'/api/learning/session')).status,200);
   }finally{await h.close();}
 });
+
+const runScope=()=>({type:'grading-run',runId:crypto.randomUUID(),taskId:crypto.randomUUID(),memberId:crypto.randomUUID(),draftId:crypto.randomUUID(),classId:'class-work',inputHash:'a'.repeat(64),modelInputHash:'b'.repeat(64),profileId:'default',profileRevision:'c'.repeat(64),pipelineVersion:'test-pipeline'});
+async function preparedWork(){const h=await harness();const login=(await h.exchange(await h.authorize())).body;h.db.exec("INSERT INTO writing_schools VALUES('school-work','合成学校','active');INSERT INTO writing_classes VALUES('class-work','school-work','2026-1','示例班','示例班','七年级','active',1);INSERT INTO writing_teacher_class_grants VALUES('wordup','teacher-1','class-work','[\"roster.read\",\"writing.grade\"]',1,0);");const body={grantId:login.grantId,requestId:crypto.randomUUID(),callbackUri:callback,scope:runScope()};return {...h,login,body,issue:(value=body)=>h.request('work/authorize',value,h.machine),check:(permitId:string,value=body)=>h.request('work/introspect',{permitId,scope:value.scope,callbackUri:value.callbackUri},h.machine)};}
+test('work permits are machine-only and immutable; they survive interactive expiry and grant cleanup without giving browsing or publishing rights',async()=>{
+ const h=await preparedWork();try{
+  assert.equal((await h.request('work/authorize',h.body)).status,401);const issued=await h.issue();assert.equal(issued.status,200,JSON.stringify(issued));const permit=issued.body;
+  assert.equal((await h.issue()).body.permitId,permit.permitId);assert.equal(h.db.prepare('SELECT COUNT(*) n FROM writing_work_permits').get()!.n,1);assert.deepEqual(permit.classes[0].scopes,['roster.read','writing.grade']);assert(!permit.scopes.includes('writing.publish'));assert(!JSON.stringify(permit).includes('wordup_session'));
+  const sourceExpiry=h.identities.get('wordup_session=teacher').expires;assert(permit.expires<=sourceExpiry);
+  assert.equal((await h.issue({...h.body,scope:{...h.body.scope,inputHash:'d'.repeat(64)}})).status,409);
+  assert.equal((await h.check(permit.permitId,{...h.body,scope:{...h.body.scope,taskId:crypto.randomUUID()}})).status,403);assert.equal((await h.check(permit.permitId)).status,200);
+  h.tick(16*60000);assert.equal((await h.request('introspect',{grantId:h.login.grantId},h.machine)).status,401);await h.exchange(await h.authorize());assert.equal(h.db.prepare('SELECT COUNT(*) n FROM writing_bridge_grants WHERE id=?').get(h.login.grantId)!.n,0);assert.equal((await h.check(permit.permitId)).status,200);
+  assert.equal((await h.request('introspect',{grantId:permit.permitId},h.machine)).status,401);assert.equal((await h.request('roster',{grantId:permit.permitId,classId:'class-work'},h.machine)).status,401);
+ }finally{await h.close();}
+});
+test('class permission versions prevent revoked and later restored grants from silently resurrecting old background work',async()=>{
+ const h=await preparedWork();try{
+  const first=(await h.issue()).body;h.db.exec("UPDATE writing_teacher_class_grants SET revoked=1,version=2 WHERE class_id='class-work';UPDATE writing_teacher_class_grants SET revoked=0,version=3 WHERE class_id='class-work'");assert.equal((await h.check(first.permitId)).status,403);assert.equal((await h.check(first.permitId)).status,401);
+  const next={...h.body,requestId:crypto.randomUUID()},second=(await h.issue(next)).body;assert.equal((await h.check(second.permitId,next)).status,200);h.db.exec("UPDATE writing_classes SET version=2 WHERE id='class-work'");assert.equal((await h.check(second.permitId,next)).status,403);
+ }finally{await h.close();}
+});
+test('background work stops on source logout even after the parent grant was cleaned up; explicit primary revocation remains session-specific',async()=>{
+ const h=await preparedWork();try{
+  const first=(await h.issue()).body,login2=(await h.exchange(await h.authorize())).body,other={...h.body,grantId:login2.grantId,requestId:crypto.randomUUID()},second=(await h.issue(other)).body;
+  await h.request('revoke',{grantId:h.login.grantId},h.machine);assert.equal((await h.check(first.permitId)).status,401);assert.equal((await h.check(second.permitId,other)).status,200);
+  h.tick(16*60000);await h.exchange(await h.authorize());assert.equal(h.db.prepare('SELECT COUNT(*) n FROM writing_bridge_grants WHERE id=?').get(login2.grantId)!.n,0);
+  await fetch(h.origin+'/api/v1/auth/logout',{method:'POST',headers:{Origin:'https://daily.test',Cookie:'wordup_session=teacher'}});assert.equal((await h.check(second.permitId,other)).status,401);
+ }finally{await h.close();}
+});
+test('work lifetime is capped at 24 hours and source disablement or role changes invalidate it without expanding scopes',async()=>{
+ const h=await preparedWork();try{
+  h.identities.get('wordup_session=teacher').expires=Date.now()+48*3600000;const first=(await h.issue()).body;assert(first.expires<=Date.now()+24*3600000);
+  const account=h.identities.get('wordup_session=teacher');h.identities.delete('wordup_session=teacher');assert.equal((await h.request('introspect',{grantId:h.login.grantId},h.machine)).status,401);h.identities.set('wordup_session=teacher',account);assert.equal((await h.check(first.permitId)).status,401);h.body.grantId=(await h.exchange(await h.authorize())).body.grantId;
+  const body={...h.body,requestId:crypto.randomUUID()},second=(await h.issue(body)).body;h.identities.set('wordup_session=teacher',{...account,role:'admin'});assert.equal((await h.check(second.permitId,body)).status,401);h.identities.set('wordup_session=teacher',account);h.body.grantId=(await h.exchange(await h.authorize())).body.grantId;
+  const thirdBody={...h.body,requestId:crypto.randomUUID()},third=(await h.issue(thirdBody)).body;h.tick(24*3600000+1);assert.equal((await h.check(third.permitId,thirdBody)).status,401);
+ }finally{await h.close();}
+});
+test('work revocation during the upstream identity check wins the race, and personal jobs cannot be rebound to a grading run',async()=>{
+ let release:(value:any)=>void=()=>{},pending=false,entered:(value?:unknown)=>void=()=>{};const reached=new Promise(r=>entered=r),h=await harness({verifySource:async()=>{if(pending){entered();await new Promise(r=>release=r);}return {provider:'wordup',subject:'teacher-1',role:'teacher',expires:Date.now()+3600000};}});try{
+  const login=(await h.exchange(await h.authorize())).body,body={grantId:login.grantId,requestId:crypto.randomUUID(),callbackUri:callback,scope:{type:'model-job',jobId:crypto.randomUUID(),requestHash:'a'.repeat(64),profileId:'default',profileRevision:'b'.repeat(64)}},issued=await h.request('work/authorize',body,h.machine);assert.equal(issued.status,200);pending=true;
+  const waiting=h.request('work/introspect',{permitId:issued.body.permitId,scope:body.scope,callbackUri:callback},h.machine);await reached;await h.request('work/revoke',{permitId:issued.body.permitId,scope:body.scope,callbackUri:callback},h.machine);release(undefined);assert.equal((await waiting).status,401);
+  pending=false;const second=await h.request('work/authorize',{...body,requestId:crypto.randomUUID()},h.machine);assert.equal(second.status,200,'Revoking one work item must preserve the source login');assert.equal((await h.request('work/introspect',{permitId:second.body.permitId,scope:runScope(),callbackUri:callback},h.machine)).status,403);
+ }finally{release(undefined);await h.close();}
+});

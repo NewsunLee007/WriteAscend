@@ -11,7 +11,7 @@ node scripts/install-daily-bridge.mjs /absolute/path/to/Daily
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily --apply
 ```
 
-安装器仅修改清单中的 17 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
+安装器仅修改清单中的 18 个源码/测试/静态文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
 
 ```sh
 node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot
@@ -30,7 +30,7 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 | `WRITING_BRIDGE_STORAGE_KEY` | Daily 本机独立随机加密密钥，至少 32 字符，绝不传到 Worker 或浏览器 |
 | `WRITING_ALLOWED_CALLBACKS` | 逗号分隔的完整回调白名单；测试环境为 `https://writeascend-staging.317792050.workers.dev/api/auth/callback` |
 
-机器凭据保护 `token/introspect/revoke/roster`、`directory/*` 及 `report-events[/receipt]`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
+机器凭据保护 `token/introspect/revoke/roster`、`directory/*` 、`work/*` 及 `report-events[/receipt]`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
 
 缺少任何必需配置时桥接关闭，桥接路由返回 503；不会创建 `writing_*` 表，也不会改变既有模块行为。公网机器接口还需核对 Cloudflare 防护是否允许服务端受认证请求，不能直接假定本地通过就能公网使用。
 
@@ -62,7 +62,7 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 
 交接页现支持已经验证的学校学生账号进入“我的作文”；教师入口保持原批阅路径。学生来源仍由同一 Daily/WordUp 验证器核验，不接受浏览器自报身份。Worker 的学生反馈接口仅提供本人已发布快照和关联原稿，教师编辑和发布分开，撤回和原稿更正会停止旧反馈访问。
 
-当前 17 文件版本已通过摘要预检安装，最新回滚快照为 `audit/private/daily-bridge-2026-10-16T17-09-13-095Z`。正式桥接仍关闭，未改环境配置、未重启服务。此前各次快照保留，可逐次恢复相应版本；回滚只恢复源码，不删除数据库中的发布事件。
+当前 18 文件版本已通过摘要预检安装，最新回滚快照为 `audit/private/daily-bridge-2026-10-16T18-33-28-609Z`。正式桥接仍关闭，未改环境配置、未重启服务。此前各次快照保留，可逐次恢复相应版本；回滚只恢复源码，不删除数据库中的发布事件。
 
 ## 发布摘要同步与 Daily 入口
 
@@ -82,4 +82,12 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 
 老师撤回或替换原稿时，WriteAscend 的完整反馈和原图立即停止访问。Daily 摘要异步更新，断网期间旧摘要可能短暂保留，但链接不能绕过完整报告的实时权限检查。同步恢复后摘要撤回。不能把摘要投递成功等同于学生已经查看、阅读或理解反馈。
 
-Cloudflare 新增迁移 `0009_integration_delivery.sql` 和每环境独立的 `FEEDBACK_EVENTS` 生产/消费队列；远程测试队列已创建，远程 Worker 和迁移尚未部署。启用前应先保留可恢复备份、应用 0001–0009 迁移、核对机器凭据/回调与队列，再进行真实学校账号和网络验收。详见 [同步验证](../../docs/verification/daily-feedback.md)。
+Cloudflare 新增迁移 `0009_integration_delivery.sql` 和每环境独立的 `FEEDBACK_EVENTS` 生产/消费队列；远程测试队列已创建，远程 Worker 和迁移尚未部署。启用前应先保留可恢复备份、应用 0001–0011 迁移、核对机器凭据/回调与队列，再进行真实学校账号和网络验收。详见 [同步验证](../../docs/verification/daily-feedback.md)。
+
+## 限定后台工作授权（2026-10-17）
+
+`writing-work.mjs` 为已提交的固定操作提供独立授权。`work/authorize` 需要有效的交互授权和机器凭据；`work/introspect` 逐次核验本机保存的来源会话、账号角色与当前权限；`work/revoke` 只能撤销对应范围。来源 Cookie 沿用 Daily 本机加密存储，不传到 Worker，也不新增教师配置项目。
+
+学校批阅授权绑定运行、任务、成员、班级、稿次、输入摘要、模型输入摘要、模型配置版本和管线版本；普通模型任务授权绑定单个任务与完整请求摘要。授权最长 24 小时，且不超过来源会话到期时间；不授予报告发布、名册浏览或任意新任务的权限。班级/教师授权版本变化会使旧授权失效，重新授予权限不自动恢复旧工作。
+
+交互授权到期或被常规清理不取消已确认工作，关闭浏览器也不取消。主动退出则撤销同来源/同会话范围的工作；Worker 还在本地 D1 记录退出，Daily 连接失败时也能阻止后续模型发送。暂停后的继续处理需要当前教师登录重新授权，结果不明的请求仍需明确确认后才可重试。已发出的供应商请求不能撤销，保存返回结果不会再次计费。详细边界见 [后台工作设计](../../docs/background-work.md) 与 [验证记录](../../docs/verification/background-work.md)。

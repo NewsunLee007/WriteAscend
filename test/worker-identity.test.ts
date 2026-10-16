@@ -10,7 +10,7 @@ import {sqlD1} from './helpers/sql-d1';
 
 async function sandbox(role='teacher') {
   const dailyDb=new DatabaseSync(':memory:'),cloudDb=new DatabaseSync(':memory:');
-  cloudDb.exec(fs.readFileSync(new URL('../migrations/0001_report_workspace.sql',import.meta.url),'utf8'));
+  for(const file of fs.readdirSync(new URL('../migrations/',import.meta.url)).filter(f=>f.endsWith('.sql')).sort())cloudDb.exec(fs.readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
   const machine='synthetic-worker-daily-machine-secret';
   let enabled=true;
   const source=async()=>{
