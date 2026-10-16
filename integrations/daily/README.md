@@ -11,7 +11,7 @@ node scripts/install-daily-bridge.mjs /absolute/path/to/Daily
 node scripts/install-daily-bridge.mjs /absolute/path/to/Daily --apply
 ```
 
-安装器仅修改清单中的 8 个源码/测试文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
+安装器仅修改清单中的 10 个源码/测试文件，原文件及安装前后摘要保存在本工程被 Git 忽略的 `audit/private/daily-bridge-<时间>/`。不会复制账号库、媒体或 `.env`，不会启动/重启服务。安装可重复运行。
 
 ```sh
 node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot
@@ -30,17 +30,21 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 | `WRITING_BRIDGE_STORAGE_KEY` | Daily 本机独立随机加密密钥，至少 32 字符，绝不传到 Worker 或浏览器 |
 | `WRITING_ALLOWED_CALLBACKS` | 逗号分隔的完整回调白名单；测试环境为 `https://writeascend-staging.317792050.workers.dev/api/auth/callback` |
 
-机器凭据保护 `token/introspect/revoke/roster`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
+机器凭据保护 `token/introspect/revoke/roster` 及 `directory/*`。`authorize` 只接受 Daily 同源 JSON POST。原 WordUp 会话仅作为 Daily 本机加密的来源引用保存，每次核验仍调用原会话验证器；Cloudflare 不接收该 Cookie 或原始签名密钥。更换本机存储密钥会使旧授权失效，用户需要重新登录。
 
 缺少任何必需配置时桥接关闭，桥接路由返回 503；不会创建 `writing_*` 表，也不会改变既有模块行为。公网机器接口还需核对 Cloudflare 防护是否允许服务端受认证请求，不能直接假定本地通过就能公网使用。
 
 ## 权限与名册
 
-已定义学校、学年班级、学生成员关系和教师班级授权表。注册教师仅拥有自己的 `writing.personal` 工作区，不自动拥有全校名单。具体班级可分别授予 `roster.read`、`writing.manage`、`writing.grade` 和 `writing.publish`。
+已定义学校、学年学期班级、学生成员关系和教师班级授权表。注册教师仅拥有自己的 `writing.personal` 工作区，不自动拥有全校名单。具体班级可分别授予 `roster.read`、`writing.manage`、`writing.grade` 和 `writing.publish`。
 
 名册适配器只读现有 WordUp 权威库，只选择非认证字段，并按唯一 subject、当前启用状态、已确认的源班级、年级和有效成员关系共同过滤。默认使用实际服务的 `~/Library/Application Support/WordUp/data/wordup.sqlite3`，可用 `WORDUP_REPORT_DB` 显式指定；不读旁边的旧库。
 
-当前还没有学校目录初始化与授权管理界面，正式目录尚未写入。学校及学年由管理员在后续预检中确认，不能按日期自动猜测，不能通过姓名自动授予班级权限。
+现已提供仅管理员可见的目录预检、确认同步、教师权限和停班界面。学校默认值经用户确认：瑞安市新纪元实验学校；当前学期 `2026-1`。新目录使用 `YYYY-1` / `YYYY-2`，历史 `academic_year` 字段保留名称并承载学期键，不按日期自动切换。不同学期创建独立班级，教师权限不自动继承。
+
+同步前必须核对具体新增、移出、改名、转班和同名数量；确认时重新读取来源并比较目录摘要，事务内保存。成员关系分段保留历史；授权只能使用在用教师账号的稳定 ID，撤销不依赖学生来源库可读。角色、操作人和会话均由服务端核验，不接受浏览器自行声明。详情见 [学校目录实现](../../docs/school-directory.md)。
+
+真实 54 班、2327 人只读对账通过，已生成学校 `2026-1` 初始化预检。正式目录仍未写入，不能通过姓名自动授予班级权限。
 
 只读名册现在返回完整过滤名册的 `snapshotHash`，各页使用同一摘要。WriteAscend 建立班级任务时要求该摘要，分页期间发生改名、停用、转班或成员变化会拒绝拼接不一致的名单；确认时还会重新比较预览内容。本次模块升级已经过安装摘要检查并保留快照，没有启用正式桥接或重启运行进程。
 
@@ -50,4 +54,6 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 - Daily 原有回归加新增登录返回测试共 14 项通过。
 - 实际 Wrangler 本地 D1/Worker + 合成 Daily 来源 + 390px 浏览器完成跨域登录、会话核验和退出验证，见 `scripts/qa/cloud-login.cjs`。
 - 合成来源不代表真实账号登录、正式 Cloudflare 防护、真实名册初始化已经通过。
-- 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；正式目录初始化、教师授权管理、真实名册对账与结果发布仍在开发范围内。
+- 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；目录管理和真实名册核对见 [验证记录](../../docs/verification/school-directory.md)；正式目录写入及结果发布尚未启用。
+
+本轮 10 文件集成源码已安装，回滚快照为 `audit/private/daily-bridge-2026-10-16T12-07-42-796Z`；仍保持正式桥接关闭，没有重启服务。

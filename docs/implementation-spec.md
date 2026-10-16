@@ -33,7 +33,7 @@ WordUp 的原始 Cookie 不交给作文前端或云端存储。桥接端保存�
 
 学生全局标识使用 `(provider='wordup', subject=students.id)`。Daily 背诵的整数 student_id、WriteAscend 的本地随机 ID 只作为历史映射。历史 Daily admin 使用独立 provider，避免与 WordUp 的 `admin` 字符串混同。
 
-在身份桥接端新增学校班级目录：`schools`、`school_classes`、`student_memberships`、`teacher_class_grants`。班级使用稳定 UUID，另存学校、学年、显示名称和状态；不能将“813”或年级单元码直接当作跨学年的唯一身份。学年与班级批次在首次名册预检时由学校管理员确认，不能按电脑日期猜测。
+在身份桥接端新增学校班级目录：`schools`、`school_classes`、`student_memberships`、`teacher_class_grants`。班级使用稳定 UUID，另存学校、学年、显示名称和状态；不能将“813”或年级单元码直接当作跨学年的唯一身份。学年与班级批次在首次名册预检时由学校管理员确认，不能按电脑日期猜测。用户现已确认学校为“瑞安市新纪元实验学校”，学期键为 `YYYY-1` / `YYYY-2`，当前默认 `2026-1`。历史 `academicYear` / `academic_year` 字段保留名称，值采用该学期格式；新学期创建独立班级且不自动继承任教授权。
 
 教师注册不自动获得学校名册。管理员给教师授予具体班级及 `roster.read`、`writing.manage`、`writing.grade`、`writing.publish` 等权限，可撤销并记录操作人。幸运星自建班级保持原用途，不直接转换为学校授权。
 

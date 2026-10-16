@@ -8,14 +8,14 @@ import type {Env} from '../worker/index';
 import {createWritingBridge} from '../integrations/daily/src/writing-bridge.mjs';
 import {sqlD1} from './helpers/sql-d1';
 
-async function sandbox() {
+async function sandbox(role='teacher') {
   const dailyDb=new DatabaseSync(':memory:'),cloudDb=new DatabaseSync(':memory:');
   cloudDb.exec(fs.readFileSync(new URL('../migrations/0001_report_workspace.sql',import.meta.url),'utf8'));
   const machine='synthetic-worker-daily-machine-secret';
   let enabled=true;
   const source=async()=>{
     if(!enabled)throw Object.assign(new Error('合成账号已停用'),{status:401});
-    return {provider:'wordup',subject:'teacher-1',role:'teacher',name:'合成教师',expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-source'}};
+    return {provider:'wordup',subject:'teacher-1',role,name:'合成教师',expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-source'}};
   };
   let dailyOrigin='';
   let bridge:ReturnType<typeof createWritingBridge>;
@@ -25,7 +25,7 @@ async function sandbox() {
   });
   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
   dailyOrigin='http://127.0.0.1:'+(server.address() as any).port;
-  bridge=createWritingBridge({db:dailyDb,publicOrigin:dailyOrigin,serviceToken:machine,storageKey:'synthetic-Daily-only-storage-encryption-secret',callbacks:['https://writeascend.test/api/auth/callback'],resolveIdentity:source,verifySource:source,readRoster:()=>({students:[{subject:'student-1',name:'合成同学',grade:'八年级',pin_hash:'must-not-leave-Daily'}],next:null})});
+  bridge=createWritingBridge({db:dailyDb,publicOrigin:dailyOrigin,serviceToken:machine,storageKey:'synthetic-Daily-only-storage-encryption-secret',callbacks:['https://writeascend.test/api/auth/callback'],resolveIdentity:source,verifySource:source,readRoster:()=>({students:[{subject:'student-1',name:'合成同学',grade:'八年级',pin_hash:'must-not-leave-Daily'}],next:null}),directory:{handle:async(action:string,body:any,identity:any)=>({action,body,actorRole:identity.role})} as any});
   const env={DB:sqlD1(cloudDb),PUBLIC_ORIGIN:'https://writeascend.test',DAILY_ORIGIN:dailyOrigin,BRIDGE_SERVICE_TOKEN:machine,FILES:{},ASSETS:{fetch:async()=>new Response('test asset')}} as unknown as Env;
   const request=(pathname:string,cookie='',method='GET',origin='https://writeascend.test')=>worker.fetch(new Request('https://writeascend.test'+pathname,{method,headers:{...(cookie?{cookie}:{}),...(method==='GET'?{}:{Origin:origin})}}),env);
   async function start(next='/') {
@@ -64,10 +64,23 @@ test('Worker and Daily exchange actual authorization code over HTTP and create o
     assert.equal((await h.request('/api/snapshots',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks/synthetic',logged.cookie,'PUT')).status,403);
+    assert.equal((await h.request('/api/admin/writing-directory/overview',logged.cookie)).status,403);
     assert.equal((await h.request('/api/auth/logout',logged.cookie,'POST','https://foreign.test')).status,403);
     assert.equal((await h.request('/api/me',logged.cookie)).status,200);
     assert.equal((await h.request('/api/auth/logout',logged.cookie,'POST')).status,200);
     assert.equal((await h.request('/api/me',logged.cookie)).status,401);
+  }finally{await h.close();}
+});
+
+test('admin directory proxy binds the current grant, strips spoofed actors and keeps mutations workspace protected',async()=>{
+  const h=await sandbox('admin');try{
+    const login=await h.login(),me=await(await h.request('/api/me',login.cookie)).json() as any;
+    const overview=await h.request('/api/admin/writing-directory/overview',login.cookie);assert.equal(overview.status,200);assert.equal((await overview.json() as any).actorRole,'admin');
+    const body={schoolName:'合成学校',academicYear:'confirmed-year',classKeys:['synthetic-key'],grantId:'foreign-grant',actor:'spoofed-admin'};
+    const request=(workspaceId:string,origin='https://writeascend.test')=>worker.fetch(new Request('https://writeascend.test/api/admin/writing-directory/preview',{method:'POST',headers:{Cookie:login.cookie,Origin:origin,'Content-Type':'application/json','X-Workspace-Id':workspaceId},body:JSON.stringify(body)}),h.env);
+    assert.equal((await request('previous-account')).status,403);assert.equal((await request(me.workspaceId,'https://foreign.test')).status,403);
+    const response=await request(me.workspaceId);assert.equal(response.status,200);const value=await response.json() as any;
+    assert.equal(value.body.schoolName,'合成学校');assert.notEqual(value.body.grantId,'foreign-grant');assert(!('actor' in value.body));assert.equal(value.actorRole,'admin');
   }finally{await h.close();}
 });
 

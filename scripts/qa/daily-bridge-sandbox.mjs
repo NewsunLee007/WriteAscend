@@ -6,26 +6,33 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
 import {createWritingBridge} from '../../integrations/daily/src/writing-bridge.mjs';
+import {createWritingDirectory} from '../../integrations/daily/src/writing-directory.mjs';
 
 const origin='http://127.0.0.1:8890',db=new DatabaseSync(':memory:');
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/teacher-workflow.json',import.meta.url),'utf8'));
 let modelCalls=0;
 const source=async req=>{
   const cookies=req.headers.cookie?.split(';').map(s=>s.trim()) || [];
-  const other=cookies.includes('wordup_session=synthetic-browser-other');
-  if(!other&&!cookies.includes('wordup_session=synthetic-browser-teacher'))throw Object.assign(new Error('请登录合成测试账号。'),{status:401});
-  return {provider:'wordup',subject:other?'synthetic-other':'synthetic-teacher',role:'teacher',name:other?'另一位合成教师':'合成测试教师',expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-browser-'+(other?'other':'teacher')}};
+  const mode=['admin','other','teacher'].find(value=>cookies.includes('wordup_session=synthetic-browser-'+value));
+  if(!mode)throw Object.assign(new Error('请登录合成测试账号。'),{status:401});
+  return {provider:'wordup',subject:mode==='admin'?'synthetic-admin':mode==='other'?'synthetic-other':'synthetic-teacher',role:mode==='admin'?'admin':'teacher',name:mode==='admin'?'合成学校管理员':mode==='other'?'另一位合成教师':'合成测试教师',expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-browser-'+mode}};
 };
 const students=Array.from({length:130},(_,i)=>({subject:'synthetic-student-'+String(i).padStart(3,'0'),name:i<2?'合成同名':i===2?'示例同学':'合成同学'+i,grade:'七年级'}));
-const bridge=createWritingBridge({db,publicOrigin:origin,serviceToken:'synthetic-local-worker-bridge-service-token',storageKey:'synthetic-local-Daily-only-storage-key',callbacks:['http://127.0.0.1:8789/api/auth/callback'],resolveIdentity:source,verifySource:value=>source({headers:{cookie:value.cookie}}),readRoster:({after='',limit=100})=>{
-  const remaining=students.filter(s=>s.subject>after),page=remaining.slice(0,limit);
-  return {students:page,snapshotHash:crypto.createHash('sha256').update(JSON.stringify(students)).digest('hex'),next:remaining.length>limit?page.at(-1).subject:null};
+const authorityStudents=[...students.map(s=>({id:s.subject,name:s.name,grade:s.grade,class_name:'合成学校班',status:'active'})),...Array.from({length:3},(_,i)=>({id:'synthetic-new-'+i,name:'新增合成同学'+i,grade:'八年级',class_name:'合成新增班',status:'active'}))];
+const authorityTeachers=[{id:'synthetic-teacher',name:'合成测试教师',status:'active'},{id:'synthetic-other',name:'另一位合成教师',status:'active'}];
+const directoryService=createWritingDirectory({db,defaults:{schoolName:'',academicYear:''},readAuthority:()=>structuredClone({students:authorityStudents,teachers:authorityTeachers})});
+const bridge=createWritingBridge({db,publicOrigin:origin,serviceToken:'synthetic-local-worker-bridge-service-token',storageKey:'synthetic-local-Daily-only-storage-key',callbacks:['http://127.0.0.1:8789/api/auth/callback'],resolveIdentity:source,verifySource:value=>source({headers:{cookie:value.cookie}}),directory:directoryService,readRoster:({classId,after='',limit=100})=>{
+  const classroom=db.prepare('SELECT * FROM writing_classes WHERE id=?').get(classId),members=new Set(db.prepare("SELECT subject FROM writing_memberships WHERE class_id=? AND status='active' AND ended IS NULL").all(classId).map(m=>m.subject));
+  const all=authorityStudents.filter(s=>s.class_name===classroom.source_name&&s.grade===classroom.grade&&members.has(s.id)).map(s=>({subject:s.id,name:s.name,grade:s.grade})).sort((a,b)=>a.subject<b.subject?-1:1);
+  const remaining=all.filter(s=>s.subject>after),page=remaining.slice(0,limit);
+  return {students:page,snapshotHash:crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex'),next:remaining.length>limit?page.at(-1).subject:null};
 }});
 // Initialize and seed only this in-memory QA directory. Never targets Daily DB.
 await bridge.handle({method:'GET',headers:{}},{writeHead(){},end(){}},new URL(origin+'/api/integrations/writeascend/synthetic-initialize'));
 db.exec(`INSERT INTO writing_schools VALUES('synthetic-school','合成测试学校','active');
   INSERT INTO writing_classes VALUES('synthetic-school-class','synthetic-school','合成学年（仅测试）','合成学校班','合成学校班','七年级','active',1);
   INSERT INTO writing_teacher_class_grants VALUES('wordup','synthetic-teacher','synthetic-school-class','["roster.read","writing.manage","writing.grade","writing.publish"]',1,0);`);
+for(const s of students)db.prepare('INSERT INTO writing_memberships(class_id,provider,subject,started) VALUES(?,?,?,?)').run('synthetic-school-class','wordup',s.subject,'synthetic-initial');
 const directory=path.resolve(import.meta.dirname,'../../integrations/daily/public');
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,origin);
@@ -33,7 +40,7 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'");
   if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls}));return;}
-  if(url.pathname==='/sandbox/use-other'){res.setHeader('Set-Cookie','wordup_session=synthetic-browser-other; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
+  if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
   if(url.pathname==='/v1/chat/completions'&&req.method==='POST'){
     if(req.headers.authorization!=='Bearer synthetic-local-model-key'){res.writeHead(401).end();return;}
     let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>20*1024*1024){res.writeHead(413).end();return;}}

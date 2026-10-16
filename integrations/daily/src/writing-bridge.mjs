@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {createWritingDirectory} from './writing-directory.mjs';
 
 const prefix = '/api/integrations/writeascend/';
 const permissions = ['roster.read', 'writing.manage', 'writing.grade', 'writing.publish'];
@@ -26,7 +27,7 @@ async function input(req) {
 
 // No WordUp signing key is copied here. Identity verification stays in Daily's
 // existing session verifier; only the resulting source reference is sealed locally.
-export function createWritingBridge({db, publicOrigin, serviceToken = '', storageKey = '', callbacks = /** @type {string[]} */ ([]), resolveIdentity, verifySource, readRoster = /** @type {Function | null} */ (null), now = Date.now}) {
+export function createWritingBridge({db, publicOrigin, serviceToken = '', storageKey = '', callbacks = /** @type {string[]} */ ([]), resolveIdentity, verifySource, readRoster = /** @type {Function | null} */ (null), directory=createWritingDirectory({db}), now = Date.now}) {
   const allowed = new Set(callbacks);
   const enabled = serviceToken.length >= 32 && storageKey.length >= 32 && allowed.size > 0;
   const key = crypto.createHash('sha256').update('writing-bridge-source-v1:' + storageKey).digest();
@@ -158,6 +159,11 @@ export function createWritingBridge({db, publicOrigin, serviceToken = '', storag
         if (!code || code.expires <= now() || code.client_id !== body.clientId || code.redirect_uri !== body.redirectUri || code.challenge !== challenge) fail(401, '授权码已失效，请重新登录。');
         const {row,identity,access} = await inspect(code.grant_id);
         audit(identity,'token',row.id);send(res,200,access);return true;
+      }
+      if(endpoint.startsWith('directory/')){
+        const {identity}=await inspect(body.grantId);
+        if(identity.role!=='admin')fail(403,'此操作需要学校管理员账号。');
+        send(res,200,await directory.handle(endpoint.slice('directory/'.length),body,identity));return true;
       }
       if (endpoint === 'introspect') {
         send(res,200,(await inspect(body.grantId)).access);return true;

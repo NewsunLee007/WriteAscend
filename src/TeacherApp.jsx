@@ -8,6 +8,7 @@ import {useCloudSnapshots} from './teacher/useCloudSnapshots';
 import {CloudSnapshotsPanel} from './teacher/CloudSnapshotsPanel';
 import {TeacherTasksPanel} from './teacher/TeacherTasksPanel';
 import {taskClasses,uniqueStudent} from './teacher/task-roster';
+const SchoolDirectoryPanel=React.lazy(()=>import('./teacher/SchoolDirectoryPanel'));
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -4939,6 +4940,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         
                         <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
                             <CloudConnection busy={isBatchProcessing}/>
+                            {cloud.mode==='cloud'&&cloud.identity?.role==='admin'&&<React.Suspense fallback={null}><SchoolDirectoryPanel/></React.Suspense>}
                             {cloud.mode === 'cloud' && <TeacherTasksPanel assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} busy={isBatchProcessing} sourceTask={sourceTask} onApply={(value,members) => {
                                 if(isBatchProcessing)return;
                                 if(files.length)throw new Error('当前批次已有作文。请先保存结果，再到完整工作台的“导入作文”中清空重选，然后载入任务，避免旧报告套用新标准。');

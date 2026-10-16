@@ -39,7 +39,12 @@ async function bridge(env:Env,path:string,body:unknown){
     if(env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:'))console.warn('Daily bridge transport:',error instanceof Error?error.message:'unknown');
     throw new HttpError(503,'Daily 暂时无法连接，请稍后重试。');
   }
-  if(!response.ok)throw new HttpError([400,401,403,404,409,413,429].includes(response.status)?response.status:503,response.status===401?'登录或授权已失效，请重新登录。':response.status===403?'当前账号没有此项权限。':'Daily 暂时无法处理请求。');
+  if(!response.ok){
+    const status=[400,401,403,404,409,413,429].includes(response.status)?response.status:503;
+    let message=status===401?'登录或授权已失效，请重新登录。':status===403?'当前账号没有此项权限。':'Daily 暂时无法处理请求。';
+    if([400,404,409,413,429].includes(status))try{const detail=await response.json() as any;if(typeof detail.error?.message==='string'&&detail.error.message.length<=600)message=detail.error.message;}catch{}
+    throw new HttpError(status,message);
+  }
   return await response.json() as Record<string,any>;
 }
 async function authenticate(req:Request,env:Env){
@@ -100,10 +105,19 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
+      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
         if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
       }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
+      const directoryAction=path.match(/^\/api\/admin\/writing-directory\/(overview|preview|sync|grant|class-status)$/);
+      if(directoryAction){
+        if(session.role!=='admin')throw new HttpError(403,'此操作需要学校管理员账号。');
+        const action=directoryAction[1],fields:Record<string,string[]>={overview:[],preview:['schoolId','schoolName','academicYear','classKeys'],sync:['schoolId','schoolName','academicYear','classKeys','planHash','requestId'],grant:['classId','subject','expectedVersion','scopes','revoked','requestId'],'class-status':['classId','expectedVersion','status','requestId']};
+        if((action==='overview'&&req.method!=='GET')||(action!=='overview'&&req.method!=='POST'))throw new HttpError(405,'目录管理请求方式不支持。');
+        const body=action==='overview'?{}:await input(req,16384) as Record<string,unknown>;
+        if(!body||typeof body!=='object'||Array.isArray(body))throw new HttpError(400,'目录管理参数不正确。');
+        return json(await bridge(env,'directory/'+action,{...Object.fromEntries(fields[action].filter(key=>key in body).map(key=>[key,body[key]])),grantId:session.grant_id}));
+      }
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       if(/^\/api\/tasks(?:\/|$)/.test(path)){teacher(session);const response=await handleTasks(req,env,session,bridge,input);if(response)return response;}

@@ -1,6 +1,6 @@
 # WriteAscend 升级工程
 
-第一阶段审计已完成，基线日期为 2026 年 10 月 16 日。当前已在保留原完整教师系统的基础上接入快速入口、本地验证的 Daily 登录、云端模型任务、报告版本存档、写作任务和授权名册，尚未部署两个线上系统。
+第一阶段审计已完成，基线日期为 2026 年 10 月 16 日。当前已在保留原完整教师系统的基础上接入快速入口、本地验证的 Daily 登录、云端模型任务、报告版本存档、写作任务、授权名册和学校目录管理，尚未部署两个线上系统。
 
 升级以原 GitHub 教师作文批阅系统的完整功能为基础：题目和标准设置、作文上传、大模型一键批量批改、教师核对、导出与班级分析。保留后逐项优化，再接入 Daily 身份、Cloudflare 后台与扫码收作业。
 
@@ -21,6 +21,8 @@
 - [跨设备存档验证](docs/verification/cloud-snapshots.md)
 - [写作任务与授权名册](docs/writing-tasks.md)
 - [任务与名册验证](docs/verification/writing-tasks.md)
+- [学校目录、学期与教师授权](docs/school-directory.md)
+- [真实名册对账与目录验证](docs/verification/school-directory.md)
 
 `sources/WriteAscend/` 是从用户 GitHub 仓库取得的只读审计基线，已从本工程 Git 跟踪中排除；该目录自身保留原仓库信息。Daily 和 WordUp 源码、正式数据库仍位于原路径，本阶段未复制账号库、口令或学生作文到本工程。
 
