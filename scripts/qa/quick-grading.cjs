@@ -19,6 +19,7 @@ async rootPage => {
   await page.goto('http://127.0.0.1:5186/');
   await page.getByRole('heading',{name:'英语作文，一键批阅。',exact:true}).waitFor();
   if(!await page.getByRole('button',{name:'一键批改',exact:true}).isDisabled())throw Error('An empty upload must not start grading.');
+  await page.getByRole('button',{name:'编辑本次写作',exact:true}).click();
   await page.getByLabel('本班年级').selectOption('九年级');
   await page.getByLabel('作文满分').fill('15');
   await page.locator('.quick-advanced summary').click();

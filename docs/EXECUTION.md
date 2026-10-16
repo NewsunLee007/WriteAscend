@@ -56,6 +56,8 @@
 - 增加无二维码照片的姓名/班级 OCR 候选匹配；整批照片先缓存再逐张识别，不将识别当作教师确认，不以系统短编号推测纸面学号。
 - 模型设置区分批改/OCR，默认复用，过滤文字型号，提供系统图片检查和帮助链接；OCR 刷新复用请求与原图。当前仅接通管理员登记的云端模型，个人云端凭据托管与真实手写验收仍待完成。71 项检查与本地浏览器验证见 `verification/student-capture.md`。
 
+- 按用户界面要求，查看 OurTeacher 公共页面与用户截图、Gradescope 和 Brisk 官方批阅截图及流程，建立 `ui-design-review.md`。首页改为复用题目摘要、按需展开完整设置，合并任务/存档区域，强化可读性和触控目标。合成云端手机首页与 4 种宽度已检查；后续页面按该规范逐步验收。
+
 ## 已准备但尚未接通的工作
 
 Cloudflare 已创建独立测试 D1 `writeascend-staging`、私有桶 `writeascend-staging-private` 和队列 `writeascend-staging-model-jobs`。教师界面与服务端模型链路已在实际本地 Worker 环境接通，但还未配置正式模型凭据、启用正式登录或部署云端版本。

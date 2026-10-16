@@ -4942,6 +4942,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
                             <CloudConnection busy={isBatchProcessing}/>
                             {cloud.mode==='cloud'&&cloud.identity?.role==='admin'&&<React.Suspense fallback={null}><SchoolDirectoryPanel/></React.Suspense>}
+                            <div className="teacher-task-tools">
                             {cloud.mode === 'cloud' && <TeacherTasksPanel assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} busy={isBatchProcessing} sourceTask={sourceTask} onApply={(value,members) => {
                                 if(isBatchProcessing)return;
                                 if(files.length)throw new Error('当前批次已有作文。请先保存结果，再到完整工作台的“导入作文”中清空重选，然后载入任务，避免旧报告套用新标准。');
@@ -4960,6 +4961,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});
                                 if(!isBatchProcessing){setStep(2);setMaxStep(previous => Math.max(previous,2));}
                             }}/>}
+                            </div>
                             {draftError && <p className="mx-auto max-w-3xl px-4 py-2 text-xs text-amber-700" role="status">{draftError}</p>}
                             {workflowMode === 'full' && <div className="teacher-mode-bar"><div>完整工作台</div><button onClick={() => { setWorkflowMode('quick'); setStep(0); }}>切换到快速批改</button></div>}
                             {step === 0 && (workflowMode === 'full' ? renderStep1() : <QuickGrading

@@ -8,8 +8,8 @@ export function CloudSnapshotsPanel({sync,onRestore,onDownload}:{sync:CloudSnaps
   async function restore(item:CloudSnapshotRef,revision?:number){await operation(async()=>{const value=await sync.read(item.id,revision);onRestore(value);setOpen(false);});}
   async function history(item:CloudSnapshotRef,before?:number){await operation(async()=>{const result=await sync.versions(item.id,before);setSelected(item);setVersions(old=>before?[...old,...result.versions]:result.versions);setVersionNext(result.next);});}
   return <>
-    <aside className="cloud-snapshot-bar no-print" aria-label="报告云端保存">
-      <span role="status">{sync.message||'本机与云端存档分别保留，可从云端恢复已保存的报告。'}</span>
+    <aside className="cloud-snapshot-bar no-print" aria-label="报告云端保存" data-status={sync.status}>
+      <span role="status">{sync.message||''}</span>
       <div>{['error','conflict'].includes(sync.status)&&<button disabled={busy||sync.status==='pending'} onClick={()=>void operation(sync.status==='conflict'?sync.copyConflict:sync.retry)}>{sync.status==='conflict'?'另存云端副本':'重试同步'}</button>}<button onClick={()=>{setTrash(false);setSelected(null);setQuery('');setError('');setOpen(true);void sync.list();}}>云端存档</button></div>
     </aside>
     {open&&<div className="cloud-snapshot-overlay no-print"><section role="dialog" aria-modal="true" aria-labelledby="cloud-history-title" className="cloud-snapshot-dialog">

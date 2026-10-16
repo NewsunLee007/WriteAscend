@@ -21,7 +21,7 @@ async rootPage => {
   await page.getByRole('button',{name:'继续进入作文批改',exact:true}).click();
   await page.getByRole('button',{name:'带入本机原有数据',exact:true}).click();
   await page.getByRole('button',{name:'一键批改',exact:true}).waitFor();
-  if(!await page.getByText('合成测试教师 · 云端工作区',{exact:true}).isVisible())throw Error('Cloud identity is not shown in the teacher app.');
+  if(!await page.getByText('合成测试教师',{exact:true}).isVisible())throw Error('Cloud identity is not shown in the teacher app.');
   const workspace=await page.evaluate(async()=>(await(await fetch('/api/me')).json()).workspaceId);
   const config=await page.evaluate(key=>JSON.parse(localStorage.getItem('wa_workspace:'+key+':smart_grader_data_v5_0')),workspace);
   if(config.config.apiKey)throw Error('Old API key was imported into the cloud workspace.');
@@ -61,14 +61,14 @@ async rootPage => {
   if(!await page.getByRole('button',{name:'保存批改结果',exact:true}).isEnabled())throw Error('A model configuration error disabled access to existing teacher results.');
   await page.unroute('http://127.0.0.1:8789/api/model/profiles');
   await page.getByRole('button',{name:'刷新连接',exact:true}).click();
-  await page.getByText('支持刷新后继续批改，可将核对后的结果保存到云端。',{exact:true}).waitFor();
+  await page.getByText('云端已连接',{exact:true}).waitFor();
   await page.getByRole('button',{name:'退出',exact:true}).click();
   await page.getByRole('link',{name:'使用 Daily 登录',exact:true}).waitFor();
   await page.goto('http://127.0.0.1:8890/sandbox/use-other');
   await page.goto('http://127.0.0.1:8789/api/auth/start');
   await page.getByRole('button',{name:'继续进入作文批改',exact:true}).click();
   await page.getByRole('button',{name:'新建空工作区',exact:true}).click();
-  await page.getByText('另一位合成教师 · 云端工作区',{exact:true}).waitFor();
+  await page.getByText('另一位合成教师',{exact:true}).waitFor();
   const otherWorkspace=await page.evaluate(async()=>(await(await fetch('/api/me')).json()).workspaceId);
   if(otherWorkspace===workspace)throw Error('Different teachers share a local storage namespace.');
   if(await page.locator('.quick-files>li').count())throw Error('Another teacher can see the previous teacher draft.');

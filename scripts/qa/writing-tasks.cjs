@@ -15,7 +15,7 @@ async page => {
     await dialog.getByRole('button',{name:'保存为新任务草稿',exact:true}).click();
     await dialog.getByText('已保存任务草稿。请预览并核对学校名单，再建立班级任务。',{exact:true}).waitFor();
     await p.getByRole('button',{name:'关闭写作任务',exact:true}).click();
-    const topic=fixture.seed.assignment.topic+' Add a clear ending.';await p.getByLabel(/写作要求/).fill(topic);
+    const topic=fixture.seed.assignment.topic+' Add a clear ending.';if(await p.getByRole('button',{name:'编辑本次写作',exact:true}).isVisible())await p.getByRole('button',{name:'编辑本次写作',exact:true}).click();await p.getByLabel(/写作要求/).fill(topic);
     await p.getByRole('button',{name:'写作任务',exact:true}).click();await dialog.getByLabel('写作任务名称',{exact:true}).fill(title);
     const row=dialog.locator('article').filter({hasText:title});await row.getByRole('button',{name:'用当前设置更新草稿',exact:true}).click();
     await row.getByText('草稿 · 标准第 2 版 · 0 人',{exact:true}).waitFor();

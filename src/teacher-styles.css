@@ -3,6 +3,7 @@
 @source "./report/";
 @import "./report/legacy-paper.css";
 @import "./teacher/quick-grading.css";
+@import "./teacher/teacher-ui.css";
 @source "./teacher/";
 
 /* Teacher workflow remains the application entry. Responsive changes are additive. */

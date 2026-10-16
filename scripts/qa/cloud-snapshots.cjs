@@ -81,7 +81,7 @@ async page => {
     await a.getByRole('button',{name:'关闭云端存档',exact:true}).click();
     await a.getByRole('button',{name:'退出',exact:true}).click();await a.getByRole('link',{name:'使用 Daily 登录',exact:true}).waitFor();
     await a.goto('http://127.0.0.1:8890/sandbox/use-other');await a.goto(root+'/api/auth/start');await a.getByRole('button',{name:'继续进入作文批改',exact:true}).click();
-    await a.getByText('另一位合成教师 · 云端工作区',{exact:true}).waitFor();
+    await a.getByText('另一位合成教师',{exact:true}).waitFor();
     if((await api(a,'/api/snapshots/'+id)).status!==404||(await api(a,'/api/assets/'+asset.id+'/meta')).status!==404)throw Error('Another teacher accessed a report or image');
     const wrong=await a.evaluate(async()=>({status:(await fetch('/api/snapshots',{method:'POST',headers:{'Content-Type':'application/json','X-Workspace-Id':'previous-account'},body:'{}'})).status}));
     if(wrong.status!==403)throw Error('Cross-account pending mutation was accepted');
