@@ -14,7 +14,7 @@ export interface ModelBindings {
   MODEL_PENDING_LIMIT?:string;
   [key:`MODEL_KEY_${string}`]:string|undefined;
 }
-type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number};
+type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string};
 type Principal={principal:string;grant_id:string;role:string};
 type Job={id:string;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
@@ -38,11 +38,16 @@ function profiles(env:Env):Profile[]{
     if(keyBinding!=='MODEL_API_KEY'&&!/^MODEL_KEY_[A-Z0-9_]+$/.test(keyBinding))fail(503,'云端模型密钥配置不正确，请联系管理员。');
     const maxTokens=Number(p.maxTokens??10000),timeoutMs=Number(p.timeoutMs??180000);
     if(!Number.isInteger(maxTokens)||maxTokens<512||maxTokens>24000||!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>300000)fail(503,'云端模型参数不正确，请联系管理员。');
-    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs};
+    if(p.supportsImages!==undefined&&typeof p.supportsImages!=='boolean')fail(503,'模型图片能力配置不正确，请联系管理员。');
+    const purposes=p.purposes??['grading','ocr'];
+    if(!Array.isArray(purposes)||!purposes.length||purposes.length>2||new Set(purposes).size!==purposes.length||purposes.some((v:unknown)=>!['grading','ocr'].includes(v as string)))fail(503,'模型用途配置不正确，请联系管理员。');
+    let helpUrl:string|undefined;
+    if(p.helpUrl!==undefined){try{const help=new URL(p.helpUrl);if(help.protocol!=='https:'||help.username||help.password||help.search||help.hash)throw Error();helpUrl=help.href;}catch{fail(503,'模型帮助链接配置不正确，请联系管理员。');}}
+    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs,supportsImages:p.supportsImages!==false,purposes,helpUrl};
   });
 }
 function keyFor(env:Env,p:Profile){return p.keyBinding==='MODEL_API_KEY'?env.MODEL_API_KEY:env[p.keyBinding as `MODEL_KEY_${string}`];}
-export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model}));}
+export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model,supportsImages:p.supportsImages,purposes:p.purposes,...(p.helpUrl?{helpUrl:p.helpUrl}:{})}));}
 const revision=(p:Profile)=>sha(JSON.stringify({apiUrl:p.apiUrl,model:p.model,keyBinding:p.keyBinding,maxTokens:p.maxTokens,timeoutMs:p.timeoutMs}));
 
 export function validateModelPayload(value:unknown){
@@ -77,6 +82,9 @@ export function validateModelPayload(value:unknown){
   return {messages,temperature,...(body.response_format?{response_format:{type:'json_object'}}:{})};
 }
 
+function validateImageCapability(profile:Profile,payload:ReturnType<typeof validateModelPayload>){
+  if(!profile.supportsImages&&payload.messages.some((m:any)=>Array.isArray(m.content)&&m.content.some((p:any)=>p.type==='image_url')))fail(400,'所选模型仅支持文字，不能识别题目或作文图片。请选择支持图片输入的模型。');
+}
 async function getJob(env:Env,id:string){return env.DB.prepare('SELECT * FROM model_jobs WHERE id=?').bind(id).first<Job>();}
 function safeJob(row:Job){return {id:row.id,profileId:row.profile_id,state:row.state,created:row.created,updated:row.updated,error:row.error_message?{status:row.error_status,message:row.error_message}:null};}
 async function deliver(env:Env,id:string){
@@ -97,6 +105,7 @@ export async function handleModelApi(req:Request,env:Env,session:Principal,readI
     const profile=profiles(env).find(p=>p.id===input.profileId);
     if(!profile||!keyFor(env,profile))fail(400,'此云端模型尚未配置，请重新选择。');
     const payload=validateModelPayload(input.payload);
+    validateImageCapability(profile,payload);
     const dailyLimit=Number(env.MODEL_DAILY_LIMIT??1200),pendingLimit=Number(env.MODEL_PENDING_LIMIT??20);
     if(!Number.isInteger(dailyLimit)||dailyLimit<0||dailyLimit>1000000||!Number.isInteger(pendingLimit)||pendingLimit<1||pendingLimit>200)fail(503,'云端任务额度配置不正确，请联系管理员。');
     const profileRevision=await revision(profile),requestHash=await sha(JSON.stringify({payload,profileRevision}));
@@ -177,7 +186,8 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       if(!stored)fail(503,'已保存的作文请求暂不可用。');
       const envelope=await stored.json() as any;
       if(envelope.profileRevision!==await revision(profile))fail(409,'模型设置已更新，请核对后重新提交。');
-      const payload={...await hydrateAssetImages(env,row.owner,validateModelPayload(envelope.payload)),model:profile.model,max_tokens:profile.maxTokens,stream:false};
+      const validated=validateModelPayload(envelope.payload);validateImageCapability(profile,validated);
+      const payload={...await hydrateAssetImages(env,row.owner,validated),model:profile.model,max_tokens:profile.maxTokens,stream:false};
       const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?").bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now()).run();
       if(!sending.meta.changes){message.retry({delaySeconds:15});continue;}
       let response:Response;

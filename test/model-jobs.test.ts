@@ -139,3 +139,16 @@ test('multiple configured providers remain selectable while unconfigured keys an
     await h.consume(id);assert.equal(h.job(id).state,'succeeded');
   }finally{globalThis.fetch=originalFetch;h.close();}
 });
+
+test('model capabilities and help links are public metadata, while text-only profiles reject images before queue intake',async()=>{
+  const h=sandbox();try{
+    h.env.MODEL_PROFILES=JSON.stringify([{id:'text',label:'仅文字',apiUrl:'https://model.invalid/v1/chat/completions',model:'text-model',supportsImages:false,purposes:['grading'],helpUrl:'https://docs.example.test/models'}]);
+    const catalog=modelCatalog(h.env);assert.equal(catalog[0].supportsImages,false);assert.deepEqual(catalog[0].purposes,['grading']);assert.equal(catalog[0].helpUrl,'https://docs.example.test/models');
+    const response=await h.request('/api/model/jobs',{profileId:'text',requestId:'synthetic-text-image-0001',payload:{messages:[{role:'user',content:[{type:'image_url',image_url:{url:'wa-asset:10000000-0000-4000-8000-000000000001'}}]}]}});
+    assert.equal(response.status,400);assert.match((await response.json() as any).error.message,/仅支持文字/);assert.equal(h.sent.length,0);assert.equal(h.db.prepare('SELECT COUNT(*) n FROM model_jobs').get()!.n,0);
+    assert.equal((await h.request('/api/model/jobs',{profileId:'text',requestId:'synthetic-text-only-0001',payload})).status,202);
+    for(const changes of [{supportsImages:'yes'},{purposes:['ocr','ocr']},{purposes:['unknown']},{helpUrl:'javascript:alert(1)'},{helpUrl:'https://key:secret@docs.example.test'}]){
+      h.env.MODEL_PROFILES=JSON.stringify([{id:'bad',label:'Invalid',apiUrl:'https://model.invalid/v1/chat/completions',model:'bad-model',...changes}]);assert.equal((await h.request('/api/model/profiles',null)).status,503);
+    }
+  }finally{h.close();}
+});

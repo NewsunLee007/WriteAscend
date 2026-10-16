@@ -1135,7 +1135,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const callAI = async (messages, responseJson = true, options) => {
                 const opts = options && typeof options === 'object' ? options : {};
-                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: cloud.profileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired, onAssets: ids => {
+                const selectedCloudProfileId = opts.purpose === 'ocr' ? cloud.ocrProfileId : cloud.profileId;
+                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: selectedCloudProfileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired, onAssets: ids => {
                     if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudAssetIds:ids} : file));
                 }, onJob: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudPendingJobId:id} : file));}, onSettled: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId && file.cloudPendingJobId === id ? {...file,cloudPendingJobId:null} : file));} }) : null;
                 const apiHeaders = cloudTransport ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };
@@ -1147,7 +1148,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     if (/HTTP\s*4\d\d/.test(m)) return 'client';
                     return 'other';
                 };
-                if (cloud.mode === 'cloud' ? !modelReady : !config.apiKey) {
+                if (cloud.mode === 'cloud' ? cloud.status !== 'ready' || !selectedCloudProfileId : !config.apiKey) {
                     const msg = cloud.mode === 'cloud' ? (cloud.status === 'expired' ? '请先重新使用 Daily 登录。' : '请先在设置中选择已配置的云端模型。') : '请先点击右上角设置 API Key';
                     if (opts.returnMeta) return { ok: false, error: { kind: 'config', message: msg } };
                     alert(msg);
@@ -2631,7 +2632,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const result = await callAI([
                     { role: "system", content: EXTRACT_PROMPT_TEXT_SYSTEM() },
                     { role: "user", content: [{ type: "image_url", image_url: { url: assignment.promptImageBase64 } }] }
-                ]);
+                ], true, {purpose:'ocr'});
                 if (result) {
                     setAssignment(p => ({
                         ...p,

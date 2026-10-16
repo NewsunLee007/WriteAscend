@@ -48,6 +48,8 @@ const server=http.createServer(async(req,res)=>{
     if(body.model!=='synthetic-server-model'){res.writeHead(400).end();return;}
     modelCalls++;
     await new Promise(resolve=>setTimeout(resolve,Number(process.env.SANDBOX_MODEL_DELAY_MS)||8000));
+    if(body.messages?.some(m=>typeof m.content==='string'&&m.content.startsWith('WA_VISION_CHECK_V1.'))){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({visible_text:'7M42'})}}]}));return;}
+    if(body.messages?.some(m=>typeof m.content==='string'&&m.content.startsWith('WA_IDENTITY_OCR_V1.'))){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({name:'示例同学',className:'合成学校班',studentNumber:'',multipleStudents:false})}}]}));return;}
     const response=structuredClone(fixture.response);
     if(process.env.SANDBOX_MODEL_STUDENT_NAME){const result=JSON.parse(response.choices[0].message.content);result.student_name=process.env.SANDBOX_MODEL_STUDENT_NAME;response.choices[0].message.content=JSON.stringify(result);}
     res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(response));return;

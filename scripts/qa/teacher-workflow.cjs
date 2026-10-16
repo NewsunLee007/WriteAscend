@@ -37,5 +37,6 @@ async rootPage => {
   if(size.scroll>size.viewport)throw Error('Teacher mobile screen overflows: '+JSON.stringify(size));
   const paper=await page.locator('.teacher-grading-detail .a4-wrapper').evaluate(e=>({width:e.getBoundingClientRect().width,parent:e.parentElement.getBoundingClientRect().width}));
   if(paper.width>paper.parent+1)throw Error('Report is clipped inside the mobile card.');
+  return {passed:true,originalReportSections:6,modelCalled:true,snapshotSaved:true,mobileWidth:390};
   }finally{await isolated.close();}
 }

@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-10-16T14:27:35.002631+00:00",
+  "syntheticOnly": true,
+  "realHandwritingVerified": false,
+  "realCameraVerified": false,
+  "remoteDeployed": false,
+  "checks": [
+    {
+      "script": "scripts/qa/model-ocr.cjs",
+      "scriptSha256": "1b53506da088ebc7d19ae3ae6b400cad581d8002c3de2ac95a25424b7c9ced0a",
+      "result": {
+        "passed": true,
+        "distinctModelSelection": true,
+        "textModelsExcluded": true,
+        "visionCheckUsesSyntheticImages": true,
+        "officialHelpLinks": true,
+        "ocrPreferenceSurvivesReload": true,
+        "identityOcrResumesSameRequest": true,
+        "batchPhotosDurableBeforeOcr": true,
+        "ocrNeverAutoConfirms": true,
+        "confirmedIdentityBoundToTaskMember": true,
+        "originalUploadedOnce": true,
+        "uncertainOcrNeedsExplicitReissue": true,
+        "mobileWidth": 390
+      }
+    },
+    {
+      "script": "scripts/qa/student-first-capture.cjs",
+      "scriptSha256": "d18c56f4ca9cbe5c06662f273c7e177bdaa7693c0ea0ecdb814dd2f14bb9d17a",
+      "result": {
+        "passed": true,
+        "pinyinInitials": true,
+        "sameNameCandidatesRetained": true,
+        "studentFirstUpload": true,
+        "nextOnlyAfterReceipt": true,
+        "qrMismatchRequiresChoice": true,
+        "offlineIdentitySurvivesReload": true,
+        "multiPageRetainsStudent": true,
+        "mobileWidth": 390
+      }
+    },
+    {
+      "script": "scripts/qa/writing-collection.cjs",
+      "scriptSha256": "2469d8b609b15ff4681199290ab4057b0427e2d782cd3859c4690c5ed090a160",
+      "result": {
+        "passed": true,
+        "offlinePhotoRecovered": true,
+        "lostReceiptReused": true,
+        "multiPageComplete": true,
+        "rescanDeduplicated": true,
+        "replacementHistoryPreserved": true,
+        "sameNameSeparated": true,
+        "manualIdentityReviewed": true,
+        "multiplePapersBlocked": true,
+        "cameraStopsOnClose": true,
+        "logoutClearsPhotosAcrossTabs": true
+      }
+    },
+    {
+      "script": "scripts/qa/teacher-workflow.cjs",
+      "scriptSha256": "840f6fc4c3331ecfc83719b2ee9a4913b9e291f9828bf7df845ba51723a176d1",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    {
+      "script": "scripts/qa/quick-grading.cjs",
+      "scriptSha256": "b63a1c495029d35d511aed093514789bf3fb03608eb8a56736ba9c5e7f95cea8",
+      "result": {
+        "passed": true,
+        "completedWithoutError": true
+      }
+    },
+    {
+      "script": "scripts/qa/batch-grading.cjs",
+      "scriptSha256": "7908499d8fc4515a95b8a8f319df6360dc5c703c02b2181073f022fedc0d2db3",
+      "result": {
+        "passed": true,
+        "completedWithoutError": true
+      }
+    },
+    {
+      "script": "scripts/qa/cloud-grading.cjs",
+      "scriptSha256": "58e12ffb25144ee89daa302ec892e4ae7427c213a0b95fc25dc2ebdb55033a43",
+      "result": {
+        "passed": true,
+        "originalReportPreserved": true,
+        "refreshReusesModelJob": true,
+        "privateTeacherIsolation": true
+      }
+    }
+  ]
+}

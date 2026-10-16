@@ -2,9 +2,19 @@
 
 当前完成本地开发与模拟来源联调，尚未启用正式 Daily 桥接、配置正式模型凭据或切换域名。原教师工作台、快速入口、评分提示词、结果解析/修复和导出继续保留。
 
+## 教师配置与图片识别
+
+教师选择批改模型即可开始，OCR 默认优先沿用同一模型，也可单独选择；选择按教师工作区保存。纯文字型号不出现在拍照批改和 OCR 选择中，服务端在入队和实际发送前再次阻止文字模型接收图片。旧配置继续按原图片模型处理；管理员须核验能力声明，`supportsImages` 不能当作真实识别验收证据。
+
+“检查连接和图片识别”使用系统生成的印刷字符图片，检查连接、图片读取和 JSON 返回；每个不同模型调用一次，同一模型不重复检查，不使用学生作文，按供应商正常计费。检查不能替代中文手写姓名、英文手写正文及评分质量实测。界面提供 [Gemini 图片输入说明](https://ai.google.dev/gemini-api/docs/image-understanding)、[兼容接口文档](https://ai.google.dev/gemini-api/docs/openai)和可选的当前服务帮助链接。
+
+题目图片及无二维码姓名识别使用 OCR 选择；原作文评分、JSON 修复、范文和难度优化继续使用批改选择及原有提示。二维码本机定位无需模型。姓名 OCR 只接收照片，不接收整班名单；本机精确匹配生成候选后仍需教师确认。
+
+当前云端凭据由管理员登记，教师无需在手机重复填写地址、型号和密钥。原本地模式的个人配置保留；云端个人凭据托管尚未实现。正式模型凭据及真实手写质量验收仍待完成。
+
 ## 调用与数据
 
-云端版先登录 Daily，获得经后台核验的教师工作区。模型设置从服务器读取，只公开模型 ID、显示名称和型号；API 地址、密钥和参数上限不由浏览器提交决定。原浏览器直连配置保留在本地开发模式，`legacy/index.html` 仍保存原版源码基线。
+云端版先登录 Daily，获得经后台核验的教师工作区。模型设置从服务器读取，只公开模型 ID、显示名称、型号、图片能力、用途与可选帮助链接；API 地址、密钥和参数上限不由浏览器提交决定。原浏览器直连配置保留在本地开发模式，`legacy/index.html` 仍保存原版源码基线。
 
 教师的现有 `callAI` 通过新的 transport 提交模型任务，并取得与原系统兼容的结果。模型任务与作文报告不是同一个对象：任务保存模型原始请求和响应；原有前端继续评分校准、修复难度、处理身份、显示与核对报告。教师核对后的报告仍按原格式保存在本机；原保存操作还会同步至私有云端存档，详见 [报告保存与恢复](cloud-report-storage.md)。正式学生发布尚未完成。
 
@@ -42,17 +52,22 @@
     "apiUrl": "https://YOUR-COMPATIBLE-PROVIDER/v1/chat/completions",
     "model": "YOUR_MODEL_NAME",
     "keyBinding": "MODEL_KEY_CLASSROOM",
+    "supportsImages": true,
+    "purposes": ["grading", "ocr"],
+    "helpUrl": "https://ai.google.dev/gemini-api/docs/image-understanding",
     "maxTokens": 10000,
     "timeoutMs": 180000
   }
 ]
 ```
 
+`purposes` 可为 `grading`（批改）、`ocr`（图片文字识别）或两者；纯文字型号设置 `supportsImages: false`。帮助链接只允许无账户凭据的 HTTPS 文档地址。OCR 可共用原供应商密钥，不需要再复制到手机。
+
 密钥单独存入相应 Worker secret，不写进 JSON、Git、浏览器或测试记录。未配置密钥的模型不会出现在选择列表中。接口只接受管理员登记的 HTTPS 地址，回环 HTTP 仅供本地联调；不跟随供应商重定向转发密钥。
 
-额度变量 `MODEL_DAILY_LIMIT` 默认每位教师每滚动 24 小时 1200 个模型任务，设为 0 可关闭该限额；包含批改、题目识别、范文与修复调用。`MODEL_PENDING_LIMIT` 默认同时 20 个任务，均可由管理员调整。请求体最多 20 MiB，单次最多 6 张图、图片合计最多 12 MiB，响应最多 2 MiB。大图压缩和扫描裁切仍属后续移动端工作，未在本阶段宣称完成。
+额度变量 `MODEL_DAILY_LIMIT` 默认每位教师每滚动 24 小时 1200 个模型任务，设为 0 可关闭该限额；包含批改、题目识别、范文与修复调用。`MODEL_PENDING_LIMIT` 默认同时 20 个任务，均可由管理员调整。请求体最多 20 MiB，单次最多 6 张图、图片合计最多 12 MiB，响应最多 2 MiB。扫描端已对超大图进行整页 JPG 转换，常规照片保留原文件；自动透视裁切及多页模型输入优化仍待完成。
 
-已创建独立测试队列 `writeascend-staging-model-jobs`。测试 D1 和私有 R2 已存在。正式部署前必须应用增量迁移 `0001_report_workspace.sql`、`0002_model_jobs.sql`、`0003_cloud_snapshots.sql`、`0004_writing_tasks.sql`，配置桥接与模型 secret，并核对公网服务通道。现在只在本地应用迁移，尚未远程部署 Worker 或切换正式域名。
+已创建独立测试队列 `writeascend-staging-model-jobs`。测试 D1 和私有 R2 已存在。正式部署前必须应用增量迁移 `0001_report_workspace.sql`、`0002_model_jobs.sql`、`0003_cloud_snapshots.sql`、`0004_writing_tasks.sql`、`0005_writing_sheets.sql`、`0006_writing_collection.sql`，配置桥接与模型 secret，并核对公网服务通道。现在只在本地应用迁移，尚未远程部署 Worker 或切换正式域名。
 
 ## 验证
 
