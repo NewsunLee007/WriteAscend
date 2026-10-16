@@ -52,6 +52,7 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
     try{
       const response=await fetch('/api/auth/logout',{method:'POST'});
       if(!response.ok)throw Error();
+      try{for(const key of Object.keys(sessionStorage))if(key.startsWith('wa_sheet_pending:'))sessionStorage.removeItem(key);}catch{}
       setIdentity(null);setProfiles([]);setStatus('anonymous');setMessage('');
     }catch{setMessage('退出暂未完成，请检查网络后重试。');}
   }

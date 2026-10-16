@@ -64,6 +64,8 @@ test('Worker and Daily exchange actual authorization code over HTTP and create o
     assert.equal((await h.request('/api/snapshots',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks/synthetic',logged.cookie,'PUT')).status,403);
+    assert.equal((await h.request('/api/tasks/10000000-0000-4000-8000-000000000001/sheets',logged.cookie,'POST')).status,403);
+    assert.equal((await h.request('/api/tasks/10000000-0000-4000-8000-000000000001/sheets/resolve',logged.cookie,'POST','https://foreign.test')).status,403);
     assert.equal((await h.request('/api/admin/writing-directory/overview',logged.cookie)).status,403);
     assert.equal((await h.request('/api/auth/logout',logged.cookie,'POST','https://foreign.test')).status,403);
     assert.equal((await h.request('/api/me',logged.cookie)).status,200);
