@@ -71,6 +71,8 @@
 
 - 补齐教师个人云端模型配置：服务商地址与帮助、服务端加密托管、OCR 默认复用、图片检查、跨教师隔离、配置版本固定及更换/删除后旧请求停止。已有报告与学生发布快照继续保留，不自动改用系统模型计费。学校失败/暂停运行可明确换模型重批，结果不明须另行确认。127 项单元检查、生产构建和 Worker dry-run 通过；本地迁移 0012 已应用，见 `verification/personal-models.md`。
 
+- 学生自主二稿已接通：本人反馈开始、教师标准逐项修改说明、手写新稿与反思、弱网照片缓存/刷新恢复、跨设备冲突处理、提交/撤回/退回、教师确认收取为下一稿，再沿用原一键批阅与发布。首稿和已发布反馈保留，学生自主修订来源继续留在原稿、报告与学生反馈中。135 项测试通过，迁移 0013 仅应用本地，见 `verification/student-revisions.md`；独立互批项目仍待建设。
+
 ## 已准备但尚未接通的工作
 
 Cloudflare 已创建独立测试 D1 `writeascend-staging`、私有桶 `writeascend-staging-private` 和队列 `writeascend-staging-model-jobs`、`writeascend-staging-feedback-events`。教师界面与服务端模型链路已在实际本地 Worker 环境接通，但还未配置正式模型凭据、启用正式登录或部署云端版本。

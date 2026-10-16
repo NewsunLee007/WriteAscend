@@ -67,7 +67,7 @@
 
 额度变量 `MODEL_DAILY_LIMIT` 默认每位教师每滚动 24 小时 1200 个模型任务，设为 0 可关闭该限额；包含批改、题目识别、范文与修复调用。`MODEL_PENDING_LIMIT` 默认同时 20 个任务，均可由管理员调整。请求体最多 20 MiB，单次最多 6 张图、图片合计最多 12 MiB，响应最多 2 MiB。扫描端已对超大图进行整页 JPG 转换，常规照片保留原文件；自动透视裁切及多页模型输入优化仍待完成。
 
-已创建独立测试队列 `writeascend-staging-model-jobs`。测试 D1 和私有 R2 已存在。正式部署前必须从当前版本顺序应用 `migrations/` 中 0001–0012 的增量迁移，配置桥接与模型 secret，并核对公网服务通道。个人托管另需配置独立 vault secret，详见 [密钥轮换和备份恢复](personal-models.md)。现在只在本地应用迁移，尚未远程部署 Worker 或切换正式域名。
+已创建独立测试队列 `writeascend-staging-model-jobs`。测试 D1 和私有 R2 已存在。正式部署前必须从当前版本顺序应用 `migrations/` 中 0001–0013 的增量迁移，配置桥接与模型 secret，并核对公网服务通道。个人托管另需配置独立 vault secret，详见 [密钥轮换和备份恢复](personal-models.md)。现在只在本地应用迁移，尚未远程部署 Worker 或切换正式域名。
 
 ## 验证
 

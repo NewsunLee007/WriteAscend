@@ -11,7 +11,7 @@ type Member={id:string;task_id:string;task_version:number;provider:string;subjec
 type Task={id:string;owner:string;status:string;current_version:number;revision:number;rubric_hash:string};
 type Draft={id:string;submission_id:string;draft_number:number;task_version:number;rubric_hash:string;page_count:number;revision:number;state:string;input_hash:string};
 type Page={id:string;pageNumber:number;revision:number;assetId:string;sha256:string;sheetId:string|null;detectedSheetId:string|null;identityMethod:string;identityNote:string;fileName:string;confirmedBy:string;created:number};
-type Manifest={taskId:string;memberId:string;identity:{provider:string;subject:string;classId:string};taskVersion:number;rubricHash:string;draftNumber:number;pageCount:number;pages:Page[]};
+type Manifest={taskId:string;memberId:string;identity:{provider:string;subject:string;classId:string};taskVersion:number;rubricHash:string;draftNumber:number;pageCount:number;pages:Page[];studentRevision?:unknown};
 const uuid=/^[a-f0-9-]{36}$/;
 function fail(status:number,message:string,code?:string):never{throw new HttpError(status,message,code);}
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -84,7 +84,7 @@ export async function handleCollection(req:Request,env:Env,session:TaskSession,b
     page={id:crypto.randomUUID(),pageNumber,revision:(await env.DB.prepare('SELECT COALESCE(MAX(revision),0) AS n FROM submission_page_versions WHERE draft_id=? AND page_number=?').bind(c.draftId,pageNumber).first<{n:number}>())!.n+1,assetId:asset.id,sha256:asset.sha256,sheetId,detectedSheetId,identityMethod,identityNote:note,fileName:typeof body.fileName==='string'?body.fileName.slice(0,240):'',confirmedBy:session.principal,created:Date.now()};
   }
   if((old?.revision||0)!==body.expectedPageRevision)fail(409,'这一页已有其他照片或版本变化，请核对后明确选择替换。','page_changed');
-  const manifest:Manifest={taskId:task.id,memberId:member.id,identity:{provider:member.provider,subject:member.subject,classId:member.class_id},taskVersion:member.task_version,rubricHash:task.rubric_hash,draftNumber:number,pageCount,pages:[...pages.filter(p=>p.pageNumber!==pageNumber),...(page?[page]:[])].sort((a,b)=>a.pageNumber-b.pageNumber)};
+  const manifest:Manifest={...(c.manifest?.studentRevision?{studentRevision:c.manifest.studentRevision}:{}),taskId:task.id,memberId:member.id,identity:{provider:member.provider,subject:member.subject,classId:member.class_id},taskVersion:member.task_version,rubricHash:task.rubric_hash,draftNumber:number,pageCount,pages:[...pages.filter(p=>p.pageNumber!==pageNumber),...(page?[page]:[])].sort((a,b)=>a.pageNumber-b.pageNumber)};
   if(manifest.pages.some(p=>p.pageNumber>pageCount))fail(409,'已有页面超过新总页数，请先核对。');
   const revision=(c.draft?.revision||0)+1,inputHash=await digest(manifest),now=Date.now(),result={...receipt(task,member,c,manifest,revision,inputHash,page),action:body.action,...(removing?{removedPageVersionId:old!.id,reason,confirmedBy:session.principal}:{})};
   const binds=[session.principal,body.requestId,requestHash],claimed='EXISTS(SELECT 1 FROM writing_collection_operations WHERE owner=? AND request_id=? AND request_hash=? AND committed=0)',gate=removing?'1=1':"COALESCE((SELECT id FROM writing_sheet_sets WHERE task_id=? AND member_id=? AND draft_number=? AND status='active'),'')=?";

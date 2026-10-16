@@ -9,6 +9,7 @@ import {handleSheets} from './sheets';
 import {handleCollection} from './collection';
 import {dispatchDailyEvent,recoverDailyFeedback} from './daily-feedback';
 import {handlePublications} from './publications';
+import {handleStudentRevisions} from './student-revisions';
 import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns} from './grading';
 
 export interface Env extends ModelBindings {
@@ -128,6 +129,7 @@ export default {
         if(!body||typeof body!=='object'||Array.isArray(body))throw new HttpError(400,'目录管理参数不正确。');
         return json(await bridge(env,'directory/'+action,{...Object.fromEntries(fields[action].filter(key=>key in body).map(key=>[key,body[key]])),grantId:session.grant_id}));
       }
+      const revisionResponse=await handleStudentRevisions(req,env,session,bridge,input);if(revisionResponse)return revisionResponse;
       const publicationResponse=await handlePublications(req,env,session,bridge,input);if(publicationResponse)return publicationResponse;
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}

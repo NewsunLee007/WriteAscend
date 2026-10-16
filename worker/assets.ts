@@ -13,7 +13,7 @@ function contentType(bytes:Uint8Array){
   if(head.startsWith('RIFF')&&head.slice(8)==='WEBP')return 'image/webp';
   return null;
 }
-async function readBytes(req:Request){
+export async function readImageBytes(req:Request){
   if(!req.body)fail(400,'请选择原稿图片。');
   if(Number(req.headers.get('content-length'))>maxBytes)fail(413,'单张原稿请控制在 12 MiB 以内。');
   const reader=req.body!.getReader(),chunks:Uint8Array[]=[];let length=0;
@@ -31,7 +31,7 @@ export async function readPrivateAsset(env:Env,owner:string,id:string){
 export async function handleAssets(req:Request,env:Env,owner:string):Promise<Response|null>{
   const path=new URL(req.url).pathname;
   if(path==='/api/assets'&&req.method==='POST'){
-    const bytes=await readBytes(req),mime=contentType(bytes);if(!mime)throw new HttpError(415,'请上传 JPG、PNG、WebP 或 GIF 原稿。');
+    const bytes=await readImageBytes(req),mime=contentType(bytes);if(!mime)throw new HttpError(415,'请上传 JPG、PNG、WebP 或 GIF 原稿。');
     const digest=await sha(bytes.buffer),existing=await env.DB.prepare('SELECT * FROM private_assets WHERE owner=? AND sha256=? AND ready=1').bind(owner,digest).first<Asset>();
     if(existing)return json({id:existing.id,sha256:digest,mime:existing.mime,bytes:existing.bytes});
     const id=crypto.randomUUID(),key='private-assets/'+await sha(owner)+'/'+digest;

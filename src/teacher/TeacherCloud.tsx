@@ -63,11 +63,13 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
     try{
       const scans=await import('./scan-outbox');
       if(identity){const pending=(await scans.readScanItems(identity.workspaceId)).filter(i=>i.stage!=='received');if(pending.length&&!window.confirm('本机还有 '+pending.length+' 张扫描照片尚未确认收取。退出会清除这些本机照片，需保留原图或重新拍摄。是否退出并清理？'))return;}
+      if(identity?.role==='student'){const revisions=await import('../student/revision-cache');if(await revisions.revisionCacheCount(identity.workspaceId)&&!window.confirm('本机还有尚未保存到服务器的修订或照片。退出会清除这些本机内容，请先保存或保留原图。是否退出？'))return;}
       const response=await fetch('/api/auth/logout',{method:'POST'});
       if(!response.ok)throw Error();
       try{for(const key of Object.keys(sessionStorage))if(key.startsWith('wa_sheet_pending:'))sessionStorage.removeItem(key);}catch{}
       let cleanupMessage='';
       if(identity){try{localStorage.setItem('wa_signed_out',JSON.stringify({workspaceId:identity.workspaceId,nonce:crypto.randomUUID()}));}catch{}try{await scans.clearScanWorkspace(identity.workspaceId);}catch{cleanupMessage='已退出，但本机扫描缓存未能清理；共享设备请在浏览器中清除此网站的数据。';}}
+      if(identity?.role==='student')try{const revisions=await import('../student/revision-cache');await revisions.clearRevisionWorkspace(identity.workspaceId);}catch{cleanupMessage='已退出，但本机修订缓存未能清理；共享设备请清除此网站的数据。';}
       setIdentity(null);setProfiles([]);setMigration(false);setStatus('anonymous');setMessage(cleanupMessage);
     }catch{setMessage('退出暂未完成，请检查网络后重试。');}
   }
