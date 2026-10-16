@@ -1,8 +1,9 @@
 async page => {
-  const fixture=await (await page.request.get('http://127.0.0.1:5186/output/teacher-workflow-fixture.json')).json();
+  const fixture=await (await page.request.get('http://127.0.0.1:5186/scripts/qa/fixtures/teacher-workflow.json')).json();
   await page.addInitScript(seed=>{
     localStorage.clear();
     localStorage.setItem('smart_grader_data_v5_0',JSON.stringify(seed));
+    localStorage.setItem('writeascend_teacher_mode','full');
   },fixture.seed);
   let modelCalls=0;
   await page.route('https://model.invalid/**',async route=>{
@@ -14,7 +15,7 @@ async page => {
   await page.getByRole('heading',{name:'1 评分标准',exact:true}).waitFor();
   await page.getByRole('button',{name:'下一步',exact:true}).click();
   await page.getByRole('heading',{name:'2 导入学生作文',exact:true}).waitFor();
-  await page.locator('input[type="file"][accept="image/*"]').setInputFiles('/Users/newsunsmac/Documents/ChatGPT/作文批阅/output/report-desktop.png');
+  await page.locator('input[type="file"][accept="image/*"]').setInputFiles({name:'synthetic-essay.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6b9sAAAAASUVORK5CYII=','base64')});
   await page.getByText('已选择 1 份文件',{exact:true}).waitFor();
   await page.getByRole('button',{name:'下一步',exact:true}).click();
   await page.getByRole('button',{name:'开始批改',exact:true}).click();

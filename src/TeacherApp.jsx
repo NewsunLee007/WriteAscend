@@ -1,5 +1,6 @@
 // Full teacher workflow retained from original GitHub baseline 2def1d2.
 import React from "react";
+import QuickGrading from './teacher/QuickGrading.jsx';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -293,11 +294,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 );
             };
 
-            const AutoTextareaEl = ({ value, onChange, className, placeholder, style, minRows = 1, maxRows = 12 }) => {
+            const AutoTextareaEl = ({ value, onChange, className, placeholder, style, minRows = 1, maxRows = 12, ariaLabel }) => {
                 const safeVal = value === undefined || value === null ? '' : value;
                 if (readOnly) return <div className={`whitespace-pre-wrap break-words ${className}`} style={style}>{safeVal}</div>;
                 return (
                     <textarea
+                        aria-label={ariaLabel}
                         value={safeVal}
                         placeholder={placeholder}
                         onChange={e => {
@@ -391,7 +393,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             <div>
                                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-3" style={{ whiteSpace: 'normal' }}>{assignment.examName ? `${assignment.examName} - ` : ''}{assignment.title ? `${assignment.title} - ` : ''}学生英语写作质量分析报告</h1>
                                 <div className="flex gap-8 text-sm text-slate-500 font-medium">
-                                    <span className="flex items-center gap-2">Class: {InputEl({ value: localData.class_name || '_______', onChange: e => handleChange('class_name', e.target.value), className: "w-24 font-bold text-slate-800 border-b border-slate-200 focus:border-indigo-500" })}</span>
+                                    <span className="flex items-center gap-2">Class: {InputEl({ 'aria-label': '报告班级', value: localData.class_name || '_______', onChange: e => handleChange('class_name', e.target.value), className: "w-24 font-bold text-slate-800 border-b border-slate-200 focus:border-indigo-500" })}</span>
                                     {(() => {
                                         const mismatch = !!(localData && localData.identity_name_mismatch);
                                         const verified = !!(localData && localData.identity_name_mismatch_verified);
@@ -414,7 +416,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                                     onClick={handleVerify}
                                                     title={activeMismatch ? "点击核对姓名" : ""}
                                                 >
-                                                    {InputEl({ value: localData.student_name || '_______', onChange: e => handleChange('student_name', e.target.value), className: cls })}
+                                                    {InputEl({ 'aria-label': '报告学生姓名', value: localData.student_name || '_______', onChange: e => handleChange('student_name', e.target.value), className: cls })}
                                                 </div>
                                             </div>
                                         );
@@ -430,7 +432,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             </div>
                             <div className="text-right flex flex-col items-end">
                                 <div className="flex items-baseline gap-1">
-                                    {InputEl({ type: "number", step: "0.5", value: localData.total_score, onChange: handleTotalChange, className: "text-6xl font-black text-red-600 w-32 text-right leading-none tracking-tighter" })}
+                                    {InputEl({ 'aria-label': '作文总分', type: "number", step: "0.5", value: localData.total_score, onChange: handleTotalChange, className: "text-6xl font-black text-red-600 w-32 text-right leading-none tracking-tighter" })}
                                     <span className="text-2xl text-slate-400 font-bold">/{rubric.total}</span>
                                 </div>
                             </div>
@@ -449,7 +451,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         {rubric.items.map(r => (
                             <div key={r.id} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center shadow-sm">
                                 <div className="font-bold text-3xl text-slate-800 leading-none mb-2">
-                                    {InputEl({ type: "number", step: "0.5", value: localData.breakdown?.[r.label] ?? 0, onChange: e => handleBreakdownChange(r.label, e), className: "w-full text-center bg-transparent" })}
+                                    {InputEl({ 'aria-label': `${r.label}分数`, type: "number", step: "0.5", value: localData.breakdown?.[r.label] ?? 0, onChange: e => handleBreakdownChange(r.label, e), className: "w-full text-center bg-transparent" })}
                                 </div>
                                 <div className="text-xs text-slate-500 font-medium uppercase tracking-wider text-center">{(() => {
                                     const v = localData?.breakdown?.[r.label];
@@ -476,6 +478,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         {!readOnly && <div className="absolute top-3 right-3 text-indigo-300 opacity-0 group-hover:opacity-100 transition"><Edit size={14}/></div>}
                         <h3 className="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> 总体评价 (Overall Comment)</h3>
                         {AutoTextareaEl({
+                            ariaLabel: '总体评价',
                             value: readOnly ? indentParagraphs(localData.brief_comment) : localData.brief_comment,
                             onChange: e => handleChange('brief_comment', e.target.value),
                             className: "text-sm text-slate-700 w-full font-medium",
@@ -656,6 +659,11 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
         // --- Main App ---
         const App = () => {
+            const [workflowMode, setWorkflowMode] = useState(() => {
+                try { return localStorage.getItem('writeascend_teacher_mode') === 'full' ? 'full' : 'quick'; }
+                catch { return 'quick'; }
+            });
+            useEffect(() => { try { localStorage.setItem('writeascend_teacher_mode', workflowMode); } catch {} }, [workflowMode]);
             const [step, setStep] = useState(0);
             const [maxStep, setMaxStep] = useState(0);
             const [config, setConfig] = useState({ apiUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', apiKey: '', model: 'qwen3-omni-flash', temperature: 0.3, preset: 'aliyun-dashscope' });
@@ -3054,6 +3062,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const handleStudentUpload = (e) => {
                 const picked = Array.from(e.target.files || []);
+                e.target.value = '';
                 if (picked.length === 0) return;
                 const rosterNames = getRosterNamesForInference();
                 const classCandidates = getClassCandidatesForInference();
@@ -3192,7 +3201,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     const fileItem = pending[i];
                     setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'loading' } : f));
                     let base64Url = "";
-                    try { base64Url = await convertFileToBase64(fileItem.file); } catch (err) { continue; }
+                    try { base64Url = await convertFileToBase64(fileItem.file); } catch (err) {
+                        setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'error' } : f));
+                        continue;
+                    }
                     
                     await new Promise(r => setTimeout(r, 1000));
                     
@@ -3277,6 +3289,21 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 setPauseRequested(true);
                 pauseRequestedRef.current = true;
                 setPauseBanner('已请求暂停：将于当前批改完成后自动暂停。');
+            };
+
+            const handleQuickStart = () => {
+                if (files.length === 0 || isBatchProcessing) return;
+                if (!files.some(f => f.status === 'idle')) {
+                    setStep(2);
+                    setMaxStep(prev => Math.max(prev, 2));
+                    return;
+                }
+                if (!String(assignment.topic || '').trim()) return alert('请先填写或识别写作要求。');
+                if (!Number.isFinite(Number(rubric.total)) || Number(rubric.total) <= 0) return alert('请设置有效的作文满分。');
+                if (!config.apiKey) { setShowConfig(true); return; }
+                setStep(2);
+                setMaxStep(prev => Math.max(prev, 2));
+                void startBatchGrading();
             };
 
             const openAnalysisGenerateDialog = () => {
@@ -4816,17 +4843,35 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     `}</style>
 
                     <div className="no-print">
-                        <Stepper currentStep={step} maxStep={maxStep} steps={['评分标准', '导入作文', '批改导出', '班级分析']} onStepClick={navigateTo} onHelp={() => setShowHelp(true)} onConfig={() => setShowConfig(true)} />
+                        {workflowMode === 'full' ? <Stepper currentStep={step} maxStep={maxStep} steps={['评分标准', '导入作文', '批改导出', '班级分析']} onStepClick={navigateTo} onHelp={() => setShowHelp(true)} onConfig={() => setShowConfig(true)} /> : (
+                            <header className="teacher-quick-header">
+                                <a href="/"><img src="/favicon.svg" alt=""/>智能英语作文批改</a>
+                                <div>{step !== 0 && <button onClick={() => setStep(0)}>返回快速批改</button>}{step === 2 && <button onClick={() => setStep(3)}>班级分析</button>}<button onClick={() => setShowConfig(true)}>设置</button><button onClick={() => setWorkflowMode('full')}>完整工作台</button></div>
+                            </header>
+                        )}
                         
-                        <main className="pb-32 pt-24">
-                            {step === 0 && renderStep1()}
+                        <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
+                            {workflowMode === 'full' && <div className="teacher-mode-bar"><div>完整工作台</div><button onClick={() => { setWorkflowMode('quick'); setStep(0); }}>切换到快速批改</button></div>}
+                            {step === 0 && (workflowMode === 'full' ? renderStep1() : <QuickGrading
+                                assignment={assignment} setAssignment={setAssignment} rubric={rubric}
+                                setRubric={updater => setRubric(prev => { const next = typeof updater === 'function' ? updater(prev) : updater; return next.total !== prev.total ? { ...next, items: redistributeItemScoresToTotal(next.items, next.total) } : next; })}
+                                classes={classes} currentClassId={currentClassId} activeClassIds={activeClassIds} setCurrentClassId={setCurrentClassId} setActiveClassIds={setActiveClassIds}
+                                onGradeChange={gradeLevel => { setRubric(prev => ({ ...prev, gradeLevel })); if (activeClassIds.length <= 1) setClasses(prev => prev.map(c => String(c.id) === String(currentClassId) ? { ...c, gradeLevel } : c)); }}
+                                files={files} isBatchProcessing={isBatchProcessing} configReady={!!config.apiKey}
+                                onPromptUpload={handlePromptImageUpload} onRecognizePrompt={extractPromptTextFromImage}
+                                onUpload={handleStudentUpload} onManageStudents={() => setShowStudentMgmt(true)} onModelSettings={() => setShowConfig(true)}
+                                onAdvanced={() => { setWorkflowMode('full'); setStep(0); }} onImportRubric={() => setShowRubricImportModal(true)}
+                                onRemoveFile={id => { const old = files.find(f => f.id === id); if (old?.url) URL.revokeObjectURL(old.url); setFiles(prev => prev.filter(f => f.id !== id)); if (selectedFileId === id) setSelectedFileId(files.find(f => f.id !== id)?.id || null); }}
+                                onRetry={() => setFiles(prev => prev.map(f => f.status === 'error' ? { ...f, status: 'idle' } : f))}
+                                onStart={handleQuickStart}
+                            />)}
                             {step === 1 && renderStep2()}
                             {step === 2 && renderStep3()}
                             {step === 3 && renderStep4()}
                         </main>
                         
                         {/* ISO Glass Navigation Pill */}
-                        <div className="teacher-navigation fixed bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 p-2 glass-iso rounded-full shadow-2xl transition-all hover:-translate-y-1">
+                        {workflowMode === 'full' && <div className="teacher-navigation fixed bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 p-2 glass-iso rounded-full shadow-2xl transition-all hover:-translate-y-1">
                             <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0} className="btn-pure flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm hover-glow">
                                 <ArrowLeft size={18} strokeWidth={2.5} /> 上一步
                             </button>
@@ -4837,7 +4882,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             }} className="btn-pure active flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm hover-glow">
                                 下一步 <ArrowRight size={18} strokeWidth={2.5} />
                             </button>}
-                        </div>
+                        </div>}
                     </div>
 
                     <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
