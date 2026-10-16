@@ -1,6 +1,6 @@
 import {uploadCloudAsset} from './cloud-assets';
 export type GradingRun={id:string;memberId:string;draftId:string;inputRevision:number;inputHash:string;state:'queued'|'running'|'ready'|'failed'|'uncertain'|'cancelled';reportId:string|null;updated:number;model:string;outdated?:boolean;canUseSavedResult?:boolean;error:{status:number;message:string}|null};
-export type GradingMember={id:string;name:string;className:string;subjectShort:string;status:string;draftId:string|null;inputRevision:number|null;inputHash:string|null;collectionState:string|null;pageCount:number|null;draftNumber:number|null;run:GradingRun|null};
+export type GradingMember={id:string;name:string;className:string;subjectShort:string;status:string;draftId:string|null;inputRevision:number|null;inputHash:string|null;collectionState:string|null;pageCount:number|null;draftNumber:number|null;run:GradingRun|null;publication?:{state:string;version:number;reportId:string;reportRevision:number;viewed:boolean;outdated:boolean}|null};
 export async function gradingApi(path:string,workspace:string,body?:unknown,method=body?'POST':'GET',signal?:AbortSignal){
  const response=await fetch(path,{method,cache:'no-store',signal,headers:{'Content-Type':'application/json','X-Workspace-Id':workspace},...(body?{body:JSON.stringify(body)}:{})});
  let value:any;try{value=await response.json();}catch{throw Error('暂时无法读取批阅进度，请检查连接后刷新。');}

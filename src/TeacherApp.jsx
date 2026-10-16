@@ -1028,7 +1028,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             lastErr = err;
                         }
                     }
-                    // Student content is not written to the browser console.
+                    // Keep raw student/model content out of logs.
                     const msg = (lastErr && lastErr.message) ? String(lastErr.message) : '';
                     throw new Error(msg.includes('Unexpected') ? msg : '模型返回的 JSON 格式有误，请稍后重试或调低温度');
                 };

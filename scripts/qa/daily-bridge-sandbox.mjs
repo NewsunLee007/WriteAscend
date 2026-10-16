@@ -13,8 +13,9 @@ const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/teacher-workflow.js
 let modelCalls=0;
 const source=async req=>{
   const cookies=req.headers.cookie?.split(';').map(s=>s.trim()) || [];
-  const mode=['admin','other','teacher'].find(value=>cookies.includes('wordup_session=synthetic-browser-'+value));
+  const mode=['student0','student1','admin','other','teacher'].find(value=>cookies.includes('wordup_session=synthetic-browser-'+value));
   if(!mode)throw Object.assign(new Error('请登录合成测试账号。'),{status:401});
+  if(mode.startsWith('student'))return {provider:'wordup',subject:mode==='student0'?'synthetic-student-000':'synthetic-student-001',role:'student',name:'合成同名',accountType:'school',isGuest:false,expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-browser-'+mode}};
   return {provider:'wordup',subject:mode==='admin'?'synthetic-admin':mode==='other'?'synthetic-other':'synthetic-teacher',role:mode==='admin'?'admin':'teacher',name:mode==='admin'?'合成学校管理员':mode==='other'?'另一位合成教师':'合成测试教师',expires:Date.now()+3600000,source:{cookie:'wordup_session=synthetic-browser-'+mode}};
 };
 const students=Array.from({length:130},(_,i)=>({subject:'synthetic-student-'+String(i).padStart(3,'0'),name:i<2?'合成同名':i===2?'示例同学':'合成同学'+i,grade:'七年级'}));
@@ -40,7 +41,7 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'");
   if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls}));return;}
-  if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
+  if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher','/sandbox/use-student0','/sandbox/use-student1'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
   if(url.pathname==='/v1/chat/completions'&&req.method==='POST'){
     if(req.headers.authorization!=='Bearer synthetic-local-model-key'){res.writeHead(401).end();return;}
     let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>20*1024*1024){res.writeHead(413).end();return;}}

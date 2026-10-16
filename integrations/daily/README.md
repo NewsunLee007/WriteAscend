@@ -57,3 +57,9 @@ node scripts/rollback-daily-bridge.mjs /absolute/path/to/snapshot --apply
 - 后续已接入教师云端登录状态和模型任务，并完成本地 Wrangler 联调，见 `../../docs/cloud-model-runtime.md`。任务与成员快照也已本地联调，见 `../../docs/writing-tasks.md`；目录管理和真实名册核对见 [验证记录](../../docs/verification/school-directory.md)；正式目录写入及结果发布尚未启用。
 
 本轮 10 文件集成源码已安装，回滚快照为 `audit/private/daily-bridge-2026-10-16T12-07-42-796Z`；仍保持正式桥接关闭，没有重启服务。
+
+## 学生反馈交接补充（2026-10-17）
+
+交接页现支持已经验证的学校学生账号进入“我的作文”；教师入口保持原批阅路径。学生来源仍由同一 Daily/WordUp 验证器核验，不接受浏览器自报身份。Worker 的学生反馈接口仅提供本人已发布快照和关联原稿，教师编辑和发布分开，撤回和原稿更正会停止旧反馈访问。
+
+新版交接静态文件已通过摘要预检更新，安装快照为 `audit/private/daily-bridge-2026-10-16T16-13-54-392Z`。正式桥接仍关闭，未改环境配置、未重启服务。本次实际 Daily 项目 203 项测试通过。发布摘要尚在 Worker outbox 待同步，Daily 接收端与个人入口下一阶段实现；不能将登录接通称为摘要同步已完成。

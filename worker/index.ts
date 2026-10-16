@@ -7,6 +7,7 @@ import {handleSnapshots} from './snapshots';
 import {handleTasks} from './tasks';
 import {handleSheets} from './sheets';
 import {handleCollection} from './collection';
+import {handlePublications} from './publications';
 import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns} from './grading';
 
 export interface Env extends ModelBindings {
@@ -75,12 +76,12 @@ export default {
       if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN});
       if(path==='/api/auth/start'&&req.method==='GET'){
         if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');
-        const id=random(),state=random(),verifier=random(),challenge=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
+        const target=nextPath(url.searchParams.get('next'),env.PUBLIC_ORIGIN),id=random(),state=random(),verifier=random(),challenge=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
         await env.DB.batch([
           env.DB.prepare('DELETE FROM auth_transactions WHERE expires<?').bind(Date.now()),
-          env.DB.prepare('INSERT INTO auth_transactions VALUES(?,?,?,?,?)').bind(await sha(id),state,verifier,nextPath(url.searchParams.get('next'),env.PUBLIC_ORIGIN),Date.now()+300000),
+          env.DB.prepare('INSERT INTO auth_transactions VALUES(?,?,?,?,?)').bind(await sha(id),state,verifier,target,Date.now()+300000),
         ]);
-        const location=new URL('/writing-connect.html',env.DAILY_ORIGIN);location.search=new URLSearchParams({client_id:'writeascend',redirect_uri:env.PUBLIC_ORIGIN+'/api/auth/callback',state,code_challenge:challenge,code_challenge_method:'S256'}).toString();
+        const location=new URL('/writing-connect.html',env.DAILY_ORIGIN);location.search=new URLSearchParams({client_id:'writeascend',redirect_uri:env.PUBLIC_ORIGIN+'/api/auth/callback',state,code_challenge:challenge,code_challenge_method:'S256',audience:target.startsWith('/student')?'student':'teacher'}).toString();
         return new Response(null,{status:302,headers:{Location:location.href,'Set-Cookie':cookie('wa_login',id,300),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}});
       }
       if(path==='/api/auth/callback'&&req.method==='GET'){
@@ -108,7 +109,7 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
+      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports|student)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
         if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
       }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
@@ -121,6 +122,7 @@ export default {
         if(!body||typeof body!=='object'||Array.isArray(body))throw new HttpError(400,'目录管理参数不正确。');
         return json(await bridge(env,'directory/'+action,{...Object.fromEntries(fields[action].filter(key=>key in body).map(key=>[key,body[key]])),grantId:session.grant_id}));
       }
+      const publicationResponse=await handlePublications(req,env,session,bridge,input);if(publicationResponse)return publicationResponse;
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       if(/^\/api\/(?:tasks|grading|writing-reports)(?:\/|$)/.test(path)){teacher(session);const response=await handleGrading(req,env,session,bridge,input)||await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}

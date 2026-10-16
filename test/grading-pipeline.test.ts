@@ -19,7 +19,7 @@ test('server JSON parsing retains legacy tolerant parsing without logging raw es
  assert.equal(responseContent(fixture.response),fixture.response.choices[0].message.content);
  assert.throws(()=>parseGradingObject('[]'),/JSON 对象/);
  let logged=false;const previous=console.error;console.error=()=>{logged=true;};try{assert.throws(()=>parseGradingObject('This is a private student essay, not JSON.'));assert.equal(logged,false);}finally{console.error=previous;}
- const source=fs.readFileSync('src/TeacherApp.jsx','utf8'),start=source.indexOf('                const cleanJsonText ='),end=source.indexOf('                const buildApiErrorMessage =',start),original=source.slice(start,end).replace("                    console.error('LLM JSON parse error, raw content:', cleanJsonText(content));",'                    // Keep raw student/model content out of server logs.');
+ const source=fs.readFileSync('src/TeacherApp.jsx','utf8'),start=source.indexOf('                const cleanJsonText ='),end=source.indexOf('                const buildApiErrorMessage =',start),original=source.slice(start,end).replace("                    console.error('LLM JSON parse error, raw content:', cleanJsonText(content));",'                    // Keep raw student/model content out of logs.');
  const extracted=fs.readFileSync('src/report/legacy-model-parser.js','utf8');assert(extracted.includes(original));
 });
 test('initial scoring remains original, while rewrite steps cannot replace the original, scores, identity or source excerpts',()=>{

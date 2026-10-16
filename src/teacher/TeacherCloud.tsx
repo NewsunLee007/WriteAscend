@@ -8,6 +8,7 @@ import './teacher-cloud.css';
 type Profile=TeacherModelProfile;
 type Identity={name:string;role:string;workspaceId:string};
 type Cloud={mode:'local'|'cloud';status:string;message:string;identity:Identity|null;profiles:Profile[];profileId:string;ocrProfileId:string;ocrChoice:string;setOcrProfileId:(id:string)=>void;setProfileId:(id:string)=>void;storage:WorkspaceStorage;refresh:()=>Promise<void>;expired:()=>void;logout:()=>Promise<void>};
+const StudentReports=React.lazy(()=>import('../student/StudentReports'));
 const context=createContext<Cloud|null>(null);
 export const useTeacherCloud=()=>useContext(context)!;
 
@@ -28,8 +29,9 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
       if(response.status===401){setIdentity(null);setProfiles([]);setMigration(false);setStatus('anonymous');return;}
       const me=await response.json();
       if(!response.ok)throw Error(me.error?.message||'暂时无法确认登录账号。');
-      if(!['teacher','admin'].includes(me.role)){setIdentity(null);setProfiles([]);setMigration(false);setStatus('forbidden');return;}
+      if(!['teacher','admin','student'].includes(me.role)){setIdentity(null);setProfiles([]);setMigration(false);setStatus('forbidden');return;}
       if(typeof me.workspaceId!=='string'||!/^[a-f0-9]{64}$/.test(me.workspaceId))throw Error('登录工作区信息不完整。');
+      if(me.role==='student'){setIdentity(me);setProfiles([]);setMigration(false);setStatus('ready');setMessage('');return;}
       const namespace=workspaceStorage(me.workspaceId);
       try{
         const existing=legacyKeys.some(key=>namespace.getItem(key)!==null);
@@ -81,11 +83,11 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
   }
   const value:Cloud={mode,status,message,identity,profiles,profileId,ocrProfileId:chooseOcrModel(profiles,profileId,ocrChoice),ocrChoice,setOcrProfileId,setProfileId,storage,refresh,expired:()=>setStatus('expired'),logout};
   const mounted=mode==='local'||(identity&&['ready','expired','error'].includes(status)&&!migration);
-  return <context.Provider value={value}>{mounted?<React.Fragment key={(identity?.workspaceId||'local')+':'+generation}>{children}</React.Fragment>:<main className="teacher-cloud-gate">
+  return <context.Provider value={value}>{mounted?<React.Fragment key={(identity?.workspaceId||'local')+':'+generation}>{identity?.role==='student'?<React.Suspense fallback={<main className="student-loading" role="status">正在打开我的作文…</main>}><StudentReports/></React.Suspense>:children}</React.Fragment>:<main className="teacher-cloud-gate">
     <section><img src="/favicon.svg" alt=""/><p className="cloud-eyebrow">教师作文工作区</p><h1>英语作文，一键批阅。</h1><p>设置或复用题目与评分标准，批量上传作文，借助大模型批阅，再核对、编辑和导出。</p>
       {migration?<><h2>保留这台设备上的原有数据</h2><p>发现旧版批改设置或历史记录。可将它们带入当前教师工作区，原数据会继续保留。模型密钥不会带入云端模式。</p><button onClick={()=>decideMigration(true)}>带入本机原有数据</button><button className="secondary" onClick={()=>decideMigration(false)}>新建空工作区</button></>:<>
-        <p role="status">{status==='loading'?'正在连接教师工作区…':status==='forbidden'?'当前登录的是学生账号，请切换教师或管理员账号。':status==='unconfigured'||status==='error'?message:message||'使用 Daily 教师账号登录后开始批改。'}</p>
-        {['anonymous','forbidden'].includes(status)&&<a className="cloud-primary" href="/api/auth/start">使用 Daily 登录</a>}
+        <p role="status">{status==='loading'?'正在连接教师工作区…':status==='forbidden'?'当前账号暂不支持作文反馈，请使用学校账号。':status==='unconfigured'||status==='error'?message:message||'使用 Daily 学校账号登录，教师可批阅作文，学生可查看已发布反馈。'}</p>
+        {['anonymous','forbidden'].includes(status)&&<a className="cloud-primary" href={"/api/auth/start?next="+encodeURIComponent(location.pathname.startsWith('/student')?location.pathname+location.search:'/')}>使用 Daily 登录</a>}
         {status==='forbidden'&&<button className="secondary" onClick={()=>void logout()}>退出当前账号</button>}
         {['error','unconfigured'].includes(status)&&<button onClick={()=>void refresh()}>重新连接</button>}
       </>}
