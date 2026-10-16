@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-16T21:29:42.966455+00:00",
+  "files": {
+    "worker/index.ts": "685818d6798de0cef4f192b19fd16881eff431de5400bce19293ae199d690811",
+    "worker/peer-exports.ts": "b48e96783f6d02ad1f148e08b1682f9d1a475dbf0cf9c731bf338ff2de40c278",
+    "migrations/0014_peer_exports.sql": "2ad20b909633c426299760f4c74a1a0ce8d45a051683090529710d5d05fb027d",
+    "src/teacher/TeacherTasksPanel.tsx": "60370bae94cfb66db402b3c4d9f9fabf9f344a8d6c71a45b3cab0049a43fd58b",
+    "src/teacher/PeerMaterialsPanel.tsx": "f7be6ab5db3f710febd5b94666f818c4add9616e3c63896809c9a4ba4115a595",
+    "src/teacher/peer-materials.css": "f17032e495abf4db31e26fb7945baf73d2020216db976e829b59bf94427617dc",
+    "apps/peer-review/worker/index.ts": "312c42da2fcdc5c46bb36c52253424e74b653dcdd2282fe1e8e8c5fae6f22e77",
+    "apps/peer-review/worker/imports.ts": "83eee1a0e8c416ee62ac035fde48005df533311ba0ff86444790d9d11e5155f2",
+    "apps/peer-review/migrations/0002_source_imports.sql": "7d127e173e03bfb1a3c7a6ee1c39a4c2f5bc8f6fea5904889bc3ff028694dcea",
+    "apps/peer-review/src/main.tsx": "8bb4194fadc3dcc90205289f0c50c8be70c4d48f5cd05fa4445084cdfc2c7393",
+    "apps/peer-review/src/ImportMaterials.tsx": "2002a7c55ae9347613e0e9edc09ee711ee1b95da79256224278ed943e0902ce4",
+    "apps/peer-review/src/style.css": "724c7a5838b9d4ee7c2903873aee1c32c40d74e2ec121e4acf65bb7ab1b43007",
+    "test/peer-exports.test.ts": "50e77ec6ca07b7c5bfa33d13360186900c9806f2cd97c3614c600a61f86c26c0",
+    "test/peer-imports.test.ts": "1d19232faa482cb97df5594a46ed7a70e9502a7a99f9ff2c50b7bac214e88d95",
+    "scripts/qa/peer-materials.cjs": "46e8316cd28be7a8f0f01d487e47a39bf3298211553d23a3b8707bde28f7a021"
+  },
+  "migrationsAppliedLocalOnly": [
+    "0014_peer_exports.sql",
+    "0002_source_imports.sql"
+  ],
+  "productionDeploy": false,
+  "formalDirectoryWrite": false
+}

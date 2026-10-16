@@ -10,12 +10,14 @@ import {handleCollection} from './collection';
 import {dispatchDailyEvent,recoverDailyFeedback} from './daily-feedback';
 import {handlePublications} from './publications';
 import {handleStudentRevisions} from './student-revisions';
+import {handlePeerExports,handlePeerExchange} from './peer-exports';
 import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns} from './grading';
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
   FEEDBACK_EVENTS?: Queue<{eventId:string}>;
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
+  PEER_ORIGIN?: string; PEER_EXCHANGE_TOKEN?: string;
 }
 type Session = {token_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;display_name:string;expires:number};
 type ClassGrant = {id:string;schoolId:string;academicYear:string;name:string;grade:string;version:number;grantVersion:number;scopes:string[]};
@@ -77,6 +79,7 @@ export default {
         return new Response(response.body as any,{status:response.status,headers});
       }
       if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN});
+      const exchange=await handlePeerExchange(req,env,input);if(exchange)return exchange;
       if(path==='/api/auth/start'&&req.method==='GET'){
         if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');
         const target=nextPath(url.searchParams.get('next'),env.PUBLIC_ORIGIN),id=random(),state=random(),verifier=random(),challenge=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
@@ -130,6 +133,7 @@ export default {
         return json(await bridge(env,'directory/'+action,{...Object.fromEntries(fields[action].filter(key=>key in body).map(key=>[key,body[key]])),grantId:session.grant_id}));
       }
       const revisionResponse=await handleStudentRevisions(req,env,session,bridge,input);if(revisionResponse)return revisionResponse;
+      const peerExportResponse=await handlePeerExports(req,env,session,bridge,input);if(peerExportResponse)return peerExportResponse;
       const publicationResponse=await handlePublications(req,env,session,bridge,input);if(publicationResponse)return publicationResponse;
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
