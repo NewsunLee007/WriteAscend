@@ -1,0 +1,12 @@
+{
+  "name": "@newsun/writing-peer-review",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent student peer-review application; teacher grading remains in WriteAscend.",
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {"@types/node":"^26.6.5","tsx":"^4.23.15","typescript":"^7.0.2"}
+}

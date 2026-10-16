@@ -1,0 +1,918 @@
+
+> writeascend@2.0.0 test:all
+> npm test && npm run peer:test
+
+
+> writeascend@2.0.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# (node:5502) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the bound multi-stage pipeline finishes under the original scoped work permit after primary expiry and cleanup
+ok 1 - the bound multi-stage pipeline finishes under the original scoped work permit after primary expiry and cleanup
+  ---
+  duration_ms: 82.01525
+  type: 'test'
+  ...
+# Subtest: pausing revokes the old permit and a fresh interactive resume authorizes only the saved run
+ok 2 - pausing revokes the old permit and a fresh interactive resume authorizes only the saved run
+  ---
+  duration_ms: 75.529708
+  type: 'test'
+  ...
+# Subtest: class revocation or local logout between pipeline stages prevents another billable call while preserving the first response
+ok 3 - class revocation or local logout between pipeline stages prevents another billable call while preserving the first response
+  ---
+  duration_ms: 51.682625
+  type: 'test'
+  ...
+# Subtest: standalone quick-grading and OCR-compatible jobs also have payload-bound work permits independent of primary expiry
+ok 4 - standalone quick-grading and OCR-compatible jobs also have payload-bound work permits independent of primary expiry
+  ---
+  duration_ms: 12.329
+  type: 'test'
+  ...
+# Subtest: local logout succeeds while Daily is unreachable and durably blocks already queued personal jobs
+ok 5 - local logout succeeds while Daily is unreachable and durably blocks already queued personal jobs
+  ---
+  duration_ms: 12.582625
+  type: 'test'
+  ...
+# Subtest: stable operation IDs survive an authorization receipt loss and reject concurrent same-ID content changes before a second model call
+ok 6 - stable operation IDs survive an authorization receipt loss and reject concurrent same-ID content changes before a second model call
+  ---
+  duration_ms: 18.13925
+  type: 'test'
+  ...
+# Subtest: stored payload corruption cannot change a work permit’s approved request or cause a model call
+ok 7 - stored payload corruption cannot change a work permit’s approved request or cause a model call
+  ---
+  duration_ms: 10.5755
+  type: 'test'
+  ...
+# (node:5503) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: complete immutable input becomes one class-bound model run and original report; refresh/repeated queue messages do not regrade
+ok 8 - complete immutable input becomes one class-bound model run and original report; refresh/repeated queue messages do not regrade
+  ---
+  duration_ms: 98.587791
+  type: 'test'
+  ...
+# Subtest: page replacement after intake leaves the run on its original input and marks its report outdated; new input gets its own run
+ok 9 - page replacement after intake leaves the run on its original input and marks its report outdated; new input gets its own run
+  ---
+  duration_ms: 52.967125
+  type: 'test'
+  ...
+# Subtest: same-name members remain separate and incomplete pages, wrong owner or revoked class cannot start or read a bound model job
+ok 10 - same-name members remain separate and incomplete pages, wrong owner or revoked class cannot start or read a bound model job
+  ---
+  duration_ms: 42.621209
+  type: 'test'
+  ...
+# Subtest: class rights are checked again before model dispatch, and reserved stage request IDs cannot be created through the public model API
+ok 11 - class rights are checked again before model dispatch, and reserved stage request IDs cannot be created through the public model API
+  ---
+  duration_ms: 17.111041
+  type: 'test'
+  ...
+# Subtest: teacher report edits use immutable revisions, reject relinking and conflicting edits, preserve AI version and do not invoke a model
+ok 12 - teacher report edits use immutable revisions, reject relinking and conflicting edits, preserve AI version and do not invoke a model
+  ---
+  duration_ms: 51.405209
+  type: 'test'
+  ...
+# Subtest: report storage failure resumes the already completed model result without another billable call
+ok 13 - report storage failure resumes the already completed model result without another billable call
+  ---
+  duration_ms: 47.941083
+  type: 'test'
+  ...
+# Subtest: unknown model processing is never automatically resent; explicit confirmation retries only the failed stage
+ok 14 - unknown model processing is never automatically resent; explicit confirmation retries only the failed stage
+  ---
+  duration_ms: 67.888209
+  type: 'test'
+  ...
+# Subtest: a failed optional rewrite retains the first grade and may be explicitly accepted without another provider call
+ok 15 - a failed optional rewrite retains the first grade and may be explicitly accepted without another provider call
+  ---
+  duration_ms: 38.936334
+  type: 'test'
+  ...
+# Subtest: one malformed response uses one saved JSON repair step, and repair cannot change canonical task identity or source score
+ok 16 - one malformed response uses one saved JSON repair step, and repair cannot change canonical task identity or source score
+  ---
+  duration_ms: 34.163792
+  type: 'test'
+  ...
+# Subtest: a class batch waits for model intake capacity and later advances without failing students or creating duplicate requests
+ok 17 - a class batch waits for model intake capacity and later advances without failing students or creating duplicate requests
+  ---
+  duration_ms: 46.245375
+  type: 'test'
+  ...
+# (node:5504) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: private original images are content-deduplicated within one owner and remain isolated between teachers
+ok 18 - private original images are content-deduplicated within one owner and remain isolated between teachers
+  ---
+  duration_ms: 30.273125
+  type: 'test'
+  ...
+# Subtest: saved cloud reports retain original sections, teacher scores, rubric and unknown fields without treating legacy IDs as authority
+ok 19 - saved cloud reports retain original sections, teacher scores, rubric and unknown fields without treating legacy IDs as authority
+  ---
+  duration_ms: 11.20675
+  type: 'test'
+  ...
+# Subtest: concurrent devices cannot overwrite each other; immutable versions retain past rubric and manual changes
+ok 20 - concurrent devices cannot overwrite each other; immutable versions retain past rubric and manual changes
+  ---
+  duration_ms: 10.281208
+  type: 'test'
+  ...
+# Subtest: cloud recycle bin is reversible and stale deletes do not hide newer content
+ok 21 - cloud recycle bin is reversible and stale deletes do not hide newer content
+  ---
+  duration_ms: 4.65525
+  type: 'test'
+  ...
+# Subtest: snapshot publication is not implied by saving; invalid or foreign image references and active model work are rejected
+ok 22 - snapshot publication is not implied by saving; invalid or foreign image references and active model work are rejected
+  ---
+  duration_ms: 4.244083
+  type: 'test'
+  ...
+# Subtest: cloud listing paginates by stable metadata and storage failure leaves no successful document record
+ok 23 - cloud listing paginates by stable metadata and storage failure leaves no successful document record
+  ---
+  duration_ms: 69.37925
+  type: 'test'
+  ...
+# (node:5505) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: bridge code is bound to callback and PKCE, consumed once, and never returns the source cookie
+ok 24 - bridge code is bound to callback and PKCE, consumed once, and never returns the source cookie
+  ---
+  duration_ms: 72.163209
+  type: 'test'
+  ...
+# Subtest: foreign origins, wrong clients/callbacks/challenges, guests and public accounts cannot authorize
+ok 25 - foreign origins, wrong clients/callbacks/challenges, guests and public accounts cannot authorize
+  ---
+  duration_ms: 25.229417
+  type: 'test'
+  ...
+# Subtest: code/grant expiration, source disablement, role changes and explicit revocation take effect
+ok 26 - code/grant expiration, source disablement, role changes and explicit revocation take effect
+  ---
+  duration_ms: 14.876375
+  type: 'test'
+  ...
+# Subtest: successful Daily logout revokes all grants for that source; foreign logout does not
+ok 27 - successful Daily logout revokes all grants for that source; foreign logout does not
+  ---
+  duration_ms: 25.064542
+  type: 'test'
+  ...
+# Subtest: teacher class grants are explicit and revocation is checked live for roster requests
+ok 28 - teacher class grants are explicit and revocation is checked live for roster requests
+  ---
+  duration_ms: 16.04725
+  type: 'test'
+  ...
+# Subtest: Daily identity adapter verifies the source before decoding, separates legacy admin and caps original expiry
+ok 29 - Daily identity adapter verifies the source before decoding, separates legacy admin and caps original expiry
+  ---
+  duration_ms: 1.348667
+  type: 'test'
+  ...
+# Subtest: disabled bridge makes no schema changes and does not interfere with existing routes
+ok 30 - disabled bridge makes no schema changes and does not interfere with existing routes
+  ---
+  duration_ms: 12.167083
+  type: 'test'
+  ...
+# Subtest: work permits are machine-only and immutable; they survive interactive expiry and grant cleanup without giving browsing or publishing rights
+ok 31 - work permits are machine-only and immutable; they survive interactive expiry and grant cleanup without giving browsing or publishing rights
+  ---
+  duration_ms: 32.38175
+  type: 'test'
+  ...
+# Subtest: class permission versions prevent revoked and later restored grants from silently resurrecting old background work
+ok 32 - class permission versions prevent revoked and later restored grants from silently resurrecting old background work
+  ---
+  duration_ms: 17.053708
+  type: 'test'
+  ...
+# Subtest: background work stops on source logout even after the parent grant was cleaned up; explicit primary revocation remains session-specific
+ok 33 - background work stops on source logout even after the parent grant was cleaned up; explicit primary revocation remains session-specific
+  ---
+  duration_ms: 22.48375
+  type: 'test'
+  ...
+# Subtest: work lifetime is capped at 24 hours and source disablement or role changes invalidate it without expanding scopes
+ok 34 - work lifetime is capped at 24 hours and source disablement or role changes invalidate it without expanding scopes
+  ---
+  duration_ms: 25.3305
+  type: 'test'
+  ...
+# Subtest: work revocation during the upstream identity check wins the race, and personal jobs cannot be rebound to a grading run
+ok 35 - work revocation during the upstream identity check wins the race, and personal jobs cannot be rebound to a grading run
+  ---
+  duration_ms: 15.234625
+  type: 'test'
+  ...
+# (node:5506) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Daily accepts only authenticated service events and projects school students’ own summaries without raw feedback or credentials
+ok 36 - Daily accepts only authenticated service events and projects school students’ own summaries without raw feedback or credentials
+  ---
+  duration_ms: 66.85225
+  type: 'test'
+  ...
+# Subtest: Daily deduplicates receipts, rejects rewriting or rebinding a version, and never resurrects a withdrawn report on old-event delivery
+ok 37 - Daily deduplicates receipts, rejects rewriting or rebinding a version, and never resurrects a withdrawn report on old-event delivery
+  ---
+  duration_ms: 1.660208
+  type: 'test'
+  ...
+# Subtest: Daily validates events, callback whitelist, score range and pagination, and paginates the complete own-only history
+ok 38 - Daily validates events, callback whitelist, score range and pagination, and paginates the complete own-only history
+  ---
+  duration_ms: 2.550417
+  type: 'test'
+  ...
+# Subtest: outbox delivers the immutable approval after the interactive grant expires; duplicate queue delivery does not duplicate Daily records or invoke a model
+ok 39 - outbox delivers the immutable approval after the interactive grant expires; duplicate queue delivery does not duplicate Daily records or invoke a model
+  ---
+  duration_ms: 48.750292
+  type: 'test'
+  ...
+# Subtest: a lost acknowledgment retries the same event, supersedes older pending versions and preserves a later withdrawal
+ok 40 - a lost acknowledgment retries the same event, supersedes older pending versions and preserves a later withdrawal
+  ---
+  duration_ms: 33.514917
+  type: 'test'
+  ...
+# Subtest: configuration failure is visible and retryable without reopening an approval; periodic audit repairs a Daily database restore
+ok 41 - configuration failure is visible and retryable without reopening an approval; periodic audit repairs a Daily database restore
+  ---
+  duration_ms: 26.741209
+  type: 'test'
+  ...
+# Subtest: a source restore behind Daily quarantines feedback instead of resurrecting an old release, and a complete source restore can reconcile it
+ok 42 - a source restore behind Daily quarantines feedback instead of resurrecting an old release, and a complete source restore can reconcile it
+  ---
+  duration_ms: 30.899375
+  type: 'test'
+  ...
+# (node:5507) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: report history paginates immutable revisions with current student visibility and restores content as a new edit without a model call
+ok 43 - report history paginates immutable revisions with current student visibility and restores content as a new edit without a model call
+  ---
+  duration_ms: 264.627084
+  type: 'test'
+  ...
+# Subtest: explicit regrade preserves old publication, deduplicates concurrent starts and permits a deliberate model change
+ok 44 - explicit regrade preserves old publication, deduplicates concurrent starts and permits a deliberate model change
+  ---
+  duration_ms: 138.960833
+  type: 'test'
+  ...
+# Subtest: run history pagination covers the complete draft and rejects other owners, students, revoked rights and invalid cursors
+ok 45 - run history pagination covers the complete draft and rejects other owners, students, revoked rights and invalid cursors
+  ---
+  duration_ms: 307.654166
+  type: 'test'
+  ...
+# Subtest: regrade cannot fork another student, a replaced input or an unfinished run
+ok 46 - regrade cannot fork another student, a replaced input or an unfinished run
+  ---
+  duration_ms: 20.701334
+  type: 'test'
+  ...
+# Subtest: background pipeline reuses the original grading and rewriting prompts and retains ordered multipage images
+ok 47 - background pipeline reuses the original grading and rewriting prompts and retains ordered multipage images
+  ---
+  duration_ms: 1.93375
+  type: 'test'
+  ...
+# Subtest: server JSON parsing retains legacy tolerant parsing without logging raw essays
+ok 48 - server JSON parsing retains legacy tolerant parsing without logging raw essays
+  ---
+  duration_ms: 3.100208
+  type: 'test'
+  ...
+# Subtest: initial scoring remains original, while rewrite steps cannot replace the original, scores, identity or source excerpts
+ok 49 - initial scoring remains original, while rewrite steps cannot replace the original, scores, identity or source excerpts
+  ---
+  duration_ms: 1.74675
+  type: 'test'
+  ...
+# Subtest: difficulty repair is bounded, can be disabled, and reports remaining excess instead of looping
+ok 50 - difficulty repair is bounded, can be disabled, and reports remaining excess instead of looping
+  ---
+  duration_ms: 1.43575
+  type: 'test'
+  ...
+# Subtest: OCR exact-name suggestions keep homonyms ambiguous, honor observed class, and never infer names or student numbers
+ok 51 - OCR exact-name suggestions keep homonyms ambiguous, honor observed class, and never infer names or student numbers
+  ---
+  duration_ms: 1.678834
+  type: 'test'
+  ...
+# Subtest: OCR accepts compatible JSON responses and fenced JSON, but does not execute content
+ok 52 - OCR accepts compatible JSON responses and fenced JSON, but does not execute content
+  ---
+  duration_ms: 0.674666
+  type: 'test'
+  ...
+# Subtest: uncertain provider outcomes require explicit reconsideration; network interruptions retain their existing request
+ok 53 - uncertain provider outcomes require explicit reconsideration; network interruptions retain their existing request
+  ---
+  duration_ms: 0.120875
+  type: 'test'
+  ...
+# (node:5510) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: model intake is private, idempotent per teacher, strips client credentials and uses server profile
+ok 54 - model intake is private, idempotent per teacher, strips client credentials and uses server profile
+  ---
+  duration_ms: 34.791125
+  type: 'test'
+  ...
+# Subtest: network ambiguity or output storage failure never automatically repeats a billable model call
+ok 55 - network ambiguity or output storage failure never automatically repeats a billable model call
+  ---
+  duration_ms: 18.099167
+  type: 'test'
+  ...
+# Subtest: known provider busy responses have bounded retries; redirects and bad output do not expose provider credentials
+ok 56 - known provider busy responses have bounded retries; redirects and bad output do not expose provider credentials
+  ---
+  duration_ms: 26.890042
+  type: 'test'
+  ...
+# Subtest: queued work verifies source authority again and freezes the selected model configuration
+ok 57 - queued work verifies source authority again and freezes the selected model configuration
+  ---
+  duration_ms: 13.425166
+  type: 'test'
+  ...
+# Subtest: outbox recovers a broker failure and leases distinguish safe pre-dispatch retries from uncertain dispatches
+ok 58 - outbox recovers a broker failure and leases distinguish safe pre-dispatch retries from uncertain dispatches
+  ---
+  duration_ms: 16.317167
+  type: 'test'
+  ...
+# Subtest: concurrent queue deliveries cannot dispatch the same model job twice
+ok 59 - concurrent queue deliveries cannot dispatch the same model job twice
+  ---
+  duration_ms: 6.256958
+  type: 'test'
+  ...
+# Subtest: remote image URLs are rejected and concurrent intake respects the pending-work cap
+ok 60 - remote image URLs are rejected and concurrent intake respects the pending-work cap
+  ---
+  duration_ms: 34.145542
+  type: 'test'
+  ...
+# Subtest: multiple configured providers remain selectable while unconfigured keys and server URLs stay private
+ok 61 - multiple configured providers remain selectable while unconfigured keys and server URLs stay private
+  ---
+  duration_ms: 18.312291
+  type: 'test'
+  ...
+# Subtest: model capabilities and help links are public metadata, while text-only profiles reject images before queue intake
+ok 62 - model capabilities and help links are public metadata, while text-only profiles reject images before queue intake
+  ---
+  duration_ms: 7.662333
+  type: 'test'
+  ...
+# Subtest: grading and OCR reuse an eligible model by default, retain explicit OCR choice, and exclude text-only models
+ok 63 - grading and OCR reuse an eligible model by default, retain explicit OCR choice, and exclude text-only models
+  ---
+  duration_ms: 0.366125
+  type: 'test'
+  ...
+# Subtest: unavailable or removed personal selections never silently switch to a system billing account
+ok 64 - unavailable or removed personal selections never silently switch to a system billing account
+  ---
+  duration_ms: 0.090375
+  type: 'test'
+  ...
+# (node:5512) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: personal credentials are encrypted, bound to owner/profile/version, absent from metadata and isolated from other teachers and students
+ok 65 - personal credentials are encrypted, bound to owner/profile/version, absent from metadata and isolated from other teachers and students
+  ---
+  duration_ms: 39.005542
+  type: 'test'
+  ...
+# Subtest: configuration saves are idempotent and versioned; label edits preserve execution while concurrent changes cannot overwrite a newer key
+ok 66 - configuration saves are idempotent and versioned; label edits preserve execution while concurrent changes cannot overwrite a newer key
+  ---
+  duration_ms: 17.852292
+  type: 'test'
+  ...
+# Subtest: key rotation stops an old bound run and an explicit new run recovers with the selected private model without changing old results
+ok 67 - key rotation stops an old bound run and an explicit new run recovers with the selected private model without changing old results
+  ---
+  duration_ms: 56.342666
+  type: 'test'
+  ...
+# Subtest: profile removal during dispatch blocks a queued request and clears only the active credential, preserving audit metadata
+ok 68 - profile removal during dispatch blocks a queued request and clears only the active credential, preserving audit metadata
+  ---
+  duration_ms: 9.157417
+  type: 'test'
+  ...
+# Subtest: vault key IDs support a rotation window and fail closed when a required old encryption key is unavailable
+ok 69 - vault key IDs support a rotation window and fail closed when a required old encryption key is unavailable
+  ---
+  duration_ms: 12.260667
+  type: 'test'
+  ...
+# Subtest: provider protocol options reach the wire and private model quota, endpoint and logout guards are enforced
+ok 70 - provider protocol options reach the wire and private model quota, endpoint and logout guards are enforced
+  ---
+  duration_ms: 37.7905
+  type: 'test'
+  ...
+# Subtest: regrading an uncertain paid request with another model still requires explicit uncertainty confirmation
+ok 71 - regrading an uncertain paid request with another model still requires explicit uncertainty confirmation
+  ---
+  duration_ms: 84.905667
+  type: 'test'
+  ...
+# Subtest: a stale selected execution version cannot enqueue a new private request after a credential change
+ok 72 - a stale selected execution version cannot enqueue a new private request after a credential change
+  ---
+  duration_ms: 10.016458
+  type: 'test'
+  ...
+# (node:5513) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: unpublished feedback is invisible; a teacher releases a safe immutable student projection and the matching original only
+ok 73 - unpublished feedback is invisible; a teacher releases a safe immutable student projection and the matching original only
+  ---
+  duration_ms: 66.202333
+  type: 'test'
+  ...
+# Subtest: edits do not change the released snapshot until an explicit versioned republish; read receipts are tied to that release
+ok 74 - edits do not change the released snapshot until an explicit versioned republish; read receipts are tied to that release
+  ---
+  duration_ms: 57.71975
+  type: 'test'
+  ...
+# Subtest: same-name students and teachers cannot read or publish each other’s results, and students need own-report scope
+ok 75 - same-name students and teachers cannot read or publish each other’s results, and students need own-report scope
+  ---
+  duration_ms: 65.382042
+  type: 'test'
+  ...
+# Subtest: teacher withdrawal removes report, original image and read access, retains history and emits one durable withdrawal event
+ok 76 - teacher withdrawal removes report, original image and read access, retains history and emits one durable withdrawal event
+  ---
+  duration_ms: 26.454958
+  type: 'test'
+  ...
+# Subtest: replacing the collected manuscript atomically withdraws its old release and prevents republishing the outdated report
+ok 77 - replacing the collected manuscript atomically withdraws its old release and prevents republishing the outdated report
+  ---
+  duration_ms: 31.911667
+  type: 'test'
+  ...
+# Subtest: publishing requires current teacher confirmation, resolved name mismatch and live publish rights
+ok 78 - publishing requires current teacher confirmation, resolved name mismatch and live publish rights
+  ---
+  duration_ms: 66.711958
+  type: 'test'
+  ...
+# Subtest: concurrent publication conflicts do not create partial heads or duplicate events, and storage failure publishes nothing
+ok 79 - concurrent publication conflicts do not create partial heads or duplicate events, and storage failure publishes nothing
+  ---
+  duration_ms: 20.405542
+  type: 'test'
+  ...
+# Subtest: withdrawal during report or image storage reads cannot return the withdrawn content
+ok 80 - withdrawal during report or image storage reads cannot return the withdrawn content
+  ---
+  duration_ms: 30.534292
+  type: 'test'
+  ...
+# Subtest: a publish grant revoked while the release snapshot is saved cannot commit a student-visible publication
+ok 81 - a publish grant revoked while the release snapshot is saved cannot commit a student-visible publication
+  ---
+  duration_ms: 39.42425
+  type: 'test'
+  ...
+# Subtest: legacy backup preserves teacher scores, every report section and unknown business fields
+ok 82 - legacy backup preserves teacher scores, every report section and unknown business fields
+  ---
+  duration_ms: 7.630333
+  type: 'test'
+  ...
+# Subtest: each saved snapshot retains its own rubric; changed labels do not recalculate old scores
+ok 83 - each saved snapshot retains its own rubric; changed labels do not recalculate old scores
+  ---
+  duration_ms: 1.998666
+  type: 'test'
+  ...
+# Subtest: serialized browser storage credentials are stripped before hashing, storage or transmission
+ok 84 - serialized browser storage credentials are stripped before hashing, storage or transmission
+  ---
+  duration_ms: 2.879125
+  type: 'test'
+  ...
+# Subtest: missing historical rubric and images remain missing rather than taking the current default
+ok 85 - missing historical rubric and images remain missing rather than taking the current default
+  ---
+  duration_ms: 0.63475
+  type: 'test'
+  ...
+# Subtest: aliases, student history and schema extensions remain usable
+ok 86 - aliases, student history and schema extensions remain usable
+  ---
+  duration_ms: 1.541792
+  type: 'test'
+  ...
+# Subtest: JSON round trip keeps rubric, sections, teacher changes and scores without duplicate reports
+ok 87 - JSON round trip keeps rubric, sections, teacher changes and scores without duplicate reports
+  ---
+  duration_ms: 3.9975
+  type: 'test'
+  ...
+# Subtest: CSV retains the original seven headers, quotes multiline content and prevents formula execution
+ok 88 - CSV retains the original seven headers, quotes multiline content and prevents formula execution
+  ---
+  duration_ms: 1.533666
+  type: 'test'
+  ...
+# Subtest: credential filtering does not pollute object prototypes and preserves unknown report metadata
+ok 89 - credential filtering does not pollute object prototypes and preserves unknown report metadata
+  ---
+  duration_ms: 0.106583
+  type: 'test'
+  ...
+# Subtest: original scoring helpers keep half marks and exclude crossed-out words
+ok 90 - original scoring helpers keep half marks and exclude crossed-out words
+  ---
+  duration_ms: 0.870541
+  type: 'test'
+  ...
+# Subtest: photo decoder accepts only writing-sheet codes, detects multiple papers including duplicate copies, and never follows unrelated QR links
+ok 91 - photo decoder accepts only writing-sheet codes, detects multiple papers including duplicate copies, and never follows unrelated QR links
+  ---
+  duration_ms: 975.01225
+  type: 'test'
+  ...
+# Subtest: student search supports Chinese, pinyin initials, full pinyin, compound surnames and class/number combinations
+ok 92 - student search supports Chinese, pinyin initials, full pinyin, compound surnames and class/number combinations
+  ---
+  duration_ms: 11.14725
+  type: 'test'
+  ...
+# Subtest: same-name search keeps every candidate and requires class or short ID to disambiguate
+ok 93 - same-name search keeps every candidate and requires class or short ID to disambiguate
+  ---
+  duration_ms: 0.482458
+  type: 'test'
+  ...
+# Subtest: capture identity detects QR member, draft and page conflicts; page suggestions retain missing pages
+ok 94 - capture identity detects QR member, draft and page conflicts; page suggestions retain missing pages
+  ---
+  duration_ms: 0.142
+  type: 'test'
+  ...
+# (node:5517) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: student own revision saves and submits against the teacher rubric; teacher accepts immutable photos into the normal next-draft grading pipeline
+ok 95 - student own revision saves and submits against the teacher rubric; teacher accepts immutable photos into the normal next-draft grading pipeline
+  ---
+  duration_ms: 121.947833
+  type: 'test'
+  ...
+# Subtest: same-name students and teachers cannot read or alter another student revision or photos; source revocation and class permissions are enforced
+ok 96 - same-name students and teachers cannot read or alter another student revision or photos; source revocation and class permissions are enforced
+  ---
+  duration_ms: 99.72675
+  type: 'test'
+  ...
+# Subtest: student saves are versioned and idempotent; concurrent devices cannot overwrite, and return/withdraw preserves the complete revision history
+ok 97 - student saves are versioned and idempotent; concurrent devices cannot overwrite, and return/withdraw preserves the complete revision history
+  ---
+  duration_ms: 40.079834
+  type: 'test'
+  ...
+# Subtest: updated or withdrawn parent feedback blocks submission until the student explicitly rebases; old feedback never leaks through the revision workspace
+ok 98 - updated or withdrawn parent feedback blocks submission until the student explicitly rebases; old feedback never leaks through the revision workspace
+  ---
+  duration_ms: 30.153458
+  type: 'test'
+  ...
+# Subtest: teacher acceptance cannot replace an existing next draft, repeat an older photo or bypass explicit identity confirmation
+ok 99 - teacher acceptance cannot replace an existing next draft, repeat an older photo or bypass explicit identity confirmation
+  ---
+  duration_ms: 27.322958
+  type: 'test'
+  ...
+# Subtest: revision content accepts only current-rubric evidence and owned uploaded photos, validates submission, and limits daily upload operations
+ok 100 - revision content accepts only current-rubric evidence and owned uploaded photos, validates submission, and limits daily upload operations
+  ---
+  duration_ms: 15.386916
+  type: 'test'
+  ...
+# Subtest: a lost create receipt remains replayable after feedback withdrawal without exposing the old feedback
+ok 101 - a lost create receipt remains replayable after feedback withdrawal without exposing the old feedback
+  ---
+  duration_ms: 14.903083
+  type: 'test'
+  ...
+# Subtest: feedback withdrawal and manuscript replacement during asynchronous preparation cannot commit stale submissions or a partial accepted draft
+ok 102 - feedback withdrawal and manuscript replacement during asynchronous preparation cannot commit stale submissions or a partial accepted draft
+  ---
+  duration_ms: 15.695167
+  type: 'test'
+  ...
+# Subtest: original scoring and model prompt block is retained exactly
+ok 103 - original scoring and model prompt block is retained exactly
+  ---
+  duration_ms: 0.637542
+  type: 'test'
+  ...
+# Subtest: all original teacher data and grading operations remain present after UI redesign
+ok 104 - all original teacher data and grading operations remain present after UI redesign
+  ---
+  duration_ms: 22.697417
+  type: 'test'
+  ...
+# Subtest: the teacher workbench and class review use the same complete report presentation
+ok 105 - the teacher workbench and class review use the same complete report presentation
+  ---
+  duration_ms: 0.824875
+  type: 'test'
+  ...
+# Subtest: main entry is the complete teacher app and does not use the report-import experiment
+ok 106 - main entry is the complete teacher app and does not use the report-import experiment
+  ---
+  duration_ms: 0.391333
+  type: 'test'
+  ...
+# (node:5519) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Worker and Daily exchange actual authorization code over HTTP and create only a separate cloud session
+ok 107 - Worker and Daily exchange actual authorization code over HTTP and create only a separate cloud session
+  ---
+  duration_ms: 84.98325
+  type: 'test'
+  ...
+# Subtest: admin directory proxy binds the current grant, strips spoofed actors and keeps mutations workspace protected
+ok 108 - admin directory proxy binds the current grant, strips spoofed actors and keeps mutations workspace protected
+  ---
+  duration_ms: 41.445791
+  type: 'test'
+  ...
+# Subtest: Worker rejects missing or wrong state and external return paths; failed transactions cannot be replayed
+ok 109 - Worker rejects missing or wrong state and external return paths; failed transactions cannot be replayed
+  ---
+  duration_ms: 40.664167
+  type: 'test'
+  ...
+# Subtest: Worker roster follows current Daily class permissions and logout still succeeds after source account disablement
+ok 110 - Worker roster follows current Daily class permissions and logout still succeeds after source account disablement
+  ---
+  duration_ms: 28.343375
+  type: 'test'
+  ...
+# (node:5520) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: out-of-order pages become one verified draft; repeated requests and rescans do not duplicate pages, and inputs remain immutable
+ok 111 - out-of-order pages become one verified draft; repeated requests and rescans do not duplicate pages, and inputs remain immutable
+  ---
+  duration_ms: 58.958792
+  type: 'test'
+  ...
+# Subtest: concurrent pages cannot overwrite each other, and a photo cannot silently belong to a second student or page
+ok 112 - concurrent pages cannot overwrite each other, and a photo cannot silently belong to a second student or page
+  ---
+  duration_ms: 16.714
+  type: 'test'
+  ...
+# Subtest: removing a mistaken page preserves its previous inputs and releases its current photo claim for an explicitly reviewed correction
+ok 113 - removing a mistaken page preserves its previous inputs and releases its current photo claim for an explicitly reviewed correction
+  ---
+  duration_ms: 23.560167
+  type: 'test'
+  ...
+# Subtest: photo ownership, explicit identity confirmation, live role and class grants, task state and actual object presence are enforced
+ok 114 - photo ownership, explicit identity confirmation, live role and class grants, task state and actual object presence are enforced
+  ---
+  duration_ms: 17.33375
+  type: 'test'
+  ...
+# Subtest: collected page counts cannot be changed by reprinting, and a late upload from a revoked sheet cannot alter the draft
+ok 115 - collected page counts cannot be changed by reprinting, and a late upload from a revoked sheet cannot alter the draft
+  ---
+  duration_ms: 13.346958
+  type: 'test'
+  ...
+# Subtest: manual sheets require an explicit member and explanation; QR membership fields cannot be spoofed and list pagination retains same-name identities
+ok 116 - manual sheets require an explicit member and explanation; QR membership fields cannot be spoofed and list pagination retains same-name identities
+  ---
+  duration_ms: 10.934542
+  type: 'test'
+  ...
+# (node:5521) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: directory administration is source-verified admin only and preflight never copies authentication fields or writes source accounts
+ok 117 - directory administration is source-verified admin only and preflight never copies authentication fields or writes source accounts
+  ---
+  duration_ms: 92.600458
+  type: 'test'
+  ...
+# Subtest: confirmed directory sync is atomic and idempotent, keeps same-name subjects separate and preserves stable class IDs
+ok 118 - confirmed directory sync is atomic and idempotent, keeps same-name subjects separate and preserves stable class IDs
+  ---
+  duration_ms: 25.372917
+  type: 'test'
+  ...
+# Subtest: stale source previews or directory state cannot overwrite another administrator changes
+ok 119 - stale source previews or directory state cannot overwrite another administrator changes
+  ---
+  duration_ms: 27.604208
+  type: 'test'
+  ...
+# Subtest: rename, transfer, leaving and returning create dated membership periods while preserving historical identities
+ok 120 - rename, transfer, leaving and returning create dated membership periods while preserving historical identities
+  ---
+  duration_ms: 19.921167
+  type: 'test'
+  ...
+# Subtest: teacher grants only use active authority teachers, honor revisions, revoke live and cannot be broadened by a student ID
+ok 121 - teacher grants only use active authority teachers, honor revisions, revoke live and cannot be broadened by a student ID
+  ---
+  duration_ms: 24.132875
+  type: 'test'
+  ...
+# Subtest: class deactivation ends members and revokes teacher scopes; resync preserves IDs but does not restore old teacher grants
+ok 122 - class deactivation ends members and revokes teacher scopes; resync preserves IDs but does not restore old teacher grants
+  ---
+  duration_ms: 19.503625
+  type: 'test'
+  ...
+# Subtest: the confirmed YYYY-1 and YYYY-2 term format creates distinct class identities without copying prior-term teacher grants
+ok 123 - the confirmed YYYY-1 and YYYY-2 term format creates distinct class identities without copying prior-term teacher grants
+  ---
+  duration_ms: 12.173958
+  type: 'test'
+  ...
+# Subtest: print sheets include full teacher requirements and rubric without exposing model essays or interpreting user text as markup
+ok 124 - print sheets include full teacher requirements and rubric without exposing model essays or interpreting user text as markup
+  ---
+  duration_ms: 7.54675
+  type: 'test'
+  ...
+# (node:5523) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: personalized sheets preserve distinct same-name task members and store token hashes only; repeat and concurrent issuance is idempotent
+ok 125 - personalized sheets preserve distinct same-name task members and store token hashes only; repeat and concurrent issuance is idempotent
+  ---
+  duration_ms: 33.59075
+  type: 'test'
+  ...
+# Subtest: reissue requires the exact previous sheet set, revokes old codes atomically, and a separate draft does not invalidate the first draft
+ok 126 - reissue requires the exact previous sheet set, revokes old codes atomically, and a separate draft does not invalidate the first draft
+  ---
+  duration_ms: 14.103708
+  type: 'test'
+  ...
+# Subtest: forged members, duplicate QR tokens, closed tasks and stale task revisions cannot issue or resolve sheets
+ok 127 - forged members, duplicate QR tokens, closed tasks and stale task revisions cannot issue or resolve sheets
+  ---
+  duration_ms: 8.535375
+  type: 'test'
+  ...
+# Subtest: sheet codes and short identifiers confer no access: owner, live class scopes and role are checked before returning identities
+ok 128 - sheet codes and short identifiers confer no access: owner, live class scopes and role are checked before returning identities
+  ---
+  duration_ms: 7.756917
+  type: 'test'
+  ...
+# (node:5524) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: teacher tasks preserve the complete original rubric and topic; only explicitly granted classes may be selected
+ok 129 - teacher tasks preserve the complete original rubric and topic; only explicitly granted classes may be selected
+  ---
+  duration_ms: 29.953708
+  type: 'test'
+  ...
+# Subtest: a repeated or concurrently retried task creation creates exactly one task and one rubric version
+ok 130 - a repeated or concurrently retried task creation creates exactly one task and one rubric version
+  ---
+  duration_ms: 11.113833
+  type: 'test'
+  ...
+# Subtest: draft changes use immutable rubric versions and concurrent device updates do not overwrite a newer version
+ok 131 - draft changes use immutable rubric versions and concurrent device updates do not overwrite a newer version
+  ---
+  duration_ms: 8.861708
+  type: 'test'
+  ...
+# Subtest: authoritative paginated roster retains same-name students by subject and activation is atomic and idempotent
+ok 132 - authoritative paginated roster retains same-name students by subject and activation is atomic and idempotent
+  ---
+  duration_ms: 27.008416
+  type: 'test'
+  ...
+# Subtest: roster changes, page inconsistency and revocation cannot silently bind the wrong students
+ok 133 - roster changes, page inconsistency and revocation cannot silently bind the wrong students
+  ---
+  duration_ms: 10.407917
+  type: 'test'
+  ...
+# Subtest: private drafts cannot become school tasks without a confirmed directory and explicit roster review
+ok 134 - private drafts cannot become school tasks without a confirmed directory and explicit roster review
+  ---
+  duration_ms: 4.151958
+  type: 'test'
+  ...
+# Subtest: task roster projection preserves original local annotations and never guesses a school number for same-name students
+ok 135 - task roster projection preserves original local annotations and never guesses a school number for same-name students
+  ---
+  duration_ms: 0.493375
+  type: 'test'
+  ...
+1..135
+# tests 135
+# suites 0
+# pass 135
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1458.698292
+
+> writeascend@2.0.0 peer:test
+> npm --prefix apps/peer-review test
+
+
+> @newsun/writing-peer-review@0.1.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: teacher confirmation freezes the exact task rubric, original points and text-observable criteria without turning peer bands into teacher marks
+ok 1 - teacher confirmation freezes the exact task rubric, original points and text-observable criteria without turning peer bands into teacher marks
+  ---
+  duration_ms: 3.464625
+  type: 'test'
+  ...
+# Subtest: incomplete/custom mappings, altered teacher totals and invisible handwriting cannot silently become a new peer rubric
+ok 2 - incomplete/custom mappings, altered teacher totals and invisible handwriting cannot silently become a new peer rubric
+  ---
+  duration_ms: 1.136917
+  type: 'test'
+  ...
+# Subtest: allocation gives every eligible student and essay exactly the chosen workload, with no self-review, duplicate essay or blocked pair
+ok 3 - allocation gives every eligible student and essay exactly the chosen workload, with no self-review, duplicate essay or blocked pair
+  ---
+  duration_ms: 23.930708
+  type: 'test'
+  ...
+# Subtest: infeasible exclusions or small cohorts fail as a whole, while tight feasible restrictions are fully matched
+ok 4 - infeasible exclusions or small cohorts fail as a whole, while tight feasible restrictions are fully matched
+  ---
+  duration_ms: 1.093042
+  type: 'test'
+  ...
+# Subtest: feedback requires a real original-text strength and an actionable improvement tied to the exact published material and teacher rubric
+ok 5 - feedback requires a real original-text strength and an actionable improvement tied to the exact published material and teacher rubric
+  ---
+  duration_ms: 1.174875
+  type: 'test'
+  ...
+# Subtest: uncertainty and negative judgements require an explicit question or matching improvement, and teacher-only criteria cannot be scored by peers
+ok 6 - uncertainty and negative judgements require an explicit question or matching improvement, and teacher-only criteria cannot be scored by peers
+  ---
+  duration_ms: 1.025
+  type: 'test'
+  ...
+# Subtest: authors respond to each suggestion with reasons; adoption requires an actual revision plan and cannot silently accept an outdated review
+ok 7 - authors respond to each suggestion with reasons; adoption requires an actual revision plan and cannot silently accept an outdated review
+  ---
+  duration_ms: 0.571875
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 102.146333

@@ -10,7 +10,10 @@
     "test": "node --import tsx --test test/*.test.ts",
     "worker:dev": "wrangler dev --env development",
     "worker:check": "tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env staging --dry-run",
-    "deploy:staging": "npm run build && wrangler deploy --env staging"
+    "deploy:staging": "npm run build && wrangler deploy --env staging",
+    "peer:test": "npm --prefix apps/peer-review test",
+    "peer:check": "npm --prefix apps/peer-review run check",
+    "test:all": "npm test && npm run peer:test"
   },
   "dependencies": {
     "jsqr": "^1.4.0",

@@ -1,0 +1,66 @@
+
+> writeascend@2.0.0 peer:test
+> npm --prefix apps/peer-review test
+
+
+> @newsun/writing-peer-review@0.1.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: teacher confirmation freezes the exact task rubric, original points and text-observable criteria without turning peer bands into teacher marks
+ok 1 - teacher confirmation freezes the exact task rubric, original points and text-observable criteria without turning peer bands into teacher marks
+  ---
+  duration_ms: 3.789583
+  type: 'test'
+  ...
+# Subtest: incomplete/custom mappings, altered teacher totals and invisible handwriting cannot silently become a new peer rubric
+ok 2 - incomplete/custom mappings, altered teacher totals and invisible handwriting cannot silently become a new peer rubric
+  ---
+  duration_ms: 1.523125
+  type: 'test'
+  ...
+# Subtest: allocation gives every eligible student and essay exactly the chosen workload, with no self-review, duplicate essay or blocked pair
+ok 3 - allocation gives every eligible student and essay exactly the chosen workload, with no self-review, duplicate essay or blocked pair
+  ---
+  duration_ms: 24.803792
+  type: 'test'
+  ...
+# Subtest: infeasible exclusions or small cohorts fail as a whole, while tight feasible restrictions are fully matched
+ok 4 - infeasible exclusions or small cohorts fail as a whole, while tight feasible restrictions are fully matched
+  ---
+  duration_ms: 0.681083
+  type: 'test'
+  ...
+# Subtest: feedback requires a real original-text strength and an actionable improvement tied to the exact published material and teacher rubric
+ok 5 - feedback requires a real original-text strength and an actionable improvement tied to the exact published material and teacher rubric
+  ---
+  duration_ms: 1.143125
+  type: 'test'
+  ...
+# Subtest: uncertainty and negative judgements require an explicit question or matching improvement, and teacher-only criteria cannot be scored by peers
+ok 6 - uncertainty and negative judgements require an explicit question or matching improvement, and teacher-only criteria cannot be scored by peers
+  ---
+  duration_ms: 0.989042
+  type: 'test'
+  ...
+# Subtest: authors respond to each suggestion with reasons; adoption requires an actual revision plan and cannot silently accept an outdated review
+ok 7 - authors respond to each suggestion with reasons; adoption requires an actual revision plan and cannot silently accept an outdated review
+  ---
+  duration_ms: 0.7495
+  type: 'test'
+  ...
+# Subtest: asynchronous hashing uses fixed snapshots, so changing a browser draft cannot retarget feedback or author responses mid-validation
+ok 8 - asynchronous hashing uses fixed snapshots, so changing a browser draft cannot retarget feedback or author responses mid-validation
+  ---
+  duration_ms: 0.475333
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 124.018667

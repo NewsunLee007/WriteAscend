@@ -73,6 +73,8 @@
 
 - 学生自主二稿已接通：本人反馈开始、教师标准逐项修改说明、手写新稿与反思、弱网照片缓存/刷新恢复、跨设备冲突处理、提交/撤回/退回、教师确认收取为下一稿，再沿用原一键批阅与发布。首稿和已发布反馈保留，学生自主修订来源继续留在原稿、报告与学生反馈中。135 项测试通过，迁移 0013 仅应用本地，见 `verification/student-revisions.md`；独立互批项目仍待建设。
 
+- 独立互批项目已建立 `apps/peer-review` 包与锁文件；核对教育部 2022 原件和 Cambridge A2/B1 写作表，按原教师维度/分值实现学生提示映射、文字材料不可观察项处理、130 人平衡分配、版本固定的原文反馈与作者回应。领域规则通过独立测试，登录、来源分享、数据库和页面尚未完成，不标记互批应用已可使用。接入规格见 `peer-review-integration.md`，研究边界见 `peer-review-research.md`。
+
 ## 已准备但尚未接通的工作
 
 Cloudflare 已创建独立测试 D1 `writeascend-staging`、私有桶 `writeascend-staging-private` 和队列 `writeascend-staging-model-jobs`、`writeascend-staging-feedback-events`。教师界面与服务端模型链路已在实际本地 Worker 环境接通，但还未配置正式模型凭据、启用正式登录或部署云端版本。
