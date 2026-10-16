@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "personalSettingsUi": true,
+  "noModelCallOnSave": true,
+  "encryptedKeyNeverReturned": true,
+  "noBrowserCredentialPersistence": true,
+  "defaultOcrReusesPrivateModel": true,
+  "labelEditKeepsQueuedExecution": true,
+  "keyChangeStopsOldJob": true,
+  "newKeyGetsFreshVisionCheck": true,
+  "crossTeacherIsolated": true,
+  "studentSettingsDenied": true,
+  "boundPipelineUsesPersonalKey": true,
+  "deleteStopsPendingJob": true,
+  "noSilentSystemBillingFallback": true,
+  "publishedFeedbackSurvivesKeyRemoval": true,
+  "responsiveWidths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "recordedAt": "2026-10-16T19:42:09.380071+00:00",
+  "scriptSha256": "76535aef06cabd4077dce5b408f896a67d95f6afe7cde9d841eb44e57277dcf8"
+}

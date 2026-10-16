@@ -1,0 +1,7 @@
+// Official provider documentation checked 2026-10-17; no model is assumed available.
+export const modelProviders=[
+ {id:'gemini',label:'Google Gemini',apiUrl:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',helpUrl:'https://ai.google.dev/gemini-api/docs/openai',visionUrl:'https://ai.google.dev/gemini-api/docs/image-understanding',keyUrl:'https://aistudio.google.com/apikey',tokenParameter:'max_tokens',sendTemperature:true},
+ {id:'qwen',label:'阿里云百炼 · 千问（北京）',apiUrl:'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',helpUrl:'https://help.aliyun.com/zh/model-studio/base-url',visionUrl:'https://help.aliyun.com/zh/model-studio/qwen-vl-compatible-with-openai',keyUrl:'https://help.aliyun.com/zh/model-studio/get-api-key',tokenParameter:'max_tokens',sendTemperature:true},
+ {id:'openai',label:'OpenAI',apiUrl:'https://api.openai.com/v1/chat/completions',helpUrl:'https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create',visionUrl:'https://developers.openai.com/api/docs/guides/images-vision',keyUrl:'https://platform.openai.com/api-keys',tokenParameter:'max_completion_tokens',sendTemperature:false},
+ {id:'custom',label:'其他兼容接口',apiUrl:'',helpUrl:'https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create',visionUrl:'',keyUrl:'',tokenParameter:'max_tokens',sendTemperature:true},
+] as const;

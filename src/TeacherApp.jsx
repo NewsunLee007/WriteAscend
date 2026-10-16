@@ -649,7 +649,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const callAI = async (messages, responseJson = true, options) => {
                 const opts = options && typeof options === 'object' ? options : {};
                 const selectedCloudProfileId = opts.purpose === 'ocr' ? cloud.ocrProfileId : cloud.profileId;
-                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: selectedCloudProfileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired, onAssets: ids => {
+                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: selectedCloudProfileId, configurationVersion: cloud.profiles.find(profile => profile.id === selectedCloudProfileId)?.configurationVersion, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired, onAssets: ids => {
                     if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudAssetIds:ids} : file));
                 }, onJob: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudPendingJobId:id} : file));}, onSettled: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId && file.cloudPendingJobId === id ? {...file,cloudPendingJobId:null} : file));} }) : null;
                 const apiHeaders = cloudTransport ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };

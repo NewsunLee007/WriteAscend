@@ -1,3 +1,4 @@
+import {handlePersonalModels,personalCatalog,readPersonalModel,personalAvailable,personalModelKey,type PersonalModel} from './personal-models';
 import type {MessageBatch,Queue} from '@cloudflare/workers-types';
 import {issueWork,inspectWork,assertWorkNotRevoked,runWorkScope,stableWorkId,type WorkBridge} from './work-permits';
 import type {GradingRun} from './grading-types';
@@ -10,6 +11,9 @@ export type ModelJobMessage={jobId:string;runId?:never;eventId?:never}|{runId:st
 export interface ModelBindings {
   MODEL_JOBS?:Queue<ModelJobMessage>;
   MODEL_PROFILES?:string;
+  MODEL_VAULT_KEY?:string;
+  MODEL_VAULT_KEY_ID?:string;
+  MODEL_VAULT_PREVIOUS_KEYS?:string;
   MODEL_API_URL?:string;
   MODEL_NAME?:string;
   MODEL_API_KEY?:string;
@@ -17,7 +21,7 @@ export interface ModelBindings {
   MODEL_PENDING_LIMIT?:string;
   [key:`MODEL_KEY_${string}`]:string|undefined;
 }
-type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string};
+type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string;tokenParameter:'max_tokens'|'max_completion_tokens';sendTemperature:boolean;personal?:PersonalModel};
 type Principal={principal:string;grant_id:string;role:string;classes?:Array<{id:string;scopes:string[]}>};
 type Job={id:string;work_permit_id:string|null;work_expires:number|null;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
@@ -32,7 +36,7 @@ function profiles(env:Env):Profile[]{
   if(!Array.isArray(raw)||raw.length>12)fail(503,'云端模型配置不正确，请联系管理员。');
   const seen=new Set<string>();
   return raw.map((p:any)=>{
-    if(!p||typeof p.id!=='string'||!/^[-a-zA-Z0-9_]{1,64}$/.test(p.id)||seen.has(p.id)||typeof p.label!=='string'||p.label.length>80||typeof p.model!=='string'||!p.model||p.model.length>120||typeof p.apiUrl!=='string')fail(503,'云端模型配置不正确，请联系管理员。');
+    if(!p||typeof p.id!=='string'||!/^[-a-zA-Z0-9_]{1,64}$/.test(p.id)||seen.has(p.id)||/^personal_[a-f0-9]{32}$/.test(p.id)||typeof p.label!=='string'||p.label.length>80||typeof p.model!=='string'||!p.model||p.model.length>120||typeof p.apiUrl!=='string')fail(503,'云端模型配置不正确，请联系管理员。');
     seen.add(p.id);
     let url:URL;try{url=new URL(p.apiUrl);}catch{fail(503,'云端模型地址不正确，请联系管理员。');}
     const local=env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:')&&url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname);
@@ -46,12 +50,19 @@ function profiles(env:Env):Profile[]{
     if(!Array.isArray(purposes)||!purposes.length||purposes.length>2||new Set(purposes).size!==purposes.length||purposes.some((v:unknown)=>!['grading','ocr'].includes(v as string)))fail(503,'模型用途配置不正确，请联系管理员。');
     let helpUrl:string|undefined;
     if(p.helpUrl!==undefined){try{const help=new URL(p.helpUrl);if(help.protocol!=='https:'||help.username||help.password||help.search||help.hash)throw Error();helpUrl=help.href;}catch{fail(503,'模型帮助链接配置不正确，请联系管理员。');}}
-    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs,supportsImages:p.supportsImages!==false,purposes,helpUrl};
+    const tokenParameter=p.tokenParameter||'max_tokens',sendTemperature=p.sendTemperature??true;if(!['max_tokens','max_completion_tokens'].includes(tokenParameter)||typeof sendTemperature!=='boolean')fail(503,'云端模型协议参数不正确，请联系管理员。');
+    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs,supportsImages:p.supportsImages!==false,purposes,helpUrl,tokenParameter,sendTemperature};
   });
 }
 function keyFor(env:Env,p:Profile){return p.keyBinding==='MODEL_API_KEY'?env.MODEL_API_KEY:env[p.keyBinding as `MODEL_KEY_${string}`];}
-export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model,supportsImages:p.supportsImages,purposes:p.purposes,...(p.helpUrl?{helpUrl:p.helpUrl}:{})}));}
-const revision=(p:Profile)=>sha(JSON.stringify({apiUrl:p.apiUrl,model:p.model,keyBinding:p.keyBinding,maxTokens:p.maxTokens,timeoutMs:p.timeoutMs}));
+export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model,supportsImages:p.supportsImages,purposes:p.purposes,sendTemperature:p.sendTemperature,...(p.helpUrl?{helpUrl:p.helpUrl}:{})}));}
+const revision=(p:Profile)=>p.personal?Promise.resolve(p.personal.execution_revision):sha(JSON.stringify({apiUrl:p.apiUrl,model:p.model,keyBinding:p.keyBinding,maxTokens:p.maxTokens,timeoutMs:p.timeoutMs,...(p.tokenParameter!=='max_tokens'||!p.sendTemperature?{tokenParameter:p.tokenParameter,sendTemperature:p.sendTemperature}:{})}));
+async function resolveProfile(env:Env,owner:string,id:string):Promise<Profile|undefined>{
+ if(/^personal_[a-f0-9]{32}$/.test(id)){const row=await readPersonalModel(env,owner,id);return row?{id:row.id,label:row.label,apiUrl:row.api_url,model:row.model,keyBinding:'personal',maxTokens:row.max_tokens,timeoutMs:row.timeout_ms,supportsImages:!!row.supports_images,purposes:JSON.parse(row.purposes_json),tokenParameter:row.token_parameter,sendTemperature:!!row.send_temperature,personal:row}:undefined;}
+ return profiles(env).find(p=>p.id===id);
+}
+const available=(env:Env,p:Profile)=>p.personal?personalAvailable(env,p.personal):!!keyFor(env,p);
+async function catalogFor(env:Env,owner:string){const own=await personalCatalog(env,owner),managed=modelCatalog(env).map(p=>({...p,source:'system',available:true}));return [...own,...managed];}
 
 export function validateModelPayload(value:unknown){
   const body=value as any;
@@ -100,7 +111,8 @@ export async function handleModelApi(req:Request,env:Env,session:Principal,readI
   const path=new URL(req.url).pathname;
   if(!path.startsWith('/api/model/'))return null;
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
-  if(path==='/api/model/profiles'&&req.method==='GET')return json({profiles:modelCatalog(env)});
+  const settings=await handlePersonalModels(req,env,session,readInput);if(settings)return settings;
+  if(path==='/api/model/profiles'&&req.method==='GET')return json({profiles:await catalogFor(env,session.principal)});
   if(path==='/api/model/jobs'&&req.method==='POST'){
     const modelInput=await readInput(req,20*1024*1024);
     return enqueueModelJob(env,session,modelInput,undefined,verify);
@@ -149,25 +161,29 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
     if(!claimed.meta.changes){message.retry({delaySeconds:15});continue;}
     row=(await getJob(env,id))!;
     try{
-      const profile=profiles(env).find(p=>p.id===row!.profile_id);
-      if(!profile||!keyFor(env,profile))fail(503,'所选云端模型暂不可用。');
+      const profile=await resolveProfile(env,row.owner,row.profile_id);
+      if(!profile||!available(env,profile))fail(503,'所选云端模型暂不可用。');
       const stored=await env.FILES.get(row.request_key);
       if(!stored)fail(503,'已保存的作文请求暂不可用。');
       const envelope=await stored.json() as any;
       if(envelope.profileRevision!==await revision(profile))fail(409,'模型设置已更新，请核对后重新提交。');
       const validated=validateModelPayload(envelope.payload);validateImageCapability(profile,validated);
       if(await sha(JSON.stringify({payload:validated,profileRevision:envelope.profileRevision}))!==row.request_hash)fail(409,'已保存的模型请求内容校验未通过，请联系管理员核对存档。');
-      const payload={...await hydrateAssetImages(env,row.owner,validated),model:profile.model,max_tokens:profile.maxTokens,stream:false};
+      const hydrated=await hydrateAssetImages(env,row.owner,validated),{temperature,...messages}=hydrated;
+      const payload={...messages,...(profile.sendTemperature?{temperature}:{}),model:profile.model,[profile.tokenParameter]:profile.maxTokens,stream:false};
       const linked=await env.DB.prepare('SELECT g.* FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=? AND b.owner=?').bind(id,row.owner).first<GradingRun>();
       const authority=linked?.work_permit_id?await inspectWork(env,row.owner,linked.work_permit_id,runWorkScope(linked),verify):row.work_permit_id?await inspectWork(env,row.owner,row.work_permit_id,{type:'model-job',jobId:row.id,requestHash:row.request_hash,profileId:row.profile_id,profileRevision:envelope.profileRevision},verify):await verify(env,'introspect',{grantId:row.grant_id});
       if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
       await requireJobClass(env,id,authority.classes||[],true);
       await assertWorkNotRevoked(env,linked?.grant_id||row.grant_id);
-      const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?").bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now()).run();
-      if(!sending.meta.changes){message.retry({delaySeconds:15});continue;}
+      const currentProfile=await resolveProfile(env,row.owner,row.profile_id);if(!currentProfile||!available(env,currentProfile)||await revision(currentProfile)!==envelope.profileRevision)fail(409,'模型配置已更改或移除，请核对后重新批阅。');
+      const providerKey=currentProfile.personal?await personalModelKey(env,currentProfile.personal):keyFor(env,currentProfile)!;
+      const profileGuard=profile.personal?" AND EXISTS(SELECT 1 FROM personal_model_profiles WHERE id=? AND owner=? AND status='active' AND execution_revision=?)":'',profileBinds=profile.personal?[profile.id,row.owner,envelope.profileRevision]:[];
+      const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?"+profileGuard).bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now(),...profileBinds).run();
+      if(!sending.meta.changes){if(profile.personal){const value=await readPersonalModel(env,row.owner,profile.id);if(!value||value.execution_revision!==envelope.profileRevision)fail(409,'模型配置已更改或移除，请核对后重新批阅。');}message.retry({delaySeconds:15});continue;}
       let response:Response;
       try{
-        response=await fetch(profile.apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+keyFor(env,profile)},body:JSON.stringify(payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
+        response=await fetch(profile.apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+providerKey},body:JSON.stringify(payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
       }catch{
         await finish(env,id,token,'uncertain',409,'模型处理结果暂未确认。请先核对任务结果，再决定是否重新批改。');message.ack();continue;
       }
@@ -179,13 +195,13 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
           message.retry({delaySeconds:Math.min(60,5*row.attempts)});continue;
         }
         const status=response.status===429?429:response.status===400?400:502;
-        await finish(env,id,token,'failed',status,response.status===401||response.status===403?'云端模型鉴权未通过，请联系管理员检查配置。':response.status===429?'模型当前繁忙，请稍后重试。':'云端模型未能处理这份作文，请核对图片及模型设置。');
+        await finish(env,id,token,'failed',status,response.status===401||response.status===403?(profile.personal?'个人模型鉴权未通过，请在我的模型中核对密钥与服务地址。':'云端模型鉴权未通过，请联系管理员检查配置。'):response.status===429?'模型当前繁忙，请稍后重试。':'云端模型未能处理这份作文，请核对图片及模型设置。');
         message.ack();continue;
       }
       let text:string;
       try{
         text=await boundedText(response,2*1024*1024);
-        const secret=keyFor(env,profile)!;
+        const secret=providerKey;
         if(text.includes(secret))text=text.split(secret).join('[redacted]');
         try{JSON.parse(text);}catch{
           if(/^\s*</.test(text))fail(422,'模型返回了网页内容，请核对兼容接口地址。');
@@ -225,7 +241,7 @@ export async function recoverModelOutbox(env:Env){
   for(const job of pending.results){try{await deliver(env,job.id);}catch{break;}}
 }
 
-export async function configuredGradingModel(env:Env,id:string){const p=profiles(env).find(p=>p.id===id&&p.supportsImages&&p.purposes.includes('grading'));if(!p||!keyFor(env,p))fail(400,'请选择已配置且支持作文图片的批改模型。');return {id:p!.id,model:p!.model,revision:await revision(p!)};}
+export async function configuredGradingModel(env:Env,id:string,owner:string){const p=await resolveProfile(env,owner,id);if(!p||!p.supportsImages||!p.purposes.includes('grading')||!available(env,p))fail(400,'请选择已配置且支持作文图片的批改模型。');return {id:p!.id,model:p!.model,revision:await revision(p!)};}
 export async function enqueueModelJob(env:Env,session:Principal,value:unknown,binding?:GradingBinding,verify?:WorkBridge):Promise<Response>{
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
   const input=value as any;
@@ -236,14 +252,14 @@ export async function enqueueModelJob(env:Env,session:Principal,value:unknown,bi
   }
     if(!env.MODEL_JOBS)fail(503,'云端批改队列尚未配置。');
     if(!input||typeof input.profileId!=='string'||typeof input.requestId!=='string'||!/^[-a-zA-Z0-9_]{16,128}$/.test(input.requestId))fail(400,'请提供有效的模型和请求编号。');
-    const profile=profiles(env).find(p=>p.id===input.profileId);
-    if(!profile||!keyFor(env,profile))fail(400,'此云端模型尚未配置，请重新选择。');
+    const profile=await resolveProfile(env,session.principal,input.profileId);
+    if(!profile||!available(env,profile))fail(400,'此云端模型尚未配置，请重新选择。');
     if(input.requestId.startsWith('wa-grade-')&&!binding)fail(400,'此请求编号由班级批阅服务保留。');
     const payload=validateModelPayload(input.payload);
     validateImageCapability(profile,payload);
     const dailyLimit=Number(env.MODEL_DAILY_LIMIT??1200),pendingLimit=Number(env.MODEL_PENDING_LIMIT??20);
     if(!Number.isInteger(dailyLimit)||dailyLimit<0||dailyLimit>1000000||!Number.isInteger(pendingLimit)||pendingLimit<1||pendingLimit>200)fail(503,'云端任务额度配置不正确，请联系管理员。');
-    const profileRevision=await revision(profile),requestHash=await sha(JSON.stringify({payload,profileRevision}));
+    const profileRevision=await revision(profile);if(input.configurationVersion!==undefined&&input.configurationVersion!==profileRevision)fail(409,'模型配置已变化，请刷新模型后再提交。','model_profile_changed');const requestHash=await sha(JSON.stringify({payload,profileRevision}));
     const existing=await env.DB.prepare('SELECT * FROM model_jobs WHERE owner=? AND request_id=?').bind(session.principal,input.requestId).first<Job>();
     if(existing){
       if(existing.request_hash!==requestHash)fail(409,'同一个请求编号不能提交不同的作文或模型设置。');

@@ -11,3 +11,7 @@ test('grading and OCR reuse an eligible model by default, retain explicit OCR ch
   assert.equal(chooseOcrModel([profiles[0]],'text',''),'');
   assert(supportsPurpose({id:'legacy',label:'Legacy',model:'legacy-vision'},'ocr'));
 });
+
+test('unavailable or removed personal selections never silently switch to a system billing account',()=>{
+ const system={id:'default',label:'系统',model:'vision'},mine={id:'personal_123',label:'个人',model:'vision',available:false};assert.equal(chooseGradingModel([system,mine],mine.id),'');assert.equal(chooseGradingModel([system],mine.id),'');assert.equal(chooseOcrModel([system,mine],system.id,mine.id),'');assert.equal(chooseOcrModel([system],'',''),'');
+});

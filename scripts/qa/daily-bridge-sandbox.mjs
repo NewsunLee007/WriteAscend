@@ -10,7 +10,7 @@ import {createWritingDirectory} from '../../integrations/daily/src/writing-direc
 
 const origin='http://127.0.0.1:8890',db=new DatabaseSync(':memory:');
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/teacher-workflow.json',import.meta.url),'utf8'));
-let modelCalls=0;let forceExtraRewrite=false,holdWorkChecks=false,heldWorkChecks=0,failRevoke=false;const workWaiters=[];let feedbackUnavailable=false,dropNextFeedbackResponse=false;
+let modelCalls=0;const credentialCalls={system:0,personalA:0,personalB:0};let forceExtraRewrite=false,holdWorkChecks=false,heldWorkChecks=0,failRevoke=false;const workWaiters=[];let feedbackUnavailable=false,dropNextFeedbackResponse=false;
 const source=async req=>{
   const cookies=req.headers.cookie?.split(';').map(s=>s.trim()) || [];
   const mode=['student0','student1','admin','other','teacher'].find(value=>cookies.includes('wordup_session=synthetic-browser-'+value));
@@ -62,14 +62,14 @@ const server=http.createServer(async(req,res)=>{
   if(url.pathname==='/api/integrations/writeascend/work/introspect'&&holdWorkChecks){heldWorkChecks++;await new Promise(resolve=>workWaiters.push(resolve));}
   if(url.pathname.startsWith('/api/integrations/writeascend/report-events')&&feedbackUnavailable){res.writeHead(503,{'Content-Type':'application/json'}).end(JSON.stringify({error:{message:'合成同步中断'}}));return;}
   if(url.pathname==='/api/integrations/writeascend/report-events'&&dropNextFeedbackResponse){dropNextFeedbackResponse=false;await bridge.handle(req,{writeHead(){},end(){res.destroy();}},url);return;}
-  if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls,heldWorkChecks,workPermits:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_work_permits'").get()?db.prepare('SELECT COUNT(*) n FROM writing_work_permits').get().n:0,interactiveGrants:db.prepare('SELECT COUNT(*) n FROM writing_bridge_grants WHERE expires>? AND revoked=0').get(Date.now()).n,feedbackEvents:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_feedback_events'").get()?db.prepare('SELECT COUNT(*) n FROM writing_feedback_events WHERE (? IS NULL OR draft_id=?)').get(url.searchParams.get('draftId'),url.searchParams.get('draftId')).n:0}));return;}
+  if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls,credentialCalls,heldWorkChecks,workPermits:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_work_permits'").get()?db.prepare('SELECT COUNT(*) n FROM writing_work_permits').get().n:0,interactiveGrants:db.prepare('SELECT COUNT(*) n FROM writing_bridge_grants WHERE expires>? AND revoked=0').get(Date.now()).n,feedbackEvents:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_feedback_events'").get()?db.prepare('SELECT COUNT(*) n FROM writing_feedback_events WHERE (? IS NULL OR draft_id=?)').get(url.searchParams.get('draftId'),url.searchParams.get('draftId')).n:0}));return;}
   if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher','/sandbox/use-student0','/sandbox/use-student1'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
   if(url.pathname==='/v1/chat/completions'&&req.method==='POST'){
-    if(req.headers.authorization!=='Bearer synthetic-local-model-key'){res.writeHead(401).end();return;}
+    if(!['Bearer synthetic-local-model-key','Bearer synthetic-personal-model-key-A','Bearer synthetic-personal-model-key-B'].includes(req.headers.authorization)){res.writeHead(401).end();return;}
     let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>20*1024*1024){res.writeHead(413).end();return;}}
     const body=JSON.parse(raw);
     if(body.model!=='synthetic-server-model'){res.writeHead(400).end();return;}
-    modelCalls++;
+    modelCalls++;credentialCalls[req.headers.authorization==='Bearer synthetic-local-model-key'?'system':req.headers.authorization==='Bearer synthetic-personal-model-key-A'?'personalA':'personalB']++;
     await new Promise(resolve=>setTimeout(resolve,Number(process.env.SANDBOX_MODEL_DELAY_MS)||8000));
     if(body.messages?.some(m=>typeof m.content==='string'&&m.content.startsWith('WA_VISION_CHECK_V1.'))){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({visible_text:'7M42'})}}]}));return;}
     if(body.messages?.some(m=>typeof m.content==='string'&&m.content.startsWith('WA_IDENTITY_OCR_V1.'))){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({choices:[{message:{content:JSON.stringify({name:'示例同学',className:'合成学校班',studentNumber:'',multipleStudents:false})}}]}));return;}

@@ -1,0 +1,138 @@
+[
+  {
+    "script": "scripts/qa/grading-history.cjs",
+    "scriptSha256": "3a7d674ef1847af6cfda012ab21a31dfd84c1946aea331a83c09d70475fe1433",
+    "recordedAt": "2026-10-16T19:43:05.417950+00:00",
+    "result": {
+      "passed": true,
+      "reportRevisionHistory": true,
+      "readOnlyHistory": true,
+      "historyComparison": true,
+      "restoreCreatesNewRevision": true,
+      "historyDoesNotInvokeAI": true,
+      "regradeExplicitlyInvokesOneModel": true,
+      "regradePreservesPublishedVersion": true,
+      "oldReportAccessibleDuringRegrade": true,
+      "dailyPublishedSummary": true,
+      "dailyOwnAccountLink": true,
+      "dailyDatabaseRestoreRepaired": true,
+      "lostAcknowledgmentReconciled": true,
+      "syncAndHistoryHaveNoAdditionalModelCalls": true,
+      "withdrawalClearsDaily": true,
+      "disabledEntryLeavesExistingPage": true,
+      "teacherDailyEntry": true,
+      "studentLogin": true,
+      "unpublishedHidden": true,
+      "teacherConfirmation": true,
+      "readOnlyFeedback": true,
+      "stableOwnReportLink": true,
+      "studentPdfRendered": true,
+      "studentOwnOriginal": true,
+      "sameNameIsolated": true,
+      "teacherEditsAwaitRepublish": true,
+      "versionedRepublish": true,
+      "withdrawalBlocksReportAndImage": true,
+      "responsiveWidths": [
+        375,
+        390,
+        768,
+        1440
+      ]
+    }
+  },
+  {
+    "script": "scripts/qa/background-work.cjs",
+    "scriptSha256": "fca5dbbc2de0109c0cf39798560cde6f3d3ed546d9cf547f820d08522e1218ed",
+    "recordedAt": "2026-10-16T19:43:42.230499+00:00",
+    "result": {
+      "passed": true,
+      "boundWorkAfterPrimaryExpiry": true,
+      "boundWorkAfterClosingPage": true,
+      "multiplePipelineStages": true,
+      "freshLoginKeepsOriginalRun": true,
+      "classRevocationBlocksDispatch": true,
+      "explicitResumeRenewsOnlyExistingRun": true,
+      "standaloneModelJobWorkAfterExpiry": true,
+      "localLogoutStopsWorkWhenRemoteRevokeFails": true,
+      "noDuplicateModelCalls": true,
+      "totalSyntheticModelCalls": 4
+    }
+  },
+  {
+    "script": "scripts/qa/cloud-grading.cjs",
+    "scriptSha256": "9b07846d32a718a9e52c8f3e5b3e568a6b026b747a22a3123046daa6fe9fa768",
+    "recordedAt": "2026-10-16T19:43:55.353685+00:00",
+    "result": {
+      "passed": true,
+      "originalReportPreserved": true,
+      "refreshReusesModelJob": true,
+      "privateTeacherIsolation": true
+    }
+  },
+  {
+    "script": "scripts/qa/student-first-capture.cjs",
+    "scriptSha256": "d18c56f4ca9cbe5c06662f273c7e177bdaa7693c0ea0ecdb814dd2f14bb9d17a",
+    "recordedAt": "2026-10-16T19:44:05.721275+00:00",
+    "result": {
+      "passed": true,
+      "pinyinInitials": true,
+      "sameNameCandidatesRetained": true,
+      "studentFirstUpload": true,
+      "nextOnlyAfterReceipt": true,
+      "qrMismatchRequiresChoice": true,
+      "offlineIdentitySurvivesReload": true,
+      "multiPageRetainsStudent": true,
+      "mobileWidth": 390
+    }
+  },
+  {
+    "script": "scripts/qa/model-ocr.cjs",
+    "scriptSha256": "1b53506da088ebc7d19ae3ae6b400cad581d8002c3de2ac95a25424b7c9ced0a",
+    "recordedAt": "2026-10-16T19:44:48.378983+00:00",
+    "result": {
+      "passed": true,
+      "distinctModelSelection": true,
+      "textModelsExcluded": true,
+      "visionCheckUsesSyntheticImages": true,
+      "officialHelpLinks": true,
+      "ocrPreferenceSurvivesReload": true,
+      "identityOcrResumesSameRequest": true,
+      "batchPhotosDurableBeforeOcr": true,
+      "ocrNeverAutoConfirms": true,
+      "confirmedIdentityBoundToTaskMember": true,
+      "originalUploadedOnce": true,
+      "uncertainOcrNeedsExplicitReissue": true,
+      "mobileWidth": 390
+    }
+  },
+  {
+    "script": "scripts/qa/quick-grading.cjs",
+    "scriptSha256": "9908af2e69c236842acefd61258f0425e1185c367d2da751b76fd4b33f63248b",
+    "recordedAt": "2026-10-16T19:44:53.323984+00:00",
+    "result": {
+      "passed": true,
+      "assertionsCompleted": true
+    }
+  },
+  {
+    "script": "scripts/qa/teacher-workflow.cjs",
+    "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+    "recordedAt": "2026-10-16T19:44:58.129281+00:00",
+    "result": {
+      "passed": true,
+      "originalReportSections": 6,
+      "modelCalled": true,
+      "snapshotSaved": true,
+      "mobileWidth": 390
+    }
+  },
+  {
+    "script": "scripts/qa/batch-grading.cjs",
+    "scriptSha256": "7908499d8fc4515a95b8a8f319df6360dc5c703c02b2181073f022fedc0d2db3",
+    "recordedAt": "2026-10-16T19:45:07.427094+00:00",
+    "result": {
+      "passed": true,
+      "assertionsCompleted": true
+    }
+  }
+]

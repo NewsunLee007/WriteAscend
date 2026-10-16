@@ -2,12 +2,13 @@ import React,{createContext,useContext,useEffect,useMemo,useState} from 'react';
 import {sanitizeLegacy} from '../report/legacy-import';
 import {legacyKeys,workspaceStorage,type WorkspaceStorage} from './workspace-storage';
 import {chooseGradingModel,chooseOcrModel,supportsPurpose,type TeacherModelProfile} from './model-selection';
+import PersonalModels from './PersonalModels';
 import {checkImageModel} from './model-check';
 import './teacher-cloud.css';
 
 type Profile=TeacherModelProfile;
 type Identity={name:string;role:string;workspaceId:string};
-type Cloud={mode:'local'|'cloud';status:string;message:string;identity:Identity|null;profiles:Profile[];profileId:string;ocrProfileId:string;ocrChoice:string;setOcrProfileId:(id:string)=>void;setProfileId:(id:string)=>void;storage:WorkspaceStorage;refresh:()=>Promise<void>;expired:()=>void;logout:()=>Promise<void>};
+type Cloud={mode:'local'|'cloud';status:string;message:string;identity:Identity|null;profiles:Profile[];profileId:string;ocrProfileId:string;ocrChoice:string;setOcrProfileId:(id:string)=>void;setProfileId:(id:string)=>void;storage:WorkspaceStorage;refresh:()=>Promise<Profile[]|void>;expired:()=>void;logout:()=>Promise<void>};
 const StudentReports=React.lazy(()=>import('../student/StudentReports'));
 const context=createContext<Cloud|null>(null);
 export const useTeacherCloud=()=>useContext(context)!;
@@ -44,8 +45,8 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
       const available=Array.isArray(models.profiles)?models.profiles as Profile[]:[];
       let wanted='';try{wanted=namespace.getItem('cloud_profile')||'';}catch{}
       selectProfile(chooseGradingModel(available,wanted));
-      let ocr='';try{ocr=namespace.getItem('cloud_ocr_profile')||'';}catch{}selectOcr(available.some(p=>p.id===ocr&&supportsPurpose(p,'ocr'))?ocr:'');
-      setProfiles(available);setStatus('ready');setMessage('');
+      let ocr='';try{ocr=namespace.getItem('cloud_ocr_profile')||'';}catch{}selectOcr(available.some(p=>p.id===ocr&&supportsPurpose(p,'ocr'))?ocr:ocr.startsWith('personal_')?ocr:'');
+      setProfiles(available);setStatus('ready');setMessage('');return available;
     }catch(error){
       if(import.meta.env.DEV&&mode==='local'){setStatus('local');return;}
       setStatus('error');setMessage(error instanceof Error?error.message:'暂时无法连接作文后台。');
@@ -100,25 +101,26 @@ export function CloudConnection({busy=false}:{busy?:boolean}){
   const cloud=useTeacherCloud();
   if(cloud.mode==='local')return null;
   return <aside className="cloud-connection no-print" aria-label="云端批改连接" data-status={cloud.status}>
-    <div><strong title={cloud.identity?.name}>{cloud.identity?.name}</strong><span>{cloud.message|| (cloud.status==='expired'?'登录已过期，已保存的任务可在重新登录后继续。':cloud.status==='error'?'暂时无法核对登录，请刷新连接。':cloud.profiles.length?'云端已连接':'云端模型尚未配置，请联系管理员。')}</span></div>
+    <div><strong title={cloud.identity?.name}>{cloud.identity?.name}</strong><span>{cloud.message|| (cloud.status==='expired'?'登录已过期，已保存的任务可在重新登录后继续。':cloud.status==='error'?'暂时无法核对登录，请刷新连接。':cloud.profiles.length?'云端已连接':'请选择系统模型，或在设置中添加个人模型。')}</span></div>
     <div>{cloud.status==='expired'?<a href="/api/auth/start">重新登录</a>:<><button disabled={busy} onClick={()=>void cloud.refresh()}>刷新连接</button><button disabled={busy} onClick={()=>void cloud.logout()}>退出</button></>}</div>
   </aside>;
 }
 
 export function CloudModelSettings({temperature,onTemperatureChange}:{temperature:number;onTemperatureChange:(value:number)=>void}){
   const cloud=useTeacherCloud(),[checking,setChecking]=useState(false),[check,setCheck]=useState(''),controller=React.useRef<AbortController|null>(null);
-  useEffect(()=>{setCheck('');controller.current?.abort();setChecking(false);return()=>controller.current?.abort();},[cloud.profileId,cloud.ocrProfileId]);
+  useEffect(()=>{setCheck('');controller.current?.abort();setChecking(false);return()=>controller.current?.abort();},[cloud.profileId,cloud.ocrProfileId,cloud.profiles.find(p=>p.id===cloud.profileId)?.configurationVersion,cloud.profiles.find(p=>p.id===cloud.ocrProfileId)?.configurationVersion]);
   const grading=cloud.profiles.filter(p=>supportsPurpose(p,'grading')),ocr=cloud.profiles.filter(p=>supportsPurpose(p,'ocr'));
   const selected=cloud.profiles.find(p=>p.id===cloud.profileId),same=cloud.profileId===cloud.ocrProfileId;
   async function testModels(){
     const request=new AbortController();controller.current=request;setChecking(true);setCheck('正在使用系统测试图片检查连接和图片读取…');let timedOut=false;const timer=setTimeout(()=>{timedOut=true;request.abort();},300000);
-    try{for(const id of [...new Set([cloud.profileId,cloud.ocrProfileId])].filter(Boolean))await checkImageModel(id,cloud.identity!.workspaceId,request.signal,cloud.expired);if(!request.signal.aborted)setCheck('连接、测试图片读取与 JSON 返回均通过。正式批改前仍需用少量实际手写作文核对识别与评分质量。');}
+    try{for(const id of [...new Set([cloud.profileId,cloud.ocrProfileId])].filter(Boolean))await checkImageModel(id,cloud.identity!.workspaceId,request.signal,cloud.expired,cloud.profiles.find(p=>p.id===id)?.configurationVersion);if(!request.signal.aborted)setCheck('连接、测试图片读取与 JSON 返回均通过。正式批改前仍需用少量实际手写作文核对识别与评分质量。');}
     catch(e){if(timedOut)setCheck('检查超时，服务器任务可能仍在处理；重试会先核对原请求。');else if(!request.signal.aborted)setCheck(e instanceof Error&&e.name!=='TypeError'?e.message:'连接检查中断，请恢复网络后重试。');}
     finally{clearTimeout(timer);if(controller.current===request){controller.current=null;setChecking(false);}}
   }
-  return <div className="cloud-model-settings"><h3>AI 批改与图片识别</h3><p>选好批改模型即可开始；图片识别默认沿用同一模型，无需重复配置。API 地址与密钥由服务器保管。</p><label>选择批改模型<select aria-label="选择批改模型" value={cloud.profileId} onChange={event=>cloud.setProfileId(event.target.value)} disabled={!grading.length||checking}>{!grading.length&&<option value="">尚未配置可读取作文图片的模型</option>}{grading.map(p=><option key={p.id} value={p.id}>{p.label}（{p.model}）</option>)}</select></label>
-    <p>题目与纸面姓名使用 OCR 模型；作文正文由批改模型直接读图批阅。</p><label>图片文字识别（OCR）<select aria-label="选择图片识别模型" value={cloud.ocrChoice} onChange={e=>cloud.setOcrProfileId(e.target.value)} disabled={!ocr.length||checking}><option value="">自动选择：优先沿用批改模型</option>{ocr.map(p=><option key={p.id} value={p.id}>{p.label}（{p.model}）</option>)}</select></label><p>{cloud.ocrProfileId?(same?'当前使用同一模型完成图片识别与作文批改。':'已分开设置图片识别与作文批改模型。'):'图片识别尚未就绪，请联系管理员配置支持图片输入的模型。'}</p>
+  return <div className="cloud-model-settings"><h3>AI 批改与图片识别</h3><p>选好批改模型即可开始；图片识别默认沿用同一模型，无需重复配置。API 地址与密钥由服务器保管。</p><label>选择批改模型<select aria-label="选择批改模型" value={cloud.profileId} onChange={event=>cloud.setProfileId(event.target.value)} disabled={!grading.length||checking}>{!cloud.profileId&&<option value="">{grading.length?'请选择批改模型':'尚未配置可读取作文图片的模型'}</option>}{grading.map(p=><option key={p.id} value={p.id}>{p.label}（{p.model}）{p.source==='personal'?' · 我的模型':''}</option>)}</select></label>
+    <p>题目与纸面姓名使用 OCR 模型；作文正文由批改模型直接读图批阅。</p><label>图片文字识别（OCR）<select aria-label="选择图片识别模型" value={cloud.ocrChoice} onChange={e=>cloud.setOcrProfileId(e.target.value)} disabled={!ocr.length||checking}><option value="">自动选择：优先沿用批改模型</option>{cloud.ocrChoice&&!ocr.some(p=>p.id===cloud.ocrChoice)&&<option value={cloud.ocrChoice} disabled>原个人模型不可用，请重新选择</option>}{ocr.map(p=><option key={p.id} value={p.id}>{p.label}（{p.model}）{p.source==='personal'?' · 我的模型':''}</option>)}</select></label><p>{cloud.ocrProfileId?(same?'当前使用同一模型完成图片识别与作文批改。':'已分开设置图片识别与作文批改模型。'):'图片识别尚未就绪，请联系管理员配置支持图片输入的模型。'}</p>
     <button className="cloud-model-check" disabled={checking||!cloud.profileId||!cloud.ocrProfileId||cloud.status!=='ready'} onClick={()=>void testModels()}>{checking?'正在检查…':'检查连接和图片识别'}</button><p>使用系统测试图片，每个不同模型调用一次，按供应商正常计费。不会使用学生作文。</p>{check&&<p role="status">{check}</p>}
-    <details><summary>配置帮助与识别要求</summary><p>拍照作文需要支持图片输入的视觉模型；纯文字模型不能直接读取照片。二维码定位在本机完成，无需 OCR 模型。印刷测试通过后，还需核对中文手写姓名和英文手写正文。</p><p>学校已配置模型时，教师直接选择即可。需要添加或更换服务时，由管理员在服务器登记兼容接口、实际可用型号和密钥，并完成图片检查。</p><p><a href="https://ai.google.dev/gemini-api/docs/image-understanding" target="_blank" rel="noreferrer">Gemini 图片输入说明</a> · <a href="https://ai.google.dev/gemini-api/docs/openai" target="_blank" rel="noreferrer">Gemini 兼容接口配置</a>{selected?.helpUrl&&<> · <a href={selected.helpUrl} target="_blank" rel="noreferrer">当前模型服务帮助</a></>}</p></details>
-    <details><summary>更多生成选项</summary><label>Temperature · {Number.isFinite(temperature)?temperature:0.3}<input type="range" min="0" max="1" step="0.05" value={Number.isFinite(temperature)?temperature:0.3} onChange={e=>onTemperatureChange(Number(e.target.value))}/></label></details>{cloud.status==='expired'&&<a href="/api/auth/start">重新使用 Daily 登录</a>}</div>;
+    <details className="cloud-personal-settings" open={!grading.length}><summary>我的模型与密钥配置</summary><PersonalModels workspace={cloud.identity!.workspaceId} disabled={checking||cloud.status!=='ready'} onExpired={cloud.expired} onSaved={async id=>{const profiles=await cloud.refresh();if(id){const profile=profiles?.find((p:Profile)=>p.id===id);if(profile&&supportsPurpose(profile,'grading'))cloud.setProfileId(id);else if(profile&&supportsPurpose(profile,'ocr'))cloud.setOcrProfileId(id);}}}/></details>
+    <details><summary>配置帮助与识别要求</summary><p>拍照作文需要支持图片输入的视觉模型；纯文字模型不能直接读取照片。二维码定位在本机完成，无需 OCR 模型。印刷测试通过后，还需核对中文手写姓名和英文手写正文。</p><p>学校已配置模型时，教师直接选择即可。需要添加或更换服务时，可添加个人配置，填写实际可用的视觉型号与密钥，再检查图片识别；系统提供的连接仍由管理员维护。</p><p><a href="https://ai.google.dev/gemini-api/docs/image-understanding" target="_blank" rel="noreferrer">Gemini 图片输入说明</a> · <a href="https://ai.google.dev/gemini-api/docs/openai" target="_blank" rel="noreferrer">Gemini 兼容接口配置</a>{selected?.helpUrl&&<> · <a href={selected.helpUrl} target="_blank" rel="noreferrer">当前模型服务帮助</a></>}</p></details>
+    <details><summary>更多生成选项</summary><label>Temperature · {Number.isFinite(temperature)?temperature:0.3}<input type="range" min="0" max="1" step="0.05" value={Number.isFinite(temperature)?temperature:0.3} disabled={selected?.sendTemperature===false} onChange={e=>onTemperatureChange(Number(e.target.value))}/></label>{selected?.sendTemperature===false&&<p>当前配置不发送温度参数，使用服务商支持的默认设置。</p>}</details>{cloud.status==='expired'&&<a href="/api/auth/start">重新使用 Daily 登录</a>}</div>;
 }
