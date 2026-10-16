@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "writeascend-local",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-16",
+  "workers_dev": false,
+  "assets": {"directory":"dist", "binding":"ASSETS", "not_found_handling":"single-page-application", "run_worker_first":["/api/*"]},
+  "observability": {"enabled":true},
+  "env": {
+    "development": {
+      "name":"writeascend-development",
+      "vars":{"PUBLIC_ORIGIN":"http://127.0.0.1:8789", "DAILY_ORIGIN":"http://127.0.0.1:8890"},
+      "d1_databases":[{"binding":"DB","database_name":"writeascend-development","database_id":"local-writeascend", "migrations_dir":"migrations"}],
+      "r2_buckets":[{"binding":"FILES","bucket_name":"writeascend-development-private"}]
+    },
+    "staging": {
+      "name":"writeascend-staging",
+      "workers_dev":true,
+      "preview_urls":false,
+      "vars":{"PUBLIC_ORIGIN":"https://writeascend-staging.317792050.workers.dev", "DAILY_ORIGIN":"https://daily.newsunenglish.com"},
+      "d1_databases":[{"binding":"DB","database_name":"writeascend-staging","database_id":"c1bb77de-0b5f-4d35-8dbf-e52739c3ba75", "migrations_dir":"migrations"}],
+      "r2_buckets":[{"binding":"FILES","bucket_name":"writeascend-staging-private"}]
+    }
+  }
+}

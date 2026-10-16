@@ -1,0 +1,56 @@
+@import "tailwindcss" source(none);
+@source "./TeacherApp.jsx";
+@source "./report/";
+@import "./report/legacy-paper.css";
+
+/* Teacher workflow remains the application entry. Responsive changes are additive. */
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #b7b9f2;outline-offset:2px}
+button{touch-action:manipulation}
+@media(max-width:640px){
+  .teacher-workspace .teacher-stepper{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:10px 12px;gap:8px}
+  .teacher-workspace .teacher-stepper>div:nth-child(1){grid-column:1;grid-row:1;min-width:0}
+  .teacher-workspace .teacher-stepper>div:nth-child(2){grid-column:1/-1;grid-row:2;justify-content:space-between;min-width:0}
+  .teacher-workspace .teacher-stepper>div:nth-child(3){grid-column:2;grid-row:1}
+  .teacher-workspace .teacher-stepper>div:nth-child(1)>div{white-space:nowrap}
+  .teacher-workspace .teacher-stepper>div:nth-child(1) .text-lg{font-size:15px}
+  .teacher-workspace .teacher-stepper>div:nth-child(2) button{padding:6px 8px;gap:5px;min-height:34px}
+  .teacher-workspace .teacher-stepper>div:nth-child(2) .h-px{width:8px;margin-left:3px;margin-right:3px}
+  .teacher-workspace .teacher-stepper [aria-current=step] .step-label{display:inline;font-size:11px}
+  .teacher-workspace .teacher-stepper img{height:28px}
+  .teacher-workspace .teacher-stepper>div{gap:6px}
+  .teacher-workspace .teacher-stepper .w-8{width:24px;height:24px;font-size:11px}
+  .teacher-workspace .teacher-stepper .mx-4{margin-left:6px;margin-right:6px}
+  .teacher-workspace .teacher-stepper .text-xs{font-size:10px}
+  .teacher-workspace .pt-28{padding-top:120px}
+  .teacher-workspace main.pt-24{padding-top:108px}
+  .teacher-workspace .px-8{padding-left:14px;padding-right:14px}
+  .teacher-workspace .p-8,.teacher-workspace .p-10{padding:18px}
+  .teacher-workspace .p-16{padding:28px 16px}
+  .teacher-workspace .rounded-3xl{border-radius:18px}
+  .teacher-workspace .grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .teacher-workspace .grid-cols-5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .teacher-workspace .grid-cols-2{grid-template-columns:1fr}
+  .teacher-workspace .a4-wrapper{width:100%;min-width:0;min-height:0;padding:18px!important}
+  .teacher-workspace .a4-wrapper .text-3xl{font-size:21px;line-height:1.4}
+  .teacher-workspace .a4-wrapper .text-6xl{font-size:34px;width:82px}
+  .teacher-workspace .a4-wrapper .flex.gap-8{flex-wrap:wrap;gap:8px}
+  .teacher-workspace input,.teacher-workspace select,.teacher-workspace textarea{font-size:16px}
+  .teacher-grading-layout{height:auto;flex-direction:column}
+  .teacher-grading-sidebar{width:100%;height:auto;max-height:420px}
+  .teacher-grading-sidebar>.overflow-y-auto{max-height:180px;min-height:80px}
+  .teacher-grading-detail{min-width:0;width:100%;height:auto}
+  .teacher-grading-detail>.h-full{height:auto}
+  .teacher-grading-detail .overflow-y-auto{overflow:visible;min-width:0}
+  .teacher-grading-detail .a4-wrapper{overflow-wrap:anywhere}
+  .teacher-grading-detail .a4-wrapper .flex{min-width:0}
+  .teacher-grading-detail .a4-wrapper>div:first-child>div{flex-direction:column;align-items:stretch;gap:12px}
+  .teacher-grading-detail .a4-wrapper>div:first-child>div>div{min-width:0}
+  .teacher-grading-detail .a4-wrapper .text-right{align-self:flex-end}
+  .teacher-grading-detail .a4-wrapper .grid-cols-2{display:block}
+  .teacher-grading-detail .a4-wrapper textarea{max-width:100%;white-space:pre-wrap}
+  .teacher-navigation{width:calc(100% - 24px);bottom:12px;justify-content:space-between;gap:8px;padding:6px}
+  .teacher-navigation>button{flex:1;min-width:0;padding:10px 14px!important;font-size:13px;justify-content:center;white-space:nowrap;min-height:44px}
+  .teacher-navigation>button svg{flex-shrink:0}
+  .teacher-report-tools{right:16px;bottom:84px}
+}
+@media print{.teacher-workspace .a4-wrapper{width:100%!important;min-width:0!important;padding:0!important}}

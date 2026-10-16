@@ -1,0 +1,749 @@
+{
+  "schema": "writeascend-phase1-audit-v1",
+  "collected_at": "2026-10-16T16:47:35.649179+08:00",
+  "sqlite_version": "3.53.1",
+  "scope": "read-only schemas, aggregate counts and code; no account rows, credentials or student writing exported",
+  "writeascend": {
+    "repository": "https://github.com/NewsunLee007/WriteAscend",
+    "commit": "2def1d2397b15666e17d46363ab811e4f722890b",
+    "index_blob": "26668d8628e44c8305a2c4460cf41525106a81e4",
+    "domain": "writeascend.newsunenglish.com"
+  },
+  "sources": [
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/作文批阅/sources/WriteAscend/index.html",
+      "bytes": 515072,
+      "sha256": "9ef317732830a2a3d1c76046ba6d0293b156867040aad9dea93e6fcf6d14331f",
+      "lines": 7324
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/作文批阅/sources/WriteAscend/CNAME",
+      "bytes": 29,
+      "sha256": "3464c59663150acd1d22bbb473e0c65f7e136b59acf3ab985daa28eafd25a605",
+      "lines": 1
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/package.json",
+      "bytes": 500,
+      "sha256": "e20c4627ece38bf897330d514d1c55842ebf2f3c8b46867b7935eeca8a102684",
+      "lines": 18
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/server.mjs",
+      "bytes": 15027,
+      "sha256": "e00fafded28c7e959b75f66887f1c8d7d13f2bc367b936e9b9cbe34fa0edfcd0",
+      "lines": 273
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/config.mjs",
+      "bytes": 2021,
+      "sha256": "1e07cdd3f3d9b57f2ec1a9cca433fa325aff77fa66b6fd669b7bdb0e45de447c",
+      "lines": 46
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/teacher-auth.mjs",
+      "bytes": 2784,
+      "sha256": "298cd99bd3a10edb4a3d4d50e3ea03f0094d3e826d9e81b267e2f14e5e835ac4",
+      "lines": 41
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/wordup-identity.mjs",
+      "bytes": 1369,
+      "sha256": "530dc3ff752233205e2eb5aafb6f47288981ed9e491336f979d9d714ea34e03f",
+      "lines": 24
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/wordup-gateway.mjs",
+      "bytes": 5784,
+      "sha256": "19f556dce9f0bab2ff69f42fcb22ef0681156a60bf6a376ef9008cbd190a6ebf",
+      "lines": 70
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/fusion-store.mjs",
+      "bytes": 4899,
+      "sha256": "76867540e6c5054088202cc1632f33e63697383342dd3d986d1584e0b51e947c",
+      "lines": 53
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/registered-accounts.mjs",
+      "bytes": 2264,
+      "sha256": "537c9e1cd30457527fcd7d5b592fbb59be5c33a9d7ad642d16392ec66489547f",
+      "lines": 27
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/recitation-api.mjs",
+      "bytes": 23635,
+      "sha256": "31b47e73c2aba48c9cc93d3dc76c22fc39a8045da40e0a5e38d956e2a3ec18fd",
+      "lines": 286
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/recitation-store.mjs",
+      "bytes": 18274,
+      "sha256": "eab9ca1ecdb87fa4b49ffff65856613f484ed59e74b4b7d04c204f263ae59b3f",
+      "lines": 208
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/learning-api.mjs",
+      "bytes": 13919,
+      "sha256": "519e5f110d839a7bdac096d9dcb6ae155724c0a430260a658d9edd128bcb6200",
+      "lines": 157
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/learning-reports.mjs",
+      "bytes": 6741,
+      "sha256": "8254a7c8432eb026e4c4887c76eb9abbf1a09890b338cb17db84db81b0aa5b04",
+      "lines": 63
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/journey-store.mjs",
+      "bytes": 45707,
+      "sha256": "dad7ec3847fb6ca249dcc5a846cbf7c988a36e7bf7372dabe822dce483348487",
+      "lines": 267
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/src/journey-api.mjs",
+      "bytes": 18379,
+      "sha256": "6ac6a455cb121ce4a756a2432b684bf0265ef8f26827c04a76759d53c49736ec",
+      "lines": 140
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/public/login-routing.mjs",
+      "bytes": 810,
+      "sha256": "7609d80750346ea4bfc2484a8692e9419929bd5d87d6de23a397eff199b70485",
+      "lines": 16
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/public/login.mjs",
+      "bytes": 4873,
+      "sha256": "5197c6ae5aae9c47f15c53fcf67d6f2d24f8a9fd0effbb9956b80f475c1643e2",
+      "lines": 27
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/deploy/cloudflare/wrangler.jsonc",
+      "bytes": 625,
+      "sha256": "674683f0d15e64739ed74f9b31c82dec4bf87ef6ccccb7d201aa91a434b2dcc9",
+      "lines": 15
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/每日一句/deploy/cloudflare/worker.mjs",
+      "bytes": 6454,
+      "sha256": "115c89587bf782f5858f14c9b9f90dcdb5c6aa6a71636438f1bc64cd360c7a0a",
+      "lines": 89
+    },
+    {
+      "path": "/Users/newsunsmac/Documents/ChatGPT/单词打榜/server/local_api.py",
+      "bytes": 72048,
+      "sha256": "8ebdcbb8b214ef5c136e37b87432d5e6136835606863a1bea84f75c54d8bef9b",
+      "lines": 1481
+    },
+    {
+      "path": "/Users/newsunsmac/Library/Application Support/WordUp/venv/lib/python3.12/site-packages/server/local_api.py",
+      "bytes": 72048,
+      "sha256": "8ebdcbb8b214ef5c136e37b87432d5e6136835606863a1bea84f75c54d8bef9b",
+      "lines": 1481
+    }
+  ],
+  "wordup": {
+    "database_path": "/Users/newsunsmac/Library/Application Support/WordUp/data/wordup.sqlite3",
+    "tables": {
+      "students": {
+        "count": 2348,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "class_name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "grade",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "pin_hash",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "pin_code",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "source_key",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "failed_count",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          },
+          {
+            "name": "locked_until",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created_at",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "updated_at",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "is_guest",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          },
+          {
+            "name": "school_name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "assessment_uses",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "teacher_accounts": {
+        "count": 3,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "username_key",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "password_hash",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created_at",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "public_accounts": {
+        "count": 3,
+        "columns": [
+          {
+            "name": "username_key",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "student_id",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created_at",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      }
+    },
+    "active_school_students": 2327,
+    "grade_class_counts": [
+      {
+        "grade": "七年级",
+        "students": 758,
+        "classes": 18
+      },
+      {
+        "grade": "九年级",
+        "students": 733,
+        "classes": 18
+      },
+      {
+        "grade": "八年级",
+        "students": 836,
+        "classes": 18
+      }
+    ],
+    "same_class_same_name_groups": 1,
+    "same_name_across_classes_groups": 16
+  },
+  "daily": {
+    "tables": {
+      "students": {
+        "count": 2335,
+        "columns": [
+          {
+            "name": "id",
+            "type": "INTEGER",
+            "primary_key_position": 1
+          },
+          {
+            "name": "class_id",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "active",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "classes": {
+        "count": 54,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "salt",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "code_hash",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "wordup_account_links": {
+        "count": 2327,
+        "columns": [
+          {
+            "name": "wordup_id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "student_id",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          },
+          {
+            "name": "grade",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "class_name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "bound_at",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "profile_name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "learning_progress": {
+        "count": 485,
+        "columns": [
+          {
+            "name": "wordup_id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "grade",
+            "type": "TEXT",
+            "primary_key_position": 2
+          },
+          {
+            "name": "unit",
+            "type": "TEXT",
+            "primary_key_position": 3
+          },
+          {
+            "name": "task_id",
+            "type": "TEXT",
+            "primary_key_position": 4
+          },
+          {
+            "name": "completed",
+            "type": "INTEGER",
+            "primary_key_position": 0
+          },
+          {
+            "name": "artifact",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "updated",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "learning_reviews": {
+        "count": 0,
+        "columns": [
+          {
+            "name": "subject",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "grade",
+            "type": "TEXT",
+            "primary_key_position": 2
+          },
+          {
+            "name": "unit",
+            "type": "TEXT",
+            "primary_key_position": 3
+          },
+          {
+            "name": "task_id",
+            "type": "TEXT",
+            "primary_key_position": 4
+          },
+          {
+            "name": "feedback",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "updated",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "journey_drafts": {
+        "count": 0,
+        "columns": [
+          {
+            "name": "subject",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "version",
+            "type": "TEXT",
+            "primary_key_position": 2
+          },
+          {
+            "name": "task_id",
+            "type": "TEXT",
+            "primary_key_position": 3
+          },
+          {
+            "name": "text",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "updated",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "note",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "activity",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "journey_draft_versions": {
+        "count": 0,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "subject",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "version",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "task_id",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "text",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "note",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "activity",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "journey_evidence": {
+        "count": 0,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "subject",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "class_name",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "version",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "task_id",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "request_key",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "text",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "note",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "audio_file",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "duration",
+            "type": "REAL",
+            "primary_key_position": 0
+          },
+          {
+            "name": "transcript",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "corrected_transcript",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "source",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "support",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "journey_reviews": {
+        "count": 0,
+        "columns": [
+          {
+            "name": "id",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "evidence_id",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "actor",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "feedback",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "scores",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "oral",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "corrected_transcript",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      },
+      "journey_plans": {
+        "count": 4,
+        "columns": [
+          {
+            "name": "version",
+            "type": "TEXT",
+            "primary_key_position": 1
+          },
+          {
+            "name": "body",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "status",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "created",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "reviewer",
+            "type": "TEXT",
+            "primary_key_position": 0
+          },
+          {
+            "name": "review_note",
+            "type": "TEXT",
+            "primary_key_position": 0
+          }
+        ]
+      }
+    },
+    "account_links": 2327,
+    "links_without_authority_account": 0,
+    "active_school_accounts_without_link": 0,
+    "unlinked_active_local_students": 0,
+    "writing_self_reports": 6,
+    "journey_plan_status": {
+      "draft": 3,
+      "preview": 1
+    }
+  },
+  "reference_document": {
+    "path": "/Users/newsunsmac/Desktop/808-26923154420.docx",
+    "bytes": 76705,
+    "sha256": "d1ab800b71c9ae6e3f411da54a211a1c1f66c5b74756cf3f6ecc7c0eb03fba6c",
+    "lines": 578,
+    "essay_count": 43,
+    "section_counts": {
+      "【作文原文】": 43,
+      "【评分】": 43,
+      "【简评】": 43,
+      "【逐句批改】": 43,
+      "【润色后作文（基本款）】": 43
+    },
+    "purpose": "content comparison only; not the replacement export template; layout not assessed"
+  }
+}

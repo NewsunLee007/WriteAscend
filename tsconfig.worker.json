@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target":"ES2022", "module":"ESNext", "moduleResolution":"Bundler",
+    "strict":true,"noEmit":true,"skipLibCheck":true,"allowJs":true,"checkJs":false,
+    "types":["@cloudflare/workers-types"],"lib":["ES2022","DOM"]
+  },
+  "include":["worker","src/report/contracts.ts","src/report/legacy-import.ts"]
+}
