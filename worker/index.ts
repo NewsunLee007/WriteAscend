@@ -6,6 +6,7 @@ export interface Env {
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
 }
 type Session = {token_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;display_name:string;expires:number};
+type ClassGrant = {id:string;schoolId:string;academicYear:string;name:string;grade:string;version:number;grantVersion:number;scopes:string[]};
 class HttpError extends Error {constructor(public status:number,message:string){super(message);}}
 const json=(value:unknown,status=200,headers:Record<string,string>={})=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 const random=()=>[...crypto.getRandomValues(new Uint8Array(32))].map(v=>v.toString(16).padStart(2,'0')).join('');
@@ -27,9 +28,14 @@ async function input(req:Request,max=8*1024*1024):Promise<unknown>{
 async function bridge(env:Env,path:string,body:unknown){
   if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');
   let response:Response;
-  try {response=await fetch(new URL('/api/integrations/writeascend/'+path,env.DAILY_ORIGIN),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.BRIDGE_SERVICE_TOKEN},body:JSON.stringify(body),signal:AbortSignal.timeout(10000),redirect:'error'});}
-  catch{throw new HttpError(503,'Daily 暂时无法连接，请稍后重试。');}
-  if(!response.ok)throw new HttpError(response.status===401||response.status===403?401:503,response.status===401||response.status===403?'登录或授权已失效，请重新登录。':'Daily 暂时无法处理请求。');
+  // Manual mode also prevents forwarding the machine credential to a redirect.
+  // The actual workerd runtime rejects redirect:'error'; non-2xx stays a failure.
+  try {response=await fetch(new URL('/api/integrations/writeascend/'+path,env.DAILY_ORIGIN),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.BRIDGE_SERVICE_TOKEN},body:JSON.stringify(body),signal:AbortSignal.timeout(10000),redirect:'manual'});}
+  catch(error){
+    if(env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:'))console.warn('Daily bridge transport:',error instanceof Error?error.message:'unknown');
+    throw new HttpError(503,'Daily 暂时无法连接，请稍后重试。');
+  }
+  if(!response.ok)throw new HttpError([400,401,403,404,409,413,429].includes(response.status)?response.status:503,response.status===401?'登录或授权已失效，请重新登录。':response.status===403?'当前账号没有此项权限。':'Daily 暂时无法处理请求。');
   return await response.json() as Record<string,any>;
 }
 async function authenticate(req:Request,env:Env){
@@ -38,7 +44,8 @@ async function authenticate(req:Request,env:Env){
   if(!row)throw new HttpError(401,'登录已过期，请重新登录。');
   const verified=await bridge(env,'introspect',{grantId:row.grant_id});
   if(verified.provider!==row.provider||verified.subject!==row.subject||verified.role!==row.role||verified.active!==true)throw new HttpError(401,'账号授权已发生变化，请重新登录。');
-  return {...row,scopes:verified.scopes as string[],classes:verified.classes as unknown[]};
+  if(!Array.isArray(verified.scopes)||verified.scopes.some(s=>typeof s!=='string')||!Array.isArray(verified.classes)||verified.classes.some(c=>!c||typeof c.id!=='string'||!Array.isArray(c.scopes)||c.scopes.some((s:unknown)=>typeof s!=='string')))throw new HttpError(502,'账号权限信息不完整，请稍后重试。');
+  return {...row,scopes:verified.scopes as string[],classes:verified.classes as ClassGrant[]};
 }
 function teacher(s:Session){if(!['teacher','admin'].includes(s.role))throw new HttpError(403,'此操作需要教师账号。');}
 
@@ -72,19 +79,34 @@ export default {
         if(!['student','teacher','admin'].includes(grant.role)||!['wordup','daily_legacy_admin'].includes(grant.provider)||typeof grant.subject!=='string'||typeof grant.grantId!=='string')throw new HttpError(502,'登录身份信息不完整。');
         const token=random(),expires=Math.min(Date.now()+15*60000,Number(grant.expires));
         if(!Number.isFinite(expires)||expires<=Date.now())throw new HttpError(401,'授权已过期，请重新登录。');
-        await env.DB.prepare('INSERT INTO app_sessions VALUES(?,?,?,?,?,?,?,?,?)').bind(await sha(token),grant.provider+':'+grant.subject,grant.grantId,grant.provider,grant.subject,grant.role,String(grant.name||''),expires).run();
+        await env.DB.prepare('INSERT INTO app_sessions(token_hash,principal,grant_id,provider,subject,role,display_name,expires) VALUES(?,?,?,?,?,?,?,?)').bind(await sha(token),grant.provider+':'+grant.subject,grant.grantId,grant.provider,grant.subject,grant.role,String(grant.name||''),expires).run();
         const headers=new Headers({Location:tx.next_path,'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
         headers.append('Set-Cookie',cookie('wa_session',token,Math.floor((expires-Date.now())/1000)));headers.append('Set-Cookie',cookie('wa_login','',0));
         return new Response(null,{status:302,headers});
       }
       if(!['GET','POST','PATCH','DELETE'].includes(req.method))throw new HttpError(405,'请求方式不支持。');
       if(req.method!=='GET')sameOrigin(req,env);
+      if(path==='/api/auth/logout'&&req.method==='POST'){
+        const token=getCookie(req,'wa_session');
+        if(token){
+          const row=await env.DB.prepare('DELETE FROM app_sessions WHERE token_hash=? RETURNING grant_id').bind(await sha(token)).first<{grant_id:string}>();
+          // Local logout must succeed even when the source service is unavailable.
+          if(row){try{await bridge(env,'revoke',{grantId:row.grant_id});}catch{}}
+        }
+        return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
+      }
       const session=await authenticate(req,env);
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,name:session.display_name,role:session.role,scopes:session.scopes});
-      if(path==='/api/auth/logout'&&req.method==='POST'){
-        await env.DB.prepare('DELETE FROM app_sessions WHERE token_hash=?').bind(session.token_hash).run();
-        await bridge(env,'revoke',{grantId:session.grant_id});
-        return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
+      if(path==='/api/classes'&&req.method==='GET'){
+        teacher(session);return json({classes:session.classes});
+      }
+      const rosterMatch=path.match(/^\/api\/classes\/([a-zA-Z0-9-]+)\/roster$/);
+      if(rosterMatch&&req.method==='GET'){
+        teacher(session);
+        if(!session.classes.some(c=>c.id===rosterMatch[1]&&c.scopes.includes('roster.read')))throw new HttpError(403,'没有此班级的名册权限。');
+        const after=url.searchParams.get('after')||'';
+        if(after.length>200)throw new HttpError(400,'分页位置无效。');
+        return json(await bridge(env,'roster',{grantId:session.grant_id,classId:rosterMatch[1],after}));
       }
       if(path==='/api/reports'&&req.method==='GET'){
         teacher(session);const limit=25,offset=Math.max(0,Math.min(100000,Number(url.searchParams.get('offset'))||0));

@@ -1,0 +1,54 @@
+--- a/src/server.mjs
++++ b/src/server.mjs
+@@ -15,6 +15,10 @@
+ import {handleLearning} from './learning-api.mjs';
+ import {createJourneyRuntime} from './journey-api.mjs';
+ import {withBrowserAnnotationStyles} from './browser-annotation-policy.mjs';
++import {createWritingBridge} from './writing-bridge.mjs';
++import {createDailyWritingIdentity,createWritingRoster} from './writing-authority.mjs';
++import {createTeacherAuth} from './teacher-auth.mjs';
++import {wordupIdentity,wordupCookie} from './wordup-identity.mjs';
+ 
+ const MIME_TYPES = new Map([
+   [".html", "text/html; charset=utf-8"],
+@@ -171,6 +175,7 @@
+   if(['/daily-admin.html','/admin.html'].includes(pathname))response.setHeader('Cache-Control','no-store');
+   if (['/recite.html','/journey.html','/admin.html'].includes(pathname)) response.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=(), payment=()');
+   if (pathname === '/journey.html' || pathname.startsWith('/journey-') || pathname === '/journey.mjs' || pathname === '/journey.css' || pathname === '/admin-journey.mjs') response.setHeader('Cache-Control','no-store');
++  if (pathname.startsWith('/writing-connect')) response.setHeader('Cache-Control','no-store');
+   if (pathname.startsWith('/teacher') || pathname.startsWith('/recite')) response.setHeader('Cache-Control', 'no-store');
+   if (extension === '.html') response.setHeader('Content-Security-Policy', withBrowserAnnotationStyles(response.getHeader('Content-Security-Policy')));
+   if (request.headers["if-none-match"] === etag) {
+@@ -198,12 +203,21 @@
+ 
+ let catalogCached,catalogUntil=0;
+ const wordupHealth=createWordupHealth({web:process.env.WORDUP_WEB_ORIGIN||'http://127.0.0.1:8788',api:process.env.WORDUP_API_ORIGIN||'http://127.0.0.1:8787'});
++const writingIdentity=createDailyWritingIdentity({db:recitations.db,authenticateLegacy:createTeacherAuth(recitations.db,recitationDirectory).authenticate,verifyWordup:wordupIdentity,cookieForWordup:wordupCookie});
++const writingBridge=createWritingBridge({
++  db:recitations.db,publicOrigin:config.publicOrigin||'https://daily.newsunenglish.com',
++  serviceToken:process.env.WRITING_BRIDGE_SERVICE_TOKEN||'',storageKey:process.env.WRITING_BRIDGE_STORAGE_KEY||'',
++  callbacks:(process.env.WRITING_ALLOWED_CALLBACKS||'').split(',').map(s=>s.trim()).filter(Boolean),
++  ...writingIdentity,readRoster:createWritingRoster({db:recitations.db}),
++});
+ const server = http.createServer(async (request, response) => {
+   response.on("error", (error) => console.error("响应失败:", error));
+   const url = new URL(request.url, "http://localhost");
+ 
+   try {
+     applyHeaders(response);
++    writingBridge.observeAuthChange(request,response,url);
++    if(await writingBridge.handle(request,response,url))return;
+     if(handleWordup(request,response,url,{publicOrigin:config.publicOrigin||'https://daily.newsunenglish.com',web:process.env.WORDUP_WEB_ORIGIN||'http://127.0.0.1:8788',api:process.env.WORDUP_API_ORIGIN||'http://127.0.0.1:8787'}))return;
+     if(await journey.handle(request,response,url))return;
+     if(await handleLearning(request,response,url,{recitations,fusion,directory:recitationDirectory,publicOrigin:config.publicOrigin}))return;
+--- a/public/login-routing.mjs
++++ b/public/login-routing.mjs
+@@ -4,7 +4,7 @@
+   if(!wanted||wanted.includes('\\'))return fallback;
+   try {
+     const url=new URL(wanted,origin);
+-    if(url.origin===origin&&/^\/(?:$|(?:daily|units|recite|explore|learn|sentence|study|history|leaderboard|lucky|admin)\.html$|wordup\/?$|teaching\/?$)/.test(url.pathname))return url.pathname+url.search+url.hash;
++    if(url.origin===origin&&/^\/(?:$|(?:daily|units|recite|explore|learn|sentence|study|history|leaderboard|lucky|admin|writing-connect)\.html$|wordup\/?$|teaching\/?$)/.test(url.pathname))return url.pathname+url.search+url.hash;
+   }catch{}
+   return fallback;
+ }
