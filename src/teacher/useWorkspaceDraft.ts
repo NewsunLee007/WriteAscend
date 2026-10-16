@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 
-type Draft={files:any[];selectedFileId:string|null;step:number};
+type Draft={files:any[];selectedFileId:string|null;step:number;activeCloudSnapshot?:unknown};
 type Options={workspaceId:string|null;draft:Draft;restore:(draft:Draft)=>void};
 function openDatabase(){return new Promise<IDBDatabase>((resolve,reject)=>{
   const request=indexedDB.open('writeascend-private-drafts',1);
@@ -32,7 +32,8 @@ export function useWorkspaceDraft({workspaceId,draft,restore}:Options){
           for(const item of old.files){
             const blob=await read(db.transaction('images').objectStore('images'),[workspaceId,item.id]);
             const file=blob instanceof Blob?new File([blob],item.name||'作文.jpg',{type:blob.type}):null;
-            const url=file?URL.createObjectURL(file):'';
+            const assetId=item.cloudAssetIds?.[0];
+            const url=file?URL.createObjectURL(file):typeof assetId==='string'&&/^[a-f0-9-]{36}$/.test(assetId)?'/api/assets/'+assetId:'';
             if(file)knownImages.current.add(item.id);
             files.push({...item,file,url,status:item.status==='loading'?'idle':item.status,result:item.result?{...item.result,...(url?{original_image_url:url}:{})}:null});
           }
@@ -54,6 +55,6 @@ export function useWorkspaceDraft({workspaceId,draft,restore}:Options){
       transaction.objectStore('drafts').put({...draft,files},workspaceId);
       void done(transaction).then(()=>{knownImages.current=next;setError('');},()=>setError('临时作文未能保存在这台设备上，请保留原图并及时保存结果。'));
     }catch{setError('临时作文未能保存在这台设备上，请保留原图并及时保存结果。');}
-  },[workspaceId,ready,draft.files,draft.selectedFileId,draft.step]);
+  },[workspaceId,ready,draft.files,draft.selectedFileId,draft.step,draft.activeCloudSnapshot]);
   return error;
 }

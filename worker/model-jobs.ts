@@ -1,6 +1,7 @@
 import type {MessageBatch,Queue} from '@cloudflare/workers-types';
 import type {Env} from './index';
 import {HttpError} from './errors';
+import {hydrateAssetImages} from './assets';
 
 export type ModelJobMessage={jobId:string};
 export interface ModelBindings {
@@ -58,6 +59,10 @@ export function validateModelPayload(value:unknown){
       content=message.content.map((part:any)=>{
         if(part?.type==='text'&&typeof part.text==='string'&&part.text.length<=250000)return {type:'text',text:part.text};
         if(part?.type==='image_url'&&typeof part.image_url?.url==='string'&&/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=\r\n]+$/.test(part.image_url.url)){
+          if(++imageCount>6)fail(413,'一次模型请求最多包含 6 张图片。');
+          return {type:'image_url',image_url:{url:part.image_url.url}};
+        }
+        if(part?.type==='image_url'&&typeof part.image_url?.url==='string'&&/^wa-asset:[a-f0-9-]{36}$/.test(part.image_url.url)){
           if(++imageCount>6)fail(413,'一次模型请求最多包含 6 张图片。');
           return {type:'image_url',image_url:{url:part.image_url.url}};
         }
@@ -172,7 +177,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       if(!stored)fail(503,'已保存的作文请求暂不可用。');
       const envelope=await stored.json() as any;
       if(envelope.profileRevision!==await revision(profile))fail(409,'模型设置已更新，请核对后重新提交。');
-      const payload={...validateModelPayload(envelope.payload),model:profile.model,max_tokens:profile.maxTokens,stream:false};
+      const payload={...await hydrateAssetImages(env,row.owner,validateModelPayload(envelope.payload)),model:profile.model,max_tokens:profile.maxTokens,stream:false};
       const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?").bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now()).run();
       if(!sending.meta.changes){message.retry({delaySeconds:15});continue;}
       let response:Response;

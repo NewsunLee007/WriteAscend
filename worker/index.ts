@@ -2,6 +2,8 @@ import type {D1Database, Fetcher, R2Bucket, MessageBatch} from '@cloudflare/work
 import {importLegacy, sanitizeLegacy} from '../src/report/legacy-import';
 import {HttpError} from './errors';
 import {handleModelApi,consumeModelJobs,recoverModelOutbox,type ModelBindings,type ModelJobMessage} from './model-jobs';
+import {handleAssets} from './assets';
+import {handleSnapshots} from './snapshots';
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
@@ -97,7 +99,12 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
+      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots)(?:\/|$)/.test(path)||path==='/api/model/jobs')){
+        if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
+      }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
+      if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
+      if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       const modelResponse=await handleModelApi(req,env,session,input);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){
@@ -161,7 +168,7 @@ export default {
       throw new HttpError(404,'接口不存在。');
     }catch(e){
       if(!(e instanceof HttpError)&&env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:'))console.warn('Local Worker failure:',e instanceof Error?e.message:'unknown');
-      return json({error:{message:e instanceof HttpError?e.message:'服务暂时无法处理请求，请稍后重试。'}},e instanceof HttpError?e.status:500);
+      return json({error:{message:e instanceof HttpError?e.message:'服务暂时无法处理请求，请稍后重试。',...(e instanceof HttpError&&e.code?{code:e.code}:{})}},e instanceof HttpError?e.status:500);
     }
   },
   async queue(batch:MessageBatch<ModelJobMessage>,env:Env){await consumeModelJobs(batch,env,bridge);},

@@ -85,7 +85,7 @@ export function CloudConnection({busy=false}:{busy?:boolean}){
   const cloud=useTeacherCloud();
   if(cloud.mode==='local')return null;
   return <aside className="cloud-connection no-print" aria-label="云端批改连接">
-    <div><strong>{cloud.identity?.name} · 云端工作区</strong><span>{cloud.message|| (cloud.status==='expired'?'登录已过期，已保存的任务可在重新登录后继续。':cloud.status==='error'?'暂时无法核对登录，请刷新连接。':cloud.profiles.length?'支持刷新后继续批改，核对后的报告暂保存在本机。':'云端模型尚未配置，请联系管理员。')}</span></div>
+    <div><strong>{cloud.identity?.name} · 云端工作区</strong><span>{cloud.message|| (cloud.status==='expired'?'登录已过期，已保存的任务可在重新登录后继续。':cloud.status==='error'?'暂时无法核对登录，请刷新连接。':cloud.profiles.length?'支持刷新后继续批改，可将核对后的结果保存到云端。':'云端模型尚未配置，请联系管理员。')}</span></div>
     <div>{cloud.status==='expired'?<a href="/api/auth/start">重新登录</a>:<><button disabled={busy} onClick={()=>void cloud.refresh()}>刷新连接</button><button disabled={busy} onClick={()=>void cloud.logout()}>退出</button></>}</div>
   </aside>;
 }

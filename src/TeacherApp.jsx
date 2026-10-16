@@ -4,6 +4,8 @@ import QuickGrading from './teacher/QuickGrading.jsx';
 import {useTeacherCloud,CloudConnection,CloudModelSettings} from './teacher/TeacherCloud';
 import {createCloudModelTransport} from './teacher/cloud-model';
 import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
+import {useCloudSnapshots} from './teacher/useCloudSnapshots';
+import {CloudSnapshotsPanel} from './teacher/CloudSnapshotsPanel';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -751,10 +753,29 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [saveDraftName, setSaveDraftName] = useState('');
             const [rubricDesignAppliedAt, setRubricDesignAppliedAt] = useState('');
             const [languageDifficulty, setLanguageDifficulty] = useState({ enabled: true, capRatio: 1.0, autoRewrite: true });
+            const [activeCloudSnapshot, setActiveCloudSnapshot] = useState(null);
+            const [saveToCurrentCloud, setSaveToCurrentCloud] = useState(false);
+            const lastSavedLocalIdRef = useRef('');
+            const lastSavedAtRef = useRef('');
+            const cloudSnapshots = useCloudSnapshots({
+                workspaceId: cloud.mode === 'cloud' ? cloud.identity.workspaceId : null,
+                onExpired: cloud.expired,
+                onSynced: ({snapshot,cloud:reference}) => {
+                    const item = {...snapshot,cloud:reference};
+                    setSavedGradingResults(previous => {
+                        const found = previous.find(p => p.id === item.id);
+                        if (!found) return [item,...previous].slice(0,120);
+                        return previous.map(p => p.id !== item.id ? p : (!p.savedAt || p.savedAt <= item.savedAt ? item : {...p,cloud:reference,cloudPending:true}));
+                    });
+                    if (lastSavedLocalIdRef.current === item.id && lastSavedAtRef.current === item.savedAt) setActiveCloudSnapshot({...reference,localSavedAt:item.savedAt});
+                }
+            });
             const draftError = useWorkspaceDraft({
                 workspaceId: cloud.mode === 'cloud' ? cloud.identity.workspaceId : null,
-                draft: { files, selectedFileId, step },
+                draft: { files, selectedFileId, step, activeCloudSnapshot },
                 restore: saved => {
+                    setActiveCloudSnapshot(saved.activeCloudSnapshot || null);
+                    if(saved.activeCloudSnapshot){lastSavedLocalIdRef.current=saved.activeCloudSnapshot.localId||'';lastSavedAtRef.current=saved.activeCloudSnapshot.localSavedAt||'';}
                     setFiles(saved.files);
                     setSelectedFileId(saved.files.some(f => f.id === saved.selectedFileId) ? saved.selectedFileId : saved.files[0]?.id || null);
                     if (saved.files.length) {
@@ -1109,7 +1130,9 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const callAI = async (messages, responseJson = true, options) => {
                 const opts = options && typeof options === 'object' ? options : {};
-                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: cloud.profileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired }) : null;
+                const cloudTransport = cloud.mode === 'cloud' ? createCloudModelTransport({ profileId: cloud.profileId, workspaceId: cloud.identity.workspaceId, onUnauthorized: cloud.expired, onAssets: ids => {
+                    if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudAssetIds:ids} : file));
+                }, onJob: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId ? {...file,cloudPendingJobId:id} : file));}, onSettled: id => {if(opts.cloudFileId)setFiles(previous => previous.map(file => file.id === opts.cloudFileId && file.cloudPendingJobId === id ? {...file,cloudPendingJobId:null} : file));} }) : null;
                 const apiHeaders = cloudTransport ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };
                 const classifyErrorKind = (msg) => {
                     const m = (msg || '').toString();
@@ -1698,6 +1721,13 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 reader.onerror = error => reject(error);
             });
 
+            const readStudentImage = async (fileItem) => {
+                if (fileItem.file) return convertFileToBase64(fileItem.file);
+                const assetId = fileItem.cloudAssetIds?.[0];
+                if (cloud.mode === 'cloud' && typeof assetId === 'string' && /^[a-f0-9-]{36}$/.test(assetId)) return 'wa-asset:' + assetId;
+                throw new Error('原稿不可用，请重新上传图片。');
+            };
+
             const parseRosterNames = (rosterText) => {
                 const text = (rosterText || '').toString();
                 const candidates = [];
@@ -1963,6 +1993,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const openSaveDialogWithDefaultName = () => {
                 setSaveDraftName(buildDefaultSaveName());
+                setSaveToCurrentCloud(false);
                 setShowSaveDialog(true);
             };
 
@@ -1973,7 +2004,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 safeAssignment.promptImageBase64 = '';
                 safeAssignment.promptImageName = '';
                 const payload = {
-                    id: createId(),
+                    id: cloud.mode === 'cloud' && saveToCurrentCloud && activeCloudSnapshot ? activeCloudSnapshot.localId : createId(),
                     name,
                     savedAt: new Date().toISOString(),
                     classId: String(currentClassId || ''),
@@ -1994,10 +2025,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 };
                 setSavedGradingResults(prev => {
                     const list = Array.isArray(prev) ? prev : [];
-                    const next = [payload, ...list];
+                    const next = [payload, ...list.filter(item => item.id !== payload.id)];
                     return next.slice(0, 120);
                 });
                 setShowSaveDialog(false);
+                lastSavedLocalIdRef.current = payload.id;lastSavedAtRef.current = payload.savedAt;
+                if (cloud.mode === 'cloud') void cloudSnapshots.save(JSON.parse(JSON.stringify(payload)),files,saveToCurrentCloud ? activeCloudSnapshot : null);
             };
 
             const deleteSavedGradingSnapshot = (id) => {
@@ -2020,9 +2053,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const applySavedGradingSnapshot = (item) => {
                 if (!item || !item.data) return;
+                if (isBatchProcessing) return alert('请先暂停当前批改，再恢复历史结果。');
                 const d = item.data || {};
                 if (d.assignment) setAssignment(d.assignment);
-                if (d.rubric) {
+                if (item.cloud && d.rubric) {
+                    setRubric(JSON.parse(JSON.stringify(d.rubric)));
+                } else if (d.rubric) {
                     const loaded = d.rubric;
                     const loadedStrictnessLevelRaw = clampStrictnessLevel(loaded && loaded.strictnessLevel);
                     const loadedStrictnessLevel = loadedStrictnessLevelRaw !== null ? loadedStrictnessLevelRaw : strictnessLevelFromLabel(loaded && loaded.strictness);
@@ -2053,20 +2089,25 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 if (d.studentProfiles && typeof d.studentProfiles === 'object') setStudentProfiles(d.studentProfiles);
                 if (Array.isArray(d.files)) {
                     const restored = d.files.map((f, idx) => ({
+                        ...(f || {}),
                         id: (f && f.id) ? f.id : Math.random().toString(36).slice(2, 9),
                         file: null,
-                        url: '',
+                        url: cloud.mode === 'cloud' && /^[a-f0-9-]{36}$/.test(f?.cloudAssetIds?.[0] || '') ? '/api/assets/' + f.cloudAssetIds[0] : '',
                         name: (f && f.name) ? String(f.name) : `导入文件${idx + 1}`,
-                        status: (f && f.status) ? String(f.status) : (f && f.result ? 'success' : 'idle'),
+                        status: f?.status === 'loading' ? 'idle' : (f && f.status) ? String(f.status) : (f && f.result ? 'success' : 'idle'),
                         index: Number(f && f.index) || (idx + 1),
                         inferredStudentRawName: (f && f.inferredStudentRawName) ? String(f.inferredStudentRawName) : '',
                         inferredStudentName: (f && f.inferredStudentName) ? String(f.inferredStudentName) : '',
                         inferredClassName: (f && f.inferredClassName) ? String(f.inferredClassName) : '',
                         inferredClassId: (f && f.inferredClassId) ? String(f.inferredClassId) : '',
-                        result: (f && f.result) ? f.result : null
+                        result: (f && f.result) ? {...f.result,original_image_url:cloud.mode === 'cloud' && /^[a-f0-9-]{36}$/.test(f?.cloudAssetIds?.[0] || '') ? '/api/assets/' + f.cloudAssetIds[0] : ''} : null
                     }));
                     setFiles(restored);
+                    setSelectedFileId(restored[0]?.id || null);
+                    if (restored.some(file => file.status === 'idle')) {setIsPaused(true);setPauseBanner('已恢复存档，未批改的作文可继续处理。');}
                 }
+                setActiveCloudSnapshot(item.cloud ? {...item.cloud,revision:item.cloud.latestRevision || item.cloud.revision,localSavedAt:item.savedAt || ''} : null);
+                lastSavedLocalIdRef.current = item.id;lastSavedAtRef.current = item.savedAt || '';
             };
 
             const exportCsvHistoryFiltered = () => {
@@ -3142,7 +3183,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
                 let base64Url = "";
                 try {
-                    base64Url = await convertFileToBase64(fileItem.file);
+                    base64Url = await readStudentImage(fileItem);
                 } catch (err) {
                     setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'error' } : f));
                     setIsBatchProcessing(false);
@@ -3150,7 +3191,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     return;
                 }
 
-                if (!base64Url.startsWith('data:')) {
+                if (!base64Url.startsWith('data:') && !(cloud.mode === 'cloud' && /^wa-asset:[a-f0-9-]{36}$/.test(base64Url))) {
                     setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'error' } : f));
                     setIsBatchProcessing(false);
                     alert('重新批改失败：图片数据无效');
@@ -3164,7 +3205,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const result = await callAI([
                     { role: "system", content: SYSTEM_PROMPT_TEMPLATE(assignment, rubric, `Current Class: ${targetClassName}\nRoster:\n${getRosterTextForClassId(targetClassId)}`, targetGradeLevel, languageDifficulty) },
                     { role: "user", content: [{ type: "text", text: `标准范文：${assignment.modelEssay}` }, { type: "image_url", image_url: { url: base64Url } }] }
-                ]);
+                ], true, {cloudFileId:fileItem.id});
 
                 if (result) {
                     if (!result.standard_reference) result.standard_reference = assignment.modelEssay;
@@ -3225,14 +3266,14 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     const fileItem = pending[i];
                     setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'loading' } : f));
                     let base64Url = "";
-                    try { base64Url = await convertFileToBase64(fileItem.file); } catch (err) {
+                    try { base64Url = await readStudentImage(fileItem); } catch (err) {
                         setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'error' } : f));
                         continue;
                     }
                     
                     await new Promise(r => setTimeout(r, 1000));
                     
-                    if (!base64Url.startsWith('data:')) {
+                    if (!base64Url.startsWith('data:') && !(cloud.mode === 'cloud' && /^wa-asset:[a-f0-9-]{36}$/.test(base64Url))) {
                          setFiles(prev => prev.map(f => f.id === fileItem.id ? { ...f, status: 'error' } : f));
                          continue;
                     }
@@ -3244,7 +3285,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     const ai = await callAI([
                         { role: "system", content: SYSTEM_PROMPT_TEMPLATE(assignment, rubric, `Current Class: ${targetClassName}\nRoster:\n${getRosterTextForClassId(targetClassId)}`, targetGradeLevel, languageDifficulty) },
                         { role: "user", content: [{ type: "text", text: `标准范文：${assignment.modelEssay}` }, { type: "image_url", image_url: { url: base64Url } }] }
-                    ], true, { returnMeta: true, silent: true });
+                    ], true, { returnMeta: true, silent: true, cloudFileId:fileItem.id });
                     if (ai && ai.ok && ai.data) {
                         const result = ai.data;
                         if (!result.standard_reference) result.standard_reference = assignment.modelEssay;
@@ -4876,6 +4917,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         
                         <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : ''}`}>
                             <CloudConnection busy={isBatchProcessing}/>
+                            {cloud.mode === 'cloud' && <CloudSnapshotsPanel sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value => {
+                                applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});
+                                if(!isBatchProcessing){setStep(2);setMaxStep(previous => Math.max(previous,2));}
+                            }}/>}
                             {draftError && <p className="mx-auto max-w-3xl px-4 py-2 text-xs text-amber-700" role="status">{draftError}</p>}
                             {workflowMode === 'full' && <div className="teacher-mode-bar"><div>完整工作台</div><button onClick={() => { setWorkflowMode('quick'); setStep(0); }}>切换到快速批改</button></div>}
                             {step === 0 && (workflowMode === 'full' ? renderStep1() : <QuickGrading
@@ -5170,10 +5215,11 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         }
                     >
                         <div className="space-y-4 py-2">
-                            <div className="text-xs text-slate-500">保存到本地浏览器存储（不包含任何 API Key）。可在“班级分析”里管理与恢复。</div>
+                            <div className="text-xs text-slate-500">{cloud.mode === 'cloud' ? '本机先保留副本，再同步报告、当次评分标准和原稿到云端。同步失败时本机结果仍会保留。' : '保存到本地浏览器存储（不包含任何 API Key）。可在“班级分析”里管理与恢复。'}</div>
+                            {cloud.mode === 'cloud' && activeCloudSnapshot && <label className="flex items-start gap-2 text-xs text-slate-600"><input type="checkbox" checked={saveToCurrentCloud} onChange={event => setSaveToCurrentCloud(event.target.checked)}/><span>更新当前云端存档“{activeCloudSnapshot.name}”（第 {activeCloudSnapshot.revision} 版），保留旧版本。未勾选则另存为新记录。</span></label>}
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">名称</label>
-                                <input value={saveDraftName} onChange={(e) => setSaveDraftName(e.target.value)} className="w-full p-3 input-breath rounded-xl text-sm outline-none" placeholder={buildDefaultSaveName()} />
+                                <input aria-label="批改存档名称" value={saveDraftName} onChange={(e) => setSaveDraftName(e.target.value)} className="w-full p-3 input-breath rounded-xl text-sm outline-none" placeholder={buildDefaultSaveName()} />
                             </div>
                             <div className="text-xs text-slate-400">直接点击“保存”会使用默认名称；修改后会使用你输入的名称。</div>
                         </div>

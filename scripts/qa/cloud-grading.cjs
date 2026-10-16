@@ -10,7 +10,7 @@ async page => {
   await page.getByRole('link',{name:'使用 Daily 登录',exact:true}).waitFor();
   await page.evaluate(async seed=>{
     localStorage.clear();sessionStorage.clear();
-    await new Promise(resolve=>{const r=indexedDB.deleteDatabase('writeascend-private-drafts');r.onsuccess=resolve;r.onerror=resolve;r.onblocked=resolve;});
+    for(const name of ['writeascend-private-drafts','writeascend-cloud-sync'])await new Promise(resolve=>{const r=indexedDB.deleteDatabase(name);r.onsuccess=resolve;r.onerror=resolve;r.onblocked=resolve;});
     localStorage.setItem('smart_grader_data_v5_0',JSON.stringify(seed));
   },fixture.seed);
   const baseline=(await(await page.request.get('http://127.0.0.1:8890/sandbox/metrics')).json()).modelCalls;
@@ -39,6 +39,7 @@ async page => {
   await page.getByRole('button',{name:'继续批改',exact:true}).click();
   await page.getByRole('heading',{name:'保存批改结果',exact:true}).waitFor({timeout:40000});
   await page.getByRole('button',{name:'保存',exact:true}).click();
+  await page.getByText('已保存到云端 · 第 1 版',{exact:true}).waitFor();
   for(const label of ['总体评价 (Overall Comment)','优秀表达 (Excellent Expressions)','诊断与提升 (Correction)','内容优化建议 (Content Optimization Suggestions)','升级版习作 (Revised)','标准参考范文 (Model)'])await page.getByText(label,{exact:true}).first().waitFor();
   const metrics=await(await page.request.get('http://127.0.0.1:8890/sandbox/metrics')).json();
   if(metrics.modelCalls-baseline!==1)throw Error('Refreshing the phone page dispatched the model more than once: '+JSON.stringify(metrics));
@@ -57,7 +58,7 @@ async page => {
   if(!await page.getByRole('button',{name:'保存批改结果',exact:true}).isEnabled())throw Error('A model configuration error disabled access to existing teacher results.');
   await page.unroute('http://127.0.0.1:8789/api/model/profiles');
   await page.getByRole('button',{name:'刷新连接',exact:true}).click();
-  await page.getByText('支持刷新后继续批改，核对后的报告暂保存在本机。',{exact:true}).waitFor();
+  await page.getByText('支持刷新后继续批改，可将核对后的结果保存到云端。',{exact:true}).waitFor();
   await page.getByRole('button',{name:'退出',exact:true}).click();
   await page.getByRole('link',{name:'使用 Daily 登录',exact:true}).waitFor();
   await page.goto('http://127.0.0.1:8890/sandbox/use-other');
