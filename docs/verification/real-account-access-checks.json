@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-10-17T04:39:49.192Z",
+  "realTeacherBackendLoginObserved": true,
+  "browserPageContentVerified": false,
+  "administratorLoginVerified": false,
+  "studentLoginVerified": false,
+  "dailyIntrospection": {
+    "status": 200,
+    "active": true,
+    "role": "teacher",
+    "scopes": [
+      "writing.personal"
+    ],
+    "classCount": 0
+  },
+  "cloudAppSessions": [
+    {
+      "role": "teacher",
+      "count": 1,
+      "activeDuringCheck": 1
+    }
+  ],
+  "applicationAndGrantExpiryMatch": true,
+  "permissionChecks": [
+    {
+      "endpoint": "directory/overview",
+      "status": 403
+    },
+    {
+      "endpoint": "roster",
+      "status": 403
+    }
+  ],
+  "formalDirectoryCountsBefore": {
+    "writing_schools": 0,
+    "writing_classes": 0,
+    "writing_memberships": 0,
+    "writing_teacher_class_grants": 0
+  },
+  "formalDirectoryCountsAfter": {
+    "writing_schools": 0,
+    "writing_classes": 0,
+    "writing_memberships": 0,
+    "writing_teacher_class_grants": 0
+  },
+  "readonlyOfflineDirectoryPreview": {
+    "verifiedAt": "2026-10-17T04:39:04.047Z",
+    "authorityReadOnly": true,
+    "dailyReadOnly": true,
+    "formalDirectoryWritten": false,
+    "school": "瑞安市新纪元实验学校",
+    "academicYear": "2026-1",
+    "classes": 54,
+    "students": 2327,
+    "removed": 0
+  },
+  "privilegesChanged": false,
+  "realModelCalled": false,
+  "userCredentialsRead": false,
+  "sourceCommit": "0fc95234fab47a81d1427e90594787d11a38c6b7"
+}
