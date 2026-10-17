@@ -32,7 +32,17 @@ export function createPeerRoundAuthority({db,inspect,classesFor,sourceGrant,seal
   const latest=classroom(b);if(latest.version!==c.version||latest.grantVersion!==c.grantVersion)fail(409,'互评授权在核验期间改变。');return names;
  }
  async function adminProof(actor,roundId,b){if(actor.role!=='admin')return {admin_context:null,admin_source:null};const grant=sourceGrant(actor.grantId);if(!grant)fail(401,'请重新登录管理员账号。');const context={id:'round:'+roundId+':'+digest(b),provider:actor.provider,subject:actor.subject,role:actor.role,source_hash:grant.source_hash,source_epoch:grant.source_epoch};return {admin_context:JSON.stringify(context),admin_source:seal(unseal(grant),context)};}
- return async function handle(endpoint,body){if(!endpoint.startsWith('round/'))return null;initialize();const actor=await inspect(body.grantId);
+ return async function handle(endpoint,body){if(!endpoint.startsWith('round/'))return null;initialize();
+  // The fixed source service attests its freshly authenticated author through
+  // the peer service. No peer browser grant is impersonated or manufactured.
+  if(endpoint==='round/author'){
+   const actor=body.actor;if(!uuid.test(body.roundId)||!actor||actor.provider!=='wordup'||actor.role!=='student'||typeof actor.subject!=='string'||!actor.subject||actor.subject.length>200)fail(403,'请使用本篇作者的学校账号。');
+   const row=db.prepare('SELECT * FROM writing_peer_round_sources WHERE round_id=?').get(body.roundId);if(!row)fail(404,'互评轮次尚未授权。');const b=JSON.parse(row.binding_json);
+   const ownClass=()=>classesFor(actor).some(c=>c.id===b.classId&&c.scopes.includes('peer.own'));
+   if(!b.members.some(m=>m.provider===actor.provider&&m.subject===actor.subject)||!ownClass())fail(404,'没有分配给当前账号的互评轮次。');
+   await authority(b,row);if(!ownClass())fail(403,'当前学校成员关系已改变。');return {active:true,bindingHash:row.binding_hash,role:'student'};
+  }
+  const actor=await inspect(body.grantId);
   if(endpoint==='round/preview'||endpoint==='round/authorize'){
    const b=binding(body.binding);if(!ownerIs(actor,b.owner)||!['teacher','admin'].includes(actor.role))fail(403,'只有原任课教师可以安排本轮。');const id=endpoint==='round/authorize'?body.roundId:crypto.randomUUID();if(!uuid.test(id))fail(400,'互评轮次编号不正确。');const proof=await adminProof(actor,id,b),names=await authority(b,proof),hash=digest(b);
    // Recheck the actor after asynchronous authority reads, including source logout.

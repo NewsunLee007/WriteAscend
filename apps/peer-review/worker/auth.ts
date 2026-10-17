@@ -15,7 +15,7 @@ export function sameOrigin(req:Request,env:AuthEnv){if(req.headers.get('origin')
 function validOrigin(value:string){try{const u=new URL(value);return u.origin===value&&!u.username&&!u.password&&(u.protocol==='https:'||u.protocol==='http:'&&['127.0.0.1','localhost'].includes(u.hostname));}catch{return false;}}
 export function configured(env:AuthEnv){return validOrigin(env.PUBLIC_ORIGIN)&&validOrigin(env.DAILY_ORIGIN)&&!!env.PEER_BRIDGE_SERVICE_TOKEN&&env.PEER_BRIDGE_SERVICE_TOKEN.length>=32&&(!env.PUBLIC_ORIGIN.startsWith('https:')||env.DAILY_ORIGIN.startsWith('https:'));}
 function nextPath(value:string|null,env:AuthEnv){try{const u=new URL(value||'/',env.PUBLIC_ORIGIN);if(u.origin!==env.PUBLIC_ORIGIN||value?.includes('\\')||!/^\/(?:$|student\/?$|teacher\/?$|rounds\/[a-f0-9-]{36}$|imports\/[a-f0-9-]{36}(?:\/setup)?$)/.test(u.pathname))return '/';return u.pathname+u.search+u.hash;}catch{return '/';}}
-export async function bridge(env:AuthEnv,path:'token'|'introspect'|'renew'|'revoke'|'round/preview'|'round/authorize'|'round/check',body:unknown){
+export async function bridge(env:AuthEnv,path:'token'|'introspect'|'renew'|'revoke'|'round/preview'|'round/authorize'|'round/check'|'round/author',body:unknown){
  if(!configured(env))fail(503,'作文互批登录正在接入，请稍后重试。');let response:Response;
  try{response=await fetch(new URL('/api/integrations/writing-peer/'+path,env.DAILY_ORIGIN),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.PEER_BRIDGE_SERVICE_TOKEN},body:JSON.stringify(body),redirect:'manual',signal:AbortSignal.timeout(10000)});}catch{fail(503,'Daily 暂时无法连接，请稍后重试。');}
  if(!response!.ok&&path.startsWith('round/')&&[403,404,409].includes(response!.status))fail(response!.status,'本轮名单或学校权限已改变，请老师核对。');

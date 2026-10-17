@@ -2,11 +2,13 @@ import type {Fetcher} from '@cloudflare/workers-types';
 import {AuthError,authenticate,configured,handleAuth,sha,type AuthEnv} from './auth';
 import {handleImports} from './imports';
 import {handleRounds} from './rounds';
+import {handleRevisionBasis} from './revision-basis';
 export interface Env extends AuthEnv{ASSETS:Fetcher;SOURCE_ORIGIN?:string;SOURCE_EXCHANGE_TOKEN?:string;SOURCE_SERVICE?:Fetcher;}
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}});
 export default {async fetch(req:Request,env:Env):Promise<Response>{let renewal:string|undefined;const refreshed=(r:Response)=>{if(!renewal)return r;const headers=new Headers(r.headers);headers.append('Set-Cookie',renewal);return new Response(r.body,{status:r.status,headers});};try{const path=new URL(req.url).pathname;
  if(!path.startsWith('/api/')){const response=await env.ASSETS.fetch(req as any),headers=new Headers(response.headers as any);headers.set('Cache-Control','no-store');headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','no-referrer');headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=()');return new Response(response.body as any,{status:response.status,headers});}
  if(path==='/api/health'&&req.method==='GET')return json({service:'writing-peer',loginConfigured:configured(env)});
+ const revisionBasis=await handleRevisionBasis(req,env);if(revisionBasis)return revisionBasis;
  const auth=await handleAuth(req,env);if(auth)return auth;
  if(path.startsWith('/api/imports/')||path.startsWith('/api/rounds')||path.startsWith('/api/assignments/')){const who=await authenticate(req,env);renewal=who.renewCookie;const response=await handleRounds(req,env,who)||await handleImports(req,env,who);if(response)return refreshed(response);}
  if(path==='/api/me'&&req.method==='GET'){const who=await authenticate(req,env);renewal=who.renewCookie;return refreshed(json({authenticated:true,workspaceId:await sha('writing-peer|'+who.principal),name:who.name,role:who.role,scopes:who.scopes,classes:who.classes,expires:who.expires}));}

@@ -38,7 +38,11 @@ try{
  const peerUpgrade=cycle('previous full source before peer login');
  for(const [name,entry] of Object.entries(manifest)){const current=hash(fs.readFileSync(path.join(fixture,name)));if(current!==entry.after)execFileSync('git',['-C',fixture,'apply','--include='+name,path.join(root,'integrations/daily',current===entry.before?'daily.patch':entry.upgrades[current])]);}
  const priorFiles=JSON.parse(command('install-daily-bridge.mjs')).changes.filter(name=>!Object.hasOwn(manifest,name)&&name!=='src/writing-peer-rounds.mjs');
- for(const name of priorFiles)fs.writeFileSync(path.join(fixture,name),execFileSync('git',['-C',root,'show','HEAD:integrations/daily/'+name]));
+ for(const name of priorFiles)fs.writeFileSync(path.join(fixture,name),execFileSync('git',['-C',root,'show','37193a9:integrations/daily/'+name]));
  const provenance=fs.mkdtempSync(path.join(root,'audit/private/daily-bridge-qa-prior-'));snapshots.push(provenance);fs.writeFileSync(path.join(provenance,'snapshot.json'),JSON.stringify({target:fixture,files:priorFiles.map(name=>({name,after:hash(fs.readFileSync(path.join(fixture,name)))}))}));
- const roundsUpgrade=cycle('previous 21-file peer login bundle');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade,peerUpgrade,roundsUpgrade],realSourceUntouched:true}));
+ const roundsUpgrade=cycle('previous 21-file peer login bundle');
+ const roundFiles=JSON.parse(command('install-daily-bridge.mjs')).changes.filter(name=>!Object.hasOwn(manifest,name));
+ for(const name of roundFiles)fs.writeFileSync(path.join(fixture,name),execFileSync('git',['-C',root,'show','5b0cec5:integrations/daily/'+name]));
+ const roundProvenance=fs.mkdtempSync(path.join(root,'audit/private/daily-bridge-qa-rounds-'));snapshots.push(roundProvenance);fs.writeFileSync(path.join(roundProvenance,'snapshot.json'),JSON.stringify({target:fixture,files:roundFiles.map(name=>({name,after:hash(fs.readFileSync(path.join(fixture,name)))}))}));
+ const revisionUpgrade=cycle('previous 22-file classroom rounds bundle');console.log(JSON.stringify({passed:true,syntheticFixtureOnly:true,checks:[fresh,upgrade,peerUpgrade,roundsUpgrade,revisionUpgrade],realSourceUntouched:true}));
 }finally{fs.rmSync(fixture,{recursive:true,force:true});for(const snapshot of snapshots)fs.rmSync(snapshot,{recursive:true,force:true});}

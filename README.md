@@ -4,7 +4,7 @@
 
 升级以原 GitHub 教师作文批阅系统的完整功能为基础：题目和标准设置、作文上传、大模型一键批量批改、教师核对、导出与班级分析。保留后逐项优化，再接入 Daily 身份、Cloudflare 后台与扫码收作业。
 
-学生互批的独立工程位于 [apps/peer-review](apps/peer-review/README.md)，已完成研究核对、独立登录、材料准备/导入、轮次分配、学生评阅、教师发布和作者回应的本地联调；同伴反馈关联自主二稿及公网部署继续开发。它使用共享身份和评价标准接口，不替换或混入教师一键批改主流程。`src/main.tsx` 当前入口为从原系统保留的 `TeacherApp.jsx`；报告导入实验界面不作为产品入口。
+学生互批的独立工程位于 [apps/peer-review](apps/peer-review/README.md)，已完成研究核对、独立登录、材料准备/导入、轮次分配、学生评阅、教师发布和作者回应的本地联调；同伴反馈关联自主手写二稿已完成本地联调，公网部署与真实环境验收继续推进。它使用共享身份和评价标准接口，不替换或混入教师一键批改主流程。`src/main.tsx` 当前入口为从原系统保留的 `TeacherApp.jsx`；报告导入实验界面不作为产品入口。
 
 运行 `npm install` 后使用 `npm run dev` 在 `http://127.0.0.1:5186/` 预览。默认快速批改与右上角“完整工作台”共用原评分、模型调用、结果、档案和导出逻辑。`npm test` 验证评分逻辑与历史兼容，`npm run peer:test` 与 `npm run peer:check` 单独检查互批核心，`npm run build` 验证生产构建。浏览器回归脚本和已验证范围见 [教师流程验证](docs/verification/teacher-workflow.md)。
 
@@ -16,6 +16,7 @@
 - [已执行的验证记录](docs/verification/README.md)
 - [当前执行记录](docs/EXECUTION.md)
 - [独立互批研究与适龄改编](docs/peer-review-research.md)
+- [同伴反馈关联手写二稿](docs/peer-feedback-revisions.md)
 - [独立互批轮次与课堂流程](docs/peer-rounds.md)
 - [互批轮次验证](docs/verification/peer-rounds.md)
 - [独立互批接入方案](docs/peer-review-integration.md)

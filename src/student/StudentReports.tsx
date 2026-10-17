@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {useTeacherCloud} from '../teacher/TeacherCloud';
 import StudentRevision from './StudentRevision';
+import PeerRevisionStart from './PeerRevisionStart';
 import StudentRevisionsHome from './StudentRevisionsHome';
 import {gradingApi,gradingMutation} from '../teacher/bound-grading';
 import LegacyPaper from '../report/LegacyPaper.jsx';
@@ -11,6 +12,7 @@ export default function StudentReports(){
  const [items,setItems]=useState<any[]>([]),[next,setNext]=useState<string|null>(null),[report,setReport]=useState<any>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [revisionId,setRevisionId]=useState(()=>{const id=new URLSearchParams(location.search).get('revision')||'';return /^[a-f0-9-]{36}$/.test(id)?id:'';}),[showRevisions,setShowRevisions]=useState(new URLSearchParams(location.search).has('revisions'));
  function revisionLocation(id=''){history.replaceState(null,'',id?'/student?revision='+encodeURIComponent(id):'/student?revisions=1');}
+ const [peerRoundId,setPeerRoundId]=useState(()=>{const id=new URLSearchParams(location.search).get('peerRound')||'';return /^[a-f0-9-]{36}$/.test(id)?id:'';});
  const [query,setQuery]=useState('');const alive=useRef(true),controller=useRef(new AbortController()),lock=useRef(false),reportRef=useRef<any>(null),readReceipts=useRef(new Set<string>());reportRef.current=report;
  async function api(path:string,body?:unknown){return gradingApi(path,workspace,body,body?'POST':'GET',controller.current.signal);}
  async function list(cursor?:string){const value=await api('/api/student/reports'+(cursor?'?cursor='+encodeURIComponent(cursor):''));if(alive.current){setItems(old=>cursor?[...old,...value.reports.filter((item:any)=>!old.some(o=>o.id===item.id))]:value.reports);setNext(value.next);}}
@@ -33,7 +35,7 @@ export default function StudentReports(){
   <header className="student-writing-header no-print"><a href="/student"><img src="/favicon.svg" alt=""/><strong>我的作文</strong></a><div><span>{cloud.identity?.name}</span>{cloud.status==='expired'?<a href="/api/auth/start?next=/student">重新登录</a>:<button onClick={()=>void cloud.logout()}>退出</button>}</div></header>
   <main className="student-writing-main no-print">
    {error&&<p role="alert" className="student-report-error">{error}</p>}{notice&&<p role="status" className="student-report-notice">{notice}</p>}
-   {cloud.status==='expired'?<section className="student-writing-empty"><h1>请重新登录</h1><p>登录已过期，重新进入后即可继续查看自己的作文。</p><a href="/api/auth/start?next=/student">使用 Daily 登录</a></section>:revisionId?<StudentRevision key={revisionId} id={revisionId} onClose={()=>{setRevisionId('');setShowRevisions(true);revisionLocation();}} onFeedback={id=>{setRevisionId('');setShowRevisions(false);void open(id);}}/>:showRevisions?<StudentRevisionsHome onClose={()=>{setShowRevisions(false);history.replaceState(null,'','/student');}} onOpen={id=>{setRevisionId(id);revisionLocation(id);setShowRevisions(false);setReport(null);}}/>:report?<>
+   {cloud.status==='expired'?<section className="student-writing-empty"><h1>请重新登录</h1><p>登录已过期，重新进入后即可继续查看自己的作文。</p><a href="/api/auth/start?next=/student">使用 Daily 登录</a></section>:peerRoundId?<PeerRevisionStart roundId={peerRoundId} onOpen={id=>{setPeerRoundId('');setRevisionId(id);setReport(null);revisionLocation(id);}} onClose={()=>{setPeerRoundId('');setShowRevisions(true);revisionLocation();}}/>:revisionId?<StudentRevision key={revisionId} id={revisionId} onClose={()=>{setRevisionId('');setShowRevisions(true);revisionLocation();}} onFeedback={id=>{setRevisionId('');setShowRevisions(false);void open(id);}}/>:showRevisions?<StudentRevisionsHome onClose={()=>{setShowRevisions(false);history.replaceState(null,'','/student');}} onOpen={id=>{setRevisionId(id);revisionLocation(id);setShowRevisions(false);setReport(null);}}/>:report?<>
     <nav className="student-report-actions" aria-label="作文反馈操作"><button onClick={()=>{setReport(null);void run(()=>list());}}>返回作文列表</button><button disabled={busy} onClick={()=>void open(report.publication.draftId)}>刷新反馈</button><button className="student-primary" onClick={print}>打印我的反馈</button>{report.draftNumber<20&&<button disabled={busy} onClick={()=>void startRevision()}>开始下一稿修订</button>}</nav>
     <div className="student-feedback-meta"><span>第 {report.draftNumber} 稿 · 反馈第 {report.publication.version} 版</span><span>{report.publication.teacherName} · {date(report.publication.publishedAt)}发布</span></div>
     {report.revisionSource?.kind==='student'&&<details className="student-writing-criteria"><summary>本稿是我的自主修订 · 查看修改记录</summary>{report.revisionSource.changes.map((c:any,i:number)=><div key={i}><strong>{c.label}</strong><p>{c.evidence}</p></div>)}<p>{report.revisionSource.reflection}</p></details>}

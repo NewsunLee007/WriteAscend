@@ -17,7 +17,7 @@ export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
   FEEDBACK_EVENTS?: Queue<{eventId:string}>;
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
-  PEER_ORIGIN?: string; PEER_EXCHANGE_TOKEN?: string;
+  PEER_ORIGIN?: string; PEER_EXCHANGE_TOKEN?: string; PEER_SERVICE?:Fetcher;
 }
 type Session = {token_hash:string;principal:string;grant_id:string;provider:string;subject:string;role:string;display_name:string;expires:number};
 type ClassGrant = {id:string;schoolId:string;academicYear:string;name:string;grade:string;version:number;grantVersion:number;scopes:string[]};

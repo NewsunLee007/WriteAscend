@@ -48,7 +48,7 @@ export function createWritingPeerBridge({db,publicOrigin,serviceToken='',storage
   if(!enabled||!sourceHealthy)fail(503,'作文互评登录正在接入，请稍后重试。');initialize();const endpoint=url.pathname.slice(prefix.length);
   if(endpoint==='context'&&req.method==='GET'){parameters(Object.fromEntries(url.searchParams));const v=await resolve(req);send(res,200,{authenticated:true,name:v.name||'',role:v.role});return true;}
   if(req.method!=='POST')fail(405,'请求方式不支持。');if(endpoint==='authorize')sameOrigin(req);else machine(req);
-  if(!['authorize','token','introspect','renew','revoke','round/preview','round/authorize','round/check'].includes(endpoint))fail(404,'互评登录接口不存在。');const body=await input(req,endpoint.startsWith('round/')?128*1024:8192);
+  if(!['authorize','token','introspect','renew','revoke','round/preview','round/authorize','round/check','round/author'].includes(endpoint))fail(404,'互评登录接口不存在。');const body=await input(req,endpoint.startsWith('round/')?128*1024:8192);
   if(endpoint.startsWith('round/')){send(res,200,await roundAuthority(endpoint,body));return true;}
   if(endpoint==='authorize'){
    const p=parameters(body),epochs=new Map(sourceCookies(req).map(cookie=>[hash(cookie),epoch(hash(cookie))])),v=await resolve(req),sourceHash=v.source?.cookie?hash(v.source.cookie):'';
