@@ -137,6 +137,79 @@
       "version_metadata": {
         "binding": "VERSION"
       }
+    },
+    "production": {
+      "name": "writeascend-production",
+      "workers_dev": true,
+      "preview_urls": false,
+      "vars": {
+        "PUBLIC_ORIGIN": "https://writeascend.newsunenglish.com",
+        "DAILY_ORIGIN": "https://daily.newsunenglish.com",
+        "PEER_ORIGIN": "https://newsun-writing-peer-production.317792050.workers.dev",
+        "MODEL_VAULT_KEY_ID": "production-personal-v1"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "writeascend-production",
+          "database_id": "42be3f98-85b6-45cd-a9ff-261b6e167e91",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "writeascend-production-private"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "MODEL_JOBS",
+            "queue": "writeascend-production-model-jobs"
+          },
+          {
+            "binding": "FEEDBACK_EVENTS",
+            "queue": "writeascend-production-feedback-events"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "writeascend-production-model-jobs",
+            "max_batch_size": 1,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "max_concurrency": 2
+          },
+          {
+            "queue": "writeascend-production-feedback-events",
+            "max_batch_size": 5,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "max_concurrency": 3
+          }
+        ]
+      },
+      "triggers": {
+        "crons": [
+          "* * * * *"
+        ]
+      },
+      "services": [
+        {
+          "binding": "PEER_SERVICE",
+          "service": "newsun-writing-peer-production"
+        }
+      ],
+      "version_metadata": {
+        "binding": "VERSION"
+      },
+      "routes": [
+        {
+          "pattern": "writeascend.newsunenglish.com/*",
+          "zone_id": "18f1e2f6aa0dead6233f033ffc66db5d"
+        }
+      ]
     }
   },
   "account_id": "41c0024342aae8d7b6a8b67c7def1d3e"

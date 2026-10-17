@@ -53,6 +53,33 @@
           "service": "writeascend-staging"
         }
       ]
+    },
+    "production": {
+      "name": "newsun-writing-peer-production",
+      "workers_dev": true,
+      "preview_urls": false,
+      "version_metadata": {
+        "binding": "VERSION"
+      },
+      "vars": {
+        "PUBLIC_ORIGIN": "https://newsun-writing-peer-production.317792050.workers.dev",
+        "DAILY_ORIGIN": "https://daily.newsunenglish.com",
+        "SOURCE_ORIGIN": "https://writeascend.newsunenglish.com"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "writing-peer-production",
+          "database_id": "3dc945f1-9f2c-4718-802a-a85f58745617",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "services": [
+        {
+          "binding": "SOURCE_SERVICE",
+          "service": "writeascend-production"
+        }
+      ]
     }
   },
   "account_id": "41c0024342aae8d7b6a8b67c7def1d3e",
