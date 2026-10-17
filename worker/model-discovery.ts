@@ -1,7 +1,7 @@
 import type {Env} from './index';
 import {HttpError} from './errors';
 import {readPersonalModel,personalModelKey,validatePersonalEndpoint} from './personal-models';
-import {providerById,curatedModels,modelCatalogCheckedAt,type ModelPurpose} from '../src/teacher/model-providers';
+import {providerById,curatedModels,modelRecommendation,modelCatalogCheckedAt,type ModelPurpose} from '../src/teacher/model-providers';
 const cached=new Map<string,{expires:number;result:any}>();
 async function readBounded(response:Response){if(!response.body)throw new HttpError(502,'供应商没有返回模型目录。');const reader=response.body.getReader();let text='',size=0;const decoder=new TextDecoder();while(true){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>1024*1024){await reader.cancel();throw new HttpError(502,'供应商模型目录过大，请使用内置精选型号。');}text+=decoder.decode(chunk.value,{stream:true});}try{return JSON.parse(text+decoder.decode());}catch{throw new HttpError(502,'供应商目录格式暂不支持，请使用内置精选型号。');}}
 export async function discoverModels(req:Request,env:Env,who:{principal:string;role:string},input:(req:Request,max?:number)=>Promise<unknown>):Promise<Response|null>{
@@ -33,9 +33,9 @@ export async function discoverModels(req:Request,env:Env,who:{principal:string;r
    const target=new URL(listUrl);if(provider.id==='qwen'){target.searchParams.set('page_no',String(page));target.searchParams.set('page_size','100');target.searchParams.set('name','qwen');}
    const response=await fetch(target,{headers:{Authorization:'Bearer '+secret,Accept:'application/json'},redirect:'manual',signal:AbortSignal.timeout(12000)});
    if(!response.ok){await response.body?.cancel();if([401,403].includes(response.status))throw new HttpError(400,'目录鉴权未通过，请核对密钥、地域和账户权限。');if(response.status===429)throw new HttpError(429,'供应商目录刷新过于频繁，请稍后重试。');throw new HttpError(502,'供应商暂未提供可读取的目录，内置精选仍可选择。');}
-   const value=await readBounded(response),rows=Array.isArray(value.data)?value.data:Array.isArray(value.output?.models)?value.output.models:Array.isArray(value.models)?value.models:Array.isArray(value.data?.models)?value.data.models:null;
+   const value=await readBounded(response),rows=Array.isArray(value)?value:Array.isArray(value.data)?value.data:Array.isArray(value.output?.models)?value.output.models:Array.isArray(value.models)?value.models:Array.isArray(value.data?.models)?value.data.models:null;
    if(!rows)throw new HttpError(502,'供应商目录格式暂不支持，内置精选仍可选择。');
-   total+=rows.length;for(const row of rows){const id=typeof row==='string'?row:row?.id||row?.model||row?.name;const input=row?.inference_metadata?.request_modality,output=row?.inference_metadata?.response_modality;const noImage=Array.isArray(input)&&!input.includes('Image'),noText=Array.isArray(output)&&!output.includes('Text');if(typeof id==='string'&&id.length<=120&&!id.includes(secret)&&!noImage&&!noText&&(row?.capabilities?.vision!==false||row?.capabilities?.ocr===true))ids.push(id.replace(/^models\//,''));}
+   total+=rows.length;for(const row of rows){const id=typeof row==='string'?row:row?.id||row?.model||row?.name;const input=row?.inference_metadata?.request_modality,output=row?.inference_metadata?.response_modality;const noImage=Array.isArray(input)&&!input.includes('Image'),noText=Array.isArray(output)&&!output.includes('Text');if(typeof id==='string'&&id.length<=120&&!id.includes(secret)&&!noImage&&!noText&&(row?.capabilities?.vision!==false||row?.capabilities?.ocr===true||typeof id==='string'&&!!modelRecommendation(provider.id,id)?.specialist))ids.push(id.replace(/^models\//,''));}
    if(provider.id!=='qwen'||rows.length<100)break;
   }
  }catch(error){if(error instanceof HttpError)throw error;throw new HttpError(502,'供应商目录连接超时或中断，可重试或继续使用内置精选。');}

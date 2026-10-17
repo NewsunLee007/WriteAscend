@@ -40,3 +40,6 @@ test('school-managed OCR profiles share the same adapter and cannot be assigned 
 test('providers without a verified account-list API retain official presets without sending credentials to guessed endpoints',async()=>{
  const h=await setup();try{globalThis.fetch=async()=>{throw Error('No outbound request expected');};const value=await h.api('/api/model/discover',{provider:'glm',purpose:'grading',apiKey:secret});assert.equal(value.status,200);assert.equal(value.body.source,'builtin');assert(value.body.models.every((m:any)=>m.id.includes('v')));}finally{h.close();}
 });
+test('Mistral root-array catalogs retain verified OCR models even when chat vision capability is false',async()=>{
+ const h=await setup();try{globalThis.fetch=async(url,options)=>{assert.equal(String(url),'https://api.mistral.ai/v1/models');assert.equal(options?.redirect,'manual');return Response.json([{id:'mistral-ocr-4-1',capabilities:{completion_chat:false,vision:false}},{id:'mistral-ocr-latest',capabilities:{vision:false}},{id:'mistral-large-latest',capabilities:{vision:true}},{id:'unreviewed-ocr',capabilities:{vision:true}}]);};const found=await h.api('/api/model/discover',{provider:'mistral',purpose:'ocr',apiKey:secret});assert.equal(found.status,200);assert.deepEqual(found.body.models.map((m:any)=>m.id),['mistral-ocr-4-1','mistral-ocr-latest']);}finally{h.close();}
+});
