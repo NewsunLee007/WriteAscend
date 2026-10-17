@@ -5,6 +5,7 @@ import type {GradingRun,GradingStep} from './grading-types';
 import {HttpError} from './errors';
 import {digest,sanitizeLegacy} from '../src/report/legacy-import';
 import {readPrivateAsset} from './assets';
+import {wordCountConflict} from '../src/teacher/rubric-library';
 import {configuredGradingModel,enqueueModelJob} from './model-jobs';
 import {GRADING_PIPELINE_VERSION,gradeMessages,optimizedMessages,difficultyMessages,repairJsonMessages,responseContent,parseGradingObject,applyStage,nextStage,finalizeGrade,type PipelineInput,type PipelineStage} from '../src/report/grading-pipeline';
 
@@ -70,6 +71,8 @@ async function createRun(env:Env,session:TaskSession,taskId:string,body:any,brid
  allowClass(session.classes,c.member.class_id);await authority(env,session.principal,session.grant_id,c.member.class_id,bridge);
  if(c.task.status==='draft'||c.member.status!=='active')fail(409,'此任务或学生暂不允许批阅。');
  if(c.draft.revision!==body.inputRevision||c.draft.input_hash!==body.inputHash||c.draft.state!=='received')fail(409,'原稿已经更新，请重新核对收取情况。','grading_input_changed');
+ const countConflict=wordCountConflict(c.document.assignment.topic,c.document.rubric.wordCount);
+ if(countConflict)fail(409,countConflict+'请在任务设置中修订本次标准后再批阅；未提交模型请求。','grading_standard_conflict');
  const model=await configuredGradingModel(env,body.profileId,session.principal),temperature=body.temperature??0.25;if(body.configurationVersion!==undefined&&body.configurationVersion!==model.revision)fail(409,'模型配置已变化，请刷新模型后再提交。','model_profile_changed');
  if(typeof temperature!=='number'||!Number.isFinite(temperature)||temperature<0||temperature>1)fail(400,'批改温度参数不正确。');
  const effectiveTemperature=Math.min(temperature,0.25),key=await digest({owner:session.principal,draftId:body.draftId,inputHash:body.inputHash,profileId:model.id,profileRevision:model.revision,pipeline:GRADING_PIPELINE_VERSION,temperature:effectiveTemperature});

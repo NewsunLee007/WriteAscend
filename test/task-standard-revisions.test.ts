@@ -1,7 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {sandbox,taskId,memberIds} from './helpers/bound-sandbox';
+import {digest} from '../src/report/legacy-import';
 const route='/api/tasks/'+taskId+'/standard';
+test('a conflicting frozen word range cannot start a paid run; a versioned correction reuses its collected photo',async()=>{
+ const h=await sandbox();try{
+  const document=JSON.parse(h.objects.get('task-document') as string);document.assignment.topic='Write about your day in 60–80 words.';document.rubric.wordCount='80–100 words';
+  const rubricHash=await digest(document.rubric),contentHash=await digest({title:'合成后台批阅',document});h.objects.set('task-document',JSON.stringify(document));
+  h.db.prepare('UPDATE writing_tasks SET content_hash=?,rubric_hash=?').run(contentHash,rubricHash);h.db.prepare('UPDATE rubric_versions SET content_hash=?,rubric_hash=?').run(contentHash,rubricHash);
+  await h.collect();const refused=await h.create(await h.inputFor());assert.equal(refused.status,409);assert.equal(refused.body.error.code,'grading_standard_conflict');assert.equal(h.calls.length,0);assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM grading_runs').get()!.n,0);
+  const request=await body(h);request.rubric.wordCount='60–80 words';assert.equal((await h.request(route,request)).status,200);
+  const accepted=await h.create(await h.inputFor());assert.equal(accepted.status,202,JSON.stringify(accepted));await h.drain();assert.equal((await h.request('/api/writing-reports/'+accepted.body.run.id)).body.document.rubric.wordCount,'60–80 words');
+ }finally{h.close();}
+});
 async function body(h:Awaited<ReturnType<typeof sandbox>>){const d=(await h.request('/api/tasks/'+taskId)).body.document;return {requestId:crypto.randomUUID(),expectedRevision:2,teacherConfirmed:true,reason:'按本篇题目核对后调整字数',rubric:{...d.rubric,wordCount:'50–70 words'},settings:d.settings};}
 test('an unpublished task can revise standards without reuploading photos or overwriting an earlier report',async()=>{
  const h=await sandbox();try{
