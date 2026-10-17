@@ -3,7 +3,7 @@ import {LayoutDashboard,Files,Zap,FolderArchive,ChartNoAxesCombined,Users,Settin
 import {useTeacherCloud} from './TeacherCloud';
 import {WorkspaceNavigation,type LeaveGuard} from './workspace-navigation';
 import './workspace-shell.css';
-export const workspacePages={rubrics:['批阅标准','按文章类型选用、编辑并保存个人标准，每次任务保留独立标准。'],prepare:['题目与评分标准','明确写作要求，按本次教学目标设置评价标准。'],home:['工作台','从写作任务开始，让每份反馈都有下一步。'],tasks:['写作任务','题目、名单、收取和批阅，在同一篇任务中有序推进。'],quick:['快捷批阅','关联 Daily 班级，确认本篇题目与标准，再收取和批阅。'],upload:['本次作文','管理快捷批阅的照片与学生归属。'],reports:['批改档案','查看、编辑和导出本次结果，或继续历史批次。'],analysis:['学情分析','依据已批阅的作文，了解班级与学生的进步。'],students:['班级与学生','学校名单按任教权限关联，学生使用自己的账号查看反馈。'],settings:['模型与设置','配置批改、图片识别、报告导出和工作区备份。'],directory:['学校管理','核对学校目录、学期与教师任教权限。']} as const;
+export const workspacePages={rubrics:['批阅标准','按文章类型选用、编辑并保存个人标准，每次任务保留独立标准。'],prepare:['题目与评分标准','明确写作要求，按本次教学目标设置评价标准。'],home:['工作台','从写作任务开始，让每份反馈都有下一步。'],tasks:['写作任务','题目、名单、收取和批阅，在同一篇任务中有序推进。'],quick:['快捷批阅','关联 Daily 班级，确认本篇题目与标准，再收取和批阅。'],upload:['本次作文','管理快捷批阅的照片与学生归属。'],reports:['批改档案','按学生、任务或批次查找反馈，从原稿到报告清晰回看。'],analysis:['学情分析','依据已批阅的作文，了解班级与学生的进步。'],students:['班级与学生','学校名单按任教权限关联，学生使用自己的账号查看反馈。'],settings:['模型与设置','配置批改、图片识别、报告导出和工作区备份。'],directory:['学校管理','核对学校目录、学期与教师任教权限。']} as const;
 export type WorkspacePage=keyof typeof workspacePages;
 const links=[['home','工作台',LayoutDashboard],['tasks','写作任务',Files],['quick','快捷批阅',Zap],['rubrics','批阅标准',BookOpen],['reports','批改档案',FolderArchive],['analysis','学情分析',ChartNoAxesCombined],['students','班级与学生',Users]] as const;
 export default function WorkspaceShell({page,onNavigate,busy,children}:{page:WorkspacePage;onNavigate:(page:WorkspacePage)=>void;busy:boolean;children:React.ReactNode}){

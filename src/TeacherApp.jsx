@@ -15,6 +15,8 @@ import WorkspaceShell,{workspacePages} from './teacher/WorkspaceShell';
 import WorkspaceHome from './teacher/WorkspaceHome';
 import TaskWorkspace from './teacher/TaskWorkspace';
 import TaskPreparation from './teacher/TaskPreparation';
+import ArchiveWorkspace from './teacher/ArchiveWorkspace';
+import ReportArchive from './teacher/ReportArchive';
 import SchoolRosterPage from './teacher/SchoolRosterPage';
 import {taskClasses,uniqueStudent} from './teacher/task-roster';
 const SchoolDirectoryPanel=React.lazy(()=>import('./teacher/SchoolDirectoryPanel'));
@@ -1601,6 +1603,8 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                 if (!item || !item.data) return;
                 if (isBatchProcessing) return alert('请先暂停当前批改，再恢复历史结果。');
                 const d = item.data || {};
+                setPauseBanner('');
+                setIsPaused(false);
                 setSourceTask(d.sourceTask || null);
                 if (d.assignment) setAssignment(d.assignment);
                 if ((item.cloud || item.legacyOriginal) && d.rubric) {
@@ -3949,117 +3953,17 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
             };
 
             const renderStep3 = () => {
-                const currentFile = files.find(f => f.id === selectedFileId);
-
-                const handleToggleOverallPreview = () => {
-                    const next = !overallPreviewOpen;
-                    setOverallPreviewOpen(next);
-                    if (next) {
-                        setViewMode('grid');
-                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                    } else {
-                        const top = document.querySelector('#step-4-root')?.getBoundingClientRect().top || 0;
-                        const scrollTop = window.scrollY + top - 120;
-                        window.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-                    }
-                };
-                return (
-                    <div className="relative" id="step-4-root">
-                        <div className="mt-8 fade-in flex flex-col gap-6 px-8">
-                            <div className="flex items-center justify-between gap-4 mb-2">
-                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    本次批改报告
-                                </h2>
-                            </div>
-                        <nav className="teacher-report-tools no-print" aria-label="报告操作">
-                            <button onClick={handleToggleOverallPreview} aria-pressed={overallPreviewOpen}><Grid size={16}/>整体预览</button>
-                            <button onClick={()=>setShowPDFSettings(true)}><Sliders size={16}/>排版设置</button>
-                            <button onClick={()=>handlePrint('single')}><Printer size={16}/>打印当前学生</button>
-                            <button onClick={exportCsvForClass}><Download size={16}/>导出 CSV</button>
-                            <button className="teacher-tool-primary" onClick={()=>handlePrint('batch')}><Printer size={16}/>打印/导出所有PDF</button>
-                        </nav>
-                            <div className="teacher-grading-layout flex gap-4 items-stretch h-[calc(100vh-220px)]">
-                                <div className="teacher-grading-sidebar w-64 bg-white/90 glass-iso border border-white/60 rounded-3xl flex flex-col h-full z-10 shadow-xl backdrop-blur-md overflow-hidden">
-                                    <div className="p-5 border-b border-white/50">
-                                        {(isBatchProcessing||isPaused||files.some(f=>!['success'].includes(f.status)))&&<>
-                                        <button onClick={startBatchGrading} disabled={isBatchProcessing || files.length === 0} className={`w-full flex justify-center items-center gap-2 py-4 rounded-2xl text-sm font-bold shadow-lg transition-all transform hover:scale-[1.02] ${isBatchProcessing ? 'bg-slate-100 text-slate-400 cursor-wait' : 'btn-pure active'}`}>
-                                            {isBatchProcessing ? <Refresh className="spin" size={18}/> : <Check size={18}/>} {isBatchProcessing ? '正在智能批改...' : (isPaused ? '继续批改' : '开始批改')}
-                                        </button>
-                                        <button onClick={handlePauseBatch} disabled={!isBatchProcessing || pauseRequested} className="w-full mt-3 flex justify-center items-center gap-2 py-3 rounded-2xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            {pauseRequested ? '已请求暂停' : '暂停批改'}
-                                        </button>
-                                        </>}
-                                        <button onClick={openSaveDialogWithDefaultName} disabled={files.filter(f => f && f.status === 'success' && f.result).length === 0} className="w-full mt-3 flex justify-center items-center gap-2 py-3 rounded-2xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            保存批改结果
-                                        </button>
-                                        {pauseBanner && (
-                                            <div className="mt-3 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-2xl px-3 py-2">
-                                                {pauseBanner}
-                                            </div>
-                                        )}
-                                        <button className="w-full mt-3 btn-pure" onClick={()=>navigateWorkspace('upload')}>管理本次作文与照片</button>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                                        {files.map((f, idx) => (
-                                            <div key={f.id} onClick={() => handleFileClick(f)} className={`p-4 rounded-xl cursor-pointer flex items-center gap-4 border transition-all ${selectedFileId === f.id ? 'bg-white border-slate-200 shadow-md transform scale-[1.02]' : 'border-transparent hover:bg-white/40'}`}>
-                                                <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-inner">
-                                                    {f.url ? <img src={f.url} className="w-full h-full object-cover opacity-80" /> : <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300 text-[10px]">无图</div>}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-bold text-slate-700 truncate">{(f.result && f.result.student_name) || f.name || `学生 ${f.index}`}</div>
-                                                    <div className="text-xs mt-1 font-medium">{f.status === 'success' ? <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100">{f.result.total_score}分</span> : <span className="text-slate-400 flex items-center gap-1">{f.status==='loading'?<><Refresh size={10} className="spin"/> 批改中...</>:'待处理'}</span>}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="teacher-grading-detail flex-1 h-full">
-                                    <div className="h-full flex flex-col">
-                                        <div className="flex-1 overflow-y-auto flex justify-center relative">
-                                            {currentFile ? (
-                                                <div className="w-full max-w-7xl mx-auto">
-                                                    <div className="flex gap-8 items-start justify-between pb-40">
-                                                        <div className="hidden xl:block w-60 sticky top-10 shrink-0">
-                                                            <div className="bg-white p-4 rounded-3xl shadow-sm border border-white/60">
-                                                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider ml-1">学生原卷</h4>
-                                                                {currentFile.url ? <img src={currentFile.url} onClick={() => setLightboxSrc(currentFile.url)} className="w-full rounded-2xl border border-slate-100 shadow-inner cursor-zoom-in hover:opacity-95 transition" /> : <div className="h-64 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 text-sm">原卷不可用</div>}
-                                                            </div>
-                                                        </div>
-                                                        <div className="shrink-0 animate-in fade-in zoom-in duration-300 w-full max-w-[880px] relative">
-                                                            <div className="bg-white rounded-3xl shadow-sm border border-white/60 pt-8 pb-6 px-0 overflow-hidden">
-                                                                {currentFile.status === 'success' ? (
-                                                                    <EditablePaper readOnly={!!currentFile.cloudBoundRef} data={currentFile.result} assignment={assignment} rubric={rubric} studentIndex={currentFile.index} onUpdate={(d) => {
-                                                                        const prevResult = currentFile.result || {};
-                                                                        let nextResult = reconcileIdentityAfterTeacherEdit(prevResult, d, currentFile);
-                                                                        if (didTeacherEditScores(prevResult, nextResult, rubric)) {
-                                                                            nextResult = normalizeTeacherEditedScoresAgainstRubric(nextResult, rubric);
-                                                                        }
-                                                                        nextResult = upsertArchivedRecordForEditedResult(currentFile, prevResult, nextResult);
-                                                                        setFiles(prev => (Array.isArray(prev) ? prev : []).map(f => f.id === currentFile.id ? { ...f, result: nextResult } : f));
-                                                                    }} pdfConfig={pdfConfig} />
-                                                                ) : (
-                                                                    <div className="a4-wrapper flex flex-col items-center justify-center gap-6 text-slate-400 rounded-3xl border border-dashed border-slate-200 bg-white/50 h-[800px]">
-                                                                        {currentFile.status === 'loading' ? <Loader /> : <div className="flex flex-col items-center gap-2"><ImageIcon size={48} className="text-slate-200 mb-2"/><p>请点击左侧“开始批改”</p></div>}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center text-slate-400 h-full">
-                                                    <ImageIcon size={64} className="text-slate-200 mb-4"/>
-                                                    <p>请选择左侧学生查看</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                );
+                const handleToggleOverallPreview = () => {setOverallPreviewOpen(previous=>!previous);setViewMode('grid');window.scrollTo({top:0});};
+                return <ReportArchive files={files} classes={classes} selectedId={selectedFileId} assignment={assignment} rubric={rubric} busy={isBatchProcessing} paused={isPaused} pauseRequested={pauseRequested} banner={pauseBanner} gallery={overallPreviewOpen} onGallery={handleToggleOverallPreview} onSelect={setSelectedFileId}
+                    saveNotice={cloud.mode==='cloud'&&cloudSnapshots.message?<div className="ar-callout" role="status"><span>{cloudSnapshots.message}</span><button className="wa-text-button" onClick={()=>setArchivesTab('cloud')}>查看云端批次<ArrowRight size={15}/></button></div>:null}
+                    onRegrade={handleFileClick} onStart={startBatchGrading} onPause={handlePauseBatch} onSave={openSaveDialogWithDefaultName} onManage={()=>navigateWorkspace('upload')} onQuick={()=>navigateWorkspace('quick')}
+                    onTask={id=>{setRequestedTaskId(id||sourceTask?.id||'');setRequestedTaskStage('publish');setWorkspacePage('tasks');}} onPrint={handlePrint} onCsv={exportCsvForClass} onSettings={()=>setShowPDFSettings(true)} onPreview={id=>{setPreviewFileId(id);setPreviewScale(1);}}
+                    renderReport={(file,readOnly)=><EditablePaper readOnly={readOnly||!!file.cloudBoundRef} data={file.result} assignment={assignment} rubric={rubric} studentIndex={file.index} pdfConfig={pdfConfig} onUpdate={d=>{
+                        const previous=file.result||{};let next=reconcileIdentityAfterTeacherEdit(previous,d,file);
+                        if(didTeacherEditScores(previous,next,rubric))next=normalizeTeacherEditedScoresAgainstRubric(next,rubric);
+                        next=upsertArchivedRecordForEditedResult(file,previous,next);
+                        setFiles(old=>old.map(f=>f.id===file.id?{...f,result:next}:f));
+                    }}/>}/>;
             };
 
             const renderStep4 = () => {
@@ -4445,6 +4349,13 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                 );
             };
 
+            const loadLegacyReport = record => {
+                if(isBatchProcessing||isAnalyzingClass)return alert('请先完成或暂停当前批改与分析。');
+                if(files.length&&!window.confirm('工作台将切换到这份旧报告的独立副本。请先保存当前批次；原云端档案会保留。是否继续？'))return;
+                applySavedGradingSnapshot({id:createId(),name:'旧版报告副本',legacyOriginal:true,savedAt:new Date().toISOString(),data:{assignment:record.assignment,rubric:record.rubric,pdfConfig:record.pdfConfig,sourceTask:null,files:[{id:createId(),name:(record.result.student_name||'旧作文')+'.json',index:1,status:'success',result:record.result}]}});
+                setWorkspacePage('reports');setArchivesTab('current');setOverallPreviewOpen(false);setStep(2);setMaxStep(3);setShowLegacyArchive(false);setShowConfig(false);
+            };
+
             const renderPreparation=(section,options={})=><TaskPreparation selection={rubricSelection} onSelection={setRubricSelection} lockGrade={options.lockGrade===true} section={section} assignment={assignment} setAssignment={setAssignment} rubric={rubric} setRubric={setRubric} languageDifficulty={languageDifficulty} setLanguageDifficulty={setLanguageDifficulty} onPromptUpload={handlePromptImageUpload} onRecognize={extractPromptTextFromImage} onAnalyze={generateTopicAnalysis} onGenerateRubric={generateRubricDesign} onApplyGenerated={applyGeneratedRubricToSystem} design={rubricDesignState} onDesignChange={setRubricDesignState} onModelEssay={generateModelEssay} onImport={()=>setShowRubricImportModal(true)} onHistory={()=>setShowRubricHistory(true)} onBackup={openRubricBackupDialog}/>;
             return (
                 <WorkspaceShell page={workspacePage} onNavigate={navigateWorkspace} busy={isBatchProcessing}>
@@ -4508,7 +4419,15 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                       {workspacePage==='rubrics'&&(files.length?<section className="wa-panel"><h2>先保存本批作文与结果</h2><p>本次仍有作文或报告。为保持本批标准和结果一致，请先保存需要保留的结果，再清空本次列表，之后可编辑与保存常用标准。</p><div className="wa-actions"><button className="wa-primary" onClick={()=>navigateWorkspace('reports')}>查看并保存结果</button><button className="wa-secondary" onClick={()=>navigateWorkspace('upload')}>管理本次作文</button></div></section>:renderPreparation('rubric'))}
                       {workspacePage==='prepare'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}>{[['prompt','写作要求'],['rubric','评分标准']].map(([id,label])=><button key={id} aria-pressed={preparationTab===id} onClick={()=>setPreparationTab(id)}>{label}</button>)}</nav>{renderPreparation(preparationTab)}<div className="wa-step-footer"><span>本次设置会用于快捷批阅。</span><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>完成设置，返回批阅</button></div></>}
                       {workspacePage==='upload'&&<section className="wa-legacy-surface"><div className="wa-actions" style={{marginBottom:20}}><button className="wa-secondary" onClick={()=>navigateWorkspace('quick')}>返回快捷批阅</button><button className="wa-text-button" onClick={()=>navigateWorkspace('reports')}>查看本次结果</button></div>{renderStep2()}</section>}
-                      {workspacePage==='reports'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}><button aria-pressed={archivesTab==='current'} onClick={()=>setArchivesTab('current')}>本次批改 {files.filter(f=>f.result).length>0&&'· '+files.filter(f=>f.result).length+' 份'}</button>{cloud.mode==='cloud'&&<button aria-pressed={archivesTab==='cloud'} onClick={()=>setArchivesTab('cloud')}>云端存档</button>}{cloud.mode==='cloud'&&<button onClick={()=>setShowLegacyArchive(true)}>旧版批改档案</button>}</nav>{archivesTab==='current'?files.length?<section className="wa-legacy-surface">{renderStep3()}</section>:<section className="wa-empty"><h2>本次还没有批改结果</h2><p>从写作任务进入班级批阅，或直接上传作文快捷批改。历史结果可在云端存档中打开。</p><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>开始批阅</button></section>:<CloudSnapshotsPanel embedded sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value=>{applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});if(!isBatchProcessing){setArchivesTab('current');setStep(2);setMaxStep(previous=>Math.max(previous,2));}}}/>}</>}
+                      {workspacePage==='reports'&&<ArchiveWorkspace tab={archivesTab} onTab={setArchivesTab} count={files.filter(f=>f.status==='success'&&f.result).length} hasFiles={files.length>0} onTask={id=>{setRequestedTaskId(id||'');setRequestedTaskStage('publish');setWorkspacePage('tasks');}}
+                        current={renderStep3()}
+                        cloudArchive={<CloudSnapshotsPanel embedded sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value=>{
+                            if(isBatchProcessing||isAnalyzingClass){alert('请先完成或暂停当前批阅与分析。');return false;}
+                            if(files.length&&!window.confirm('载入此批次会切换当前工作区。请先保存当前结果；原云端批次继续保留。是否继续？'))return false;
+                            applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});setArchivesTab('current');setOverallPreviewOpen(false);setStep(2);setMaxStep(previous=>Math.max(previous,2));return true;
+                        }}/>}
+                        legacy={cloud.identity&&<React.Suspense fallback={<p role="status">正在读取历史导入档案…</p>}><LegacyArchivePanel embedded workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>setArchivesTab('current')} onLoad={loadLegacyReport}/></React.Suspense>}
+                      />}
                       {workspacePage==='analysis'&&<section className="wa-legacy-surface">{renderStep4()}</section>}
                       {workspacePage==='students'&&<SchoolRosterPage onPrivate={()=>setShowStudentMgmt(true)}/>}
                       {workspacePage==='directory'&&cloud.identity?.role==='admin'&&<React.Suspense fallback={<p role="status">正在读取学校目录…</p>}><SchoolDirectoryPanel embedded/></React.Suspense>}
@@ -4585,12 +4504,7 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                         </div>
                     </SettingsPage>
 
-                    {showLegacyArchive&&cloud.identity&&<React.Suspense fallback={<div role="status" className="cloud-snapshot-overlay">正在打开旧版档案…</div>}><LegacyArchivePanel key={cloud.identity.workspaceId} workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>setShowLegacyArchive(false)} onLoad={record=>{
-                        if(isBatchProcessing||isAnalyzingClass)return alert('请先完成或暂停当前批改与分析。');
-                        if(files.length&&!window.confirm('工作台将切换到这份旧报告的独立副本。请先保存当前批次；原云端档案会保留。是否继续？'))return;
-                        applySavedGradingSnapshot({id:createId(),name:'旧版报告副本',legacyOriginal:true,savedAt:new Date().toISOString(),data:{assignment:record.assignment,rubric:record.rubric,pdfConfig:record.pdfConfig,sourceTask:null,files:[{id:createId(),name:(record.result.student_name||'旧作文')+'.json',index:1,status:'success',result:record.result}]}});
-                        setStep(2);setMaxStep(3);setShowLegacyArchive(false);setShowConfig(false);
-                    }}/></React.Suspense>}
+                    {showLegacyArchive&&cloud.identity&&<React.Suspense fallback={<div role="status" className="cloud-snapshot-overlay">正在打开旧版档案…</div>}><LegacyArchivePanel key={cloud.identity.workspaceId} workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>setShowLegacyArchive(false)} onLoad={loadLegacyReport}/></React.Suspense>}
 
                     <Modal isOpen={!!pendingWorkspaceImport} onClose={()=>{if(!workspaceImportBusy){setPendingWorkspaceImport(null);setWorkspaceImportError('');}}} title="恢复备份前核对" footer={<div className="flex flex-wrap gap-3"><button disabled={workspaceImportBusy} onClick={exportData} className="btn-pure px-5 py-2.5 rounded-full text-sm">先备份当前工作区</button><button disabled={workspaceImportBusy||isBatchProcessing||isAnalyzingClass} onClick={()=>void confirmWorkspaceImport()} className="btn-pure active px-5 py-2.5 rounded-full text-sm">{workspaceImportBusy?'正在核对账号…':'确认恢复备份'}</button></div>}>
                         {pendingWorkspaceImport&&<div className="space-y-5 text-sm leading-7 text-slate-600">
@@ -5394,21 +5308,21 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                         const f = previewFileId ? files.find(x => x.id === previewFileId && x.status === 'success') : null;
                         if (!f) return null;
                         return (
-                            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center no-print" style={{ zIndex: 130 }}>
+                            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center no-print" role="dialog" aria-modal="true" aria-label="报告打印预览" style={{ zIndex: 130 }}>
                                 <div className="bg-slate-50 rounded-3xl shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                                     <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200">
-                                        <div>
+                                        <div className="min-w-0">
                                             <div className="text-xs font-semibold text-slate-400 mb-1">PDF 浮窗预览</div>
                                             <div className="text-sm font-bold text-slate-800 truncate">{f.name || `学生 ${f.index}`}</div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center gap-1 bg-white rounded-full border border-slate-200 px-3 py-1">
-                                                <button onClick={() => setPreviewScale(Math.max(0.5, Number((previewScale - 0.1).toFixed(2))))} className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 text-sm">-</button>
+                                                <button aria-label="缩小报告预览" onClick={() => setPreviewScale(Math.max(0.5, Number((previewScale - 0.1).toFixed(2))))} className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 text-sm">-</button>
                                                 <span className="text-xs text-slate-500 w-10 text-center">{Math.round(previewScale * 100)}%</span>
-                                                <button onClick={() => setPreviewScale(Math.min(2, Number((previewScale + 0.1).toFixed(2))))} className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 text-sm">+</button>
+                                                <button aria-label="放大报告预览" onClick={() => setPreviewScale(Math.min(2, Number((previewScale + 0.1).toFixed(2))))} className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 text-sm">+</button>
                                                 <button onClick={() => setPreviewScale(1)} className="ml-1 px-2 h-6 rounded-full text-[10px] font-semibold text-slate-500 hover:bg-slate-100">重置</button>
                                             </div>
-                                            <button onClick={() => { setPreviewFileId(null); setPreviewScale(1); }} className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200">
+                                            <button aria-label="关闭报告预览" onClick={() => { setPreviewFileId(null); setPreviewScale(1); }} className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200">
                                                 <X size={16} />
                                             </button>
                                         </div>
@@ -5424,65 +5338,6 @@ const OPTIMIZED_REPAIR_PROMPT_TEMPLATE=(...args)=>withWritingContext(ORIGINAL_OP
                     })()}
 
                     <div className="print-area">
-                        <details className="no-print max-w-7xl mx-auto mt-8 px-4" style={{display:workspacePage==='reports'&&archivesTab==='current'?undefined:'none'}}><summary className="wa-secondary" style={{marginBottom:16}}>按学生预览打印报告</summary>
-                            {files.filter(f => f.status === 'success').length > 0 && (
-                                <div className="bg-white/70 glass-panel rounded-3xl p-6 border border-white/80">
-                                    <div className="flex items-center justify-between mb-4 gap-4">
-                                        <div>
-                                            <h3 className="text-sm font-bold text-slate-700">PDF 预览</h3>
-                                            <p className="text-xs text-slate-400 mt-1">点击缩略图可在浮窗中放大查看；需要连续浏览所有学生时，可点击报告工具栏的“整体预览”打开下方连续预览区域。</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {files.filter(f => f.status === 'success').map(f => (
-                                            <div key={f.id} className="cursor-pointer group" onClick={() => { setPreviewFileId(f.id); setPreviewScale(1); }}>
-                                                <div className="aspect-[210/297] bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden relative">
-                                                    <div className="absolute inset-0 origin-top-left transform scale-[0.33] w-[300%] h-[300%] pointer-events-none">
-                                                        <div className="scale-[1] origin-top-left">
-                                                            <EditablePaper data={f.result} assignment={assignment} rubric={rubric} studentIndex={f.index} readOnly={true} pdfConfig={pdfConfig} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors"></div>
-                                                </div>
-                                                <div className="mt-2 text-center">
-                                                    <div className="text-xs font-semibold text-slate-700">{(f.result && f.result.student_name) || f.name || `学生 ${f.index}`}</div>
-                                                    <div className="text-[11px] text-green-600 font-bold bg-green-50 inline-block px-2 py-0.5 rounded-full mt-1 border border-green-100">{f.result.total_score}分</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </details>
-
-                        {workspacePage==='reports'&&archivesTab==='current'&&overallPreviewOpen && (
-                            <div className="no-print max-w-7xl mx-auto mt-6 mb-24 px-4">
-                                {files.filter(f => f.status === 'success').length > 0 && (
-                                    <div className="bg-white/70 glass-panel rounded-3xl p-6 border border-white/80">
-                                        <div className="flex items-center justify-between mb-4 gap-4">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-slate-700">PDF 整体预览</h3>
-                                                <p className="text-xs text-slate-400 mt-1">下方按学生顺序连续展示所有批改报告，方便滚动浏览；再次点击报告工具栏的“整体预览”可关闭本区域。</p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-8">
-                                            {files.filter(f => f.status === 'success').map(f => (
-                                                <div key={f.id} className="flex flex-col items-center">
-                                                    <div className="shadow-xl border border-slate-200 rounded-3xl overflow-hidden bg-white max-w-[900px] w-full">
-                                                        <EditablePaper data={f.result} assignment={assignment} rubric={rubric} studentIndex={f.index} readOnly={true} pdfConfig={pdfConfig} />
-                                                    </div>
-                                                    <div className="mt-3 text-center">
-                                                        <div className="text-xs font-semibold text-slate-700">{(f.result && f.result.student_name) || f.name || `学生 ${f.index}`}</div>
-                                                        <div className="text-[11px] text-green-600 font-bold bg-green-50 inline-block px-2 py-0.5 rounded-full mt-1 border border-green-100">{f.result.total_score}分</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
                         {/* Student Reports for printing only */}
                         {files.filter(f => f.status === 'success').map(f => {
                             const pages = estimatePageCount(f.result);

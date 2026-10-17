@@ -4,17 +4,19 @@ import {importLegacy,reportCsv,exportReportBundle} from '../report/legacy-import
 import type {ImportBundle,ReportRecord} from '../report/contracts';
 import {printLegacyReport} from './legacy-archive-print';
 import './legacy-archive.css';
+import {useWorkspaceLeaveGuard} from './workspace-navigation';
 
 type Report=ReportRecord&{cloudId:string;revision:number};
 type Batch={id:string;label:string;reportCount:number;processedCount:number;status:'pending'|'complete'|'withdrawn';revision:number;created:string;legacyIndex:boolean};
 function download(value:Blob|string,name:string,type='application/json'){
  const url=URL.createObjectURL(value instanceof Blob?value:new Blob([value],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-export default function LegacyArchivePanel({workspace,onClose,onExpired,onLoad}:{workspace:string;onClose:()=>void;onExpired:()=>void;onLoad:(report:ReportRecord)=>void}){
+export default function LegacyArchivePanel({workspace,onClose,onExpired,onLoad,embedded=false}:{embedded?:boolean;workspace:string;onClose:()=>void;onExpired:()=>void;onLoad:(report:ReportRecord)=>void}){
  const [tab,setTab]=useState<'reports'|'batches'>('reports'),[reports,setReports]=useState<Report[]>([]),[batches,setBatches]=useState<Batch[]>([]),[next,setNext]=useState<string|null>(null),[query,setQuery]=useState(''),[trash,setTrash]=useState(false);
  const [preview,setPreview]=useState<ImportBundle|null>(null),[fileName,setFileName]=useState(''),[selected,setSelected]=useState<Report|null>(null),[activeBatch,setActiveBatch]=useState<Batch|null>(null);
  const [busy,setBusy]=useState(false),[transferring,setTransferring]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[pausing,setPausing]=useState(false);
  const input=useRef<HTMLInputElement>(null),paper=useRef<HTMLDivElement>(null),content=useRef<HTMLDivElement>(null),dialog=useRef<HTMLElement>(null),generation=useRef(0),live=useRef(false),locked=useRef(false),stop=useRef(false),controllers=useRef(new Set<AbortController>()),printCleanup=useRef<(()=>void)|null>(null);
+ useWorkspaceLeaveGuard(()=>!locked.current);
  useEffect(()=>{content.current?.scrollTo({top:0});},[selected?.cloudId,preview,tab]);
  const abort=()=>new DOMException('Operation cancelled','AbortError');
  async function api(path:string,body?:unknown,method=body===undefined?'GET':'POST',blob=false):Promise<any>{
@@ -35,8 +37,8 @@ export default function LegacyArchivePanel({workspace,onClose,onExpired,onLoad}:
  async function listReports(cursor:string|null=null,search=query){const value=await api('/api/reports?'+new URLSearchParams({...cursor?{cursor}:{},...search?{q:search}:{}}));setReports(previous=>cursor?[...previous,...value.reports]:value.reports);setNext(value.nextCursor);}
  async function listBatches(cursor:string|null=null,withdrawn=trash){const value=await api('/api/legacy-imports?'+new URLSearchParams({withdrawn:withdrawn?'1':'0',...cursor?{cursor}:{}}));setBatches(previous=>cursor?[...previous,...value.batches]:value.batches);setNext(value.next);}
  useEffect(()=>{
-  live.current=true;generation.current++;void operation(()=>listReports());dialog.current?.querySelector<HTMLButtonElement>('button')?.focus();
-  const keys=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.preventDefault();onClose();return;}if(event.key!=='Tab')return;const fields=[...dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),[tabindex="0"]')||[]].filter(el=>el.offsetParent!==null);const first=fields[0],last=fields.at(-1);if(!first)return;if(event.shiftKey&&(document.activeElement===first||!dialog.current?.contains(document.activeElement))){event.preventDefault();last?.focus();}else if(!event.shiftKey&&(document.activeElement===last||!dialog.current?.contains(document.activeElement))){event.preventDefault();first.focus();}};
+  live.current=true;generation.current++;void operation(()=>listReports());if(!embedded)dialog.current?.querySelector<HTMLButtonElement>('button')?.focus();
+  const keys=(event:KeyboardEvent)=>{if(embedded)return;if(event.key==='Escape'){event.preventDefault();onClose();return;}if(event.key!=='Tab')return;const fields=[...dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),[tabindex="0"]')||[]].filter(el=>el.offsetParent!==null);const first=fields[0],last=fields.at(-1);if(!first)return;if(event.shiftKey&&(document.activeElement===first||!dialog.current?.contains(document.activeElement))){event.preventDefault();last?.focus();}else if(!event.shiftKey&&(document.activeElement===last||!dialog.current?.contains(document.activeElement))){event.preventDefault();first.focus();}};
   document.addEventListener('keydown',keys);return()=>{document.removeEventListener('keydown',keys);live.current=false;generation.current++;locked.current=false;stop.current=true;for(const controller of controllers.current)controller.abort();controllers.current.clear();printCleanup.current?.();};
  },[]);
  async function choose(file:File){
@@ -62,8 +64,8 @@ export default function LegacyArchivePanel({workspace,onClose,onExpired,onLoad}:
  const names=new Set(preview?.reports.map(report=>report.result.class_name+'|'+report.result.student_name).filter(name=>name!=='|'));
  const classes=new Set(preview?.reports.map(report=>report.result.class_name).filter(Boolean));
  const canLoad=!!selected?.rubric?.items?.length&&Number(selected.rubric.total)>0;
- return <div className="legacy-archive-overlay no-print"><section ref={dialog} role="dialog" aria-modal="true" aria-labelledby="legacy-archive-title" className="legacy-archive-dialog">
-  <header><div><p>教师数据管理</p><h2 id="legacy-archive-title">旧版批改档案</h2><span>保留原分数和批语。学生账号归属需另行核对。</span></div><button aria-label="关闭旧版批改档案" onClick={onClose}>×</button></header>
+ return <div className={"legacy-archive-overlay no-print"+(embedded?" ar-legacy-embedded":"")}><section ref={dialog} role={embedded?"region":"dialog"} aria-modal={embedded?undefined:true} aria-labelledby="legacy-archive-title" className="legacy-archive-dialog">
+  <header><div><p>教师数据管理</p><h2 id="legacy-archive-title">历史导入档案</h2><span>保留原分数和批语。学生账号归属需另行核对。</span></div>{!embedded&&<button aria-label="关闭旧版批改档案" onClick={onClose}>×</button>}</header>
   <nav className="legacy-archive-nav"><button disabled={busy} aria-pressed={tab==='reports'} onClick={()=>void changeTab('reports')}>历史报告</button><button disabled={busy} aria-pressed={tab==='batches'} onClick={()=>void changeTab('batches')}>备份文件</button><button disabled={busy} className="legacy-primary" onClick={()=>input.current?.click()}>迁移旧备份</button><input ref={input} aria-label="选择旧版JSON备份" type="file" accept=".json,application/json" hidden onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void choose(file);}}/></nav>
   {error&&<p className="legacy-notice legacy-error" role="alert">{error}</p>}{notice&&<p className="legacy-notice" role="status">{notice}</p>}
   {transferring&&!preview&&<div className="legacy-transfer-bar" role="status"><span>{activeBatch?'已迁移 '+activeBatch.processedCount+' / '+activeBatch.reportCount+' 份':'正在核对迁移进度…'}</span><button disabled={pausing} onClick={()=>{stop.current=true;setPausing(true);}}>{pausing?'正在保存当前进度…':'完成当前部分后暂停'}</button></div>}

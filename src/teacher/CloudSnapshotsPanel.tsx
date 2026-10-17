@@ -1,14 +1,14 @@
 import {useWorkspaceLeaveGuard} from './workspace-navigation';
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import type {CloudSnapshots,CloudSnapshotRef,SnapshotEnvelope} from './useCloudSnapshots';
 import './cloud-snapshots.css';
-export function CloudSnapshotsPanel({sync,onRestore,onDownload,embedded=false}:{embedded?:boolean;sync:CloudSnapshots;onRestore:(value:SnapshotEnvelope)=>void;onDownload:(snapshot:any)=>void}){
+export function CloudSnapshotsPanel({sync,onRestore,onDownload,embedded=false}:{embedded?:boolean;sync:CloudSnapshots;onRestore:(value:SnapshotEnvelope)=>void|boolean;onDownload:(snapshot:any)=>void}){
   const [open,setOpen]=useState(embedded),[trash,setTrash]=useState(false),[query,setQuery]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const [selected,setSelected]=useState<CloudSnapshotRef|null>(null),[versions,setVersions]=useState<any[]>([]),[versionNext,setVersionNext]=useState<number|null>(null);
   useEffect(()=>{if(embedded)void sync.list();},[]);
-  useWorkspaceLeaveGuard(()=>!busy);
-  async function operation(action:()=>Promise<void>){setBusy(true);setError('');try{await action();}catch(error){setError(error instanceof Error?error.message:'操作暂未完成。');}finally{setBusy(false);}}
-  async function restore(item:CloudSnapshotRef,revision?:number){await operation(async()=>{const value=await sync.read(item.id,revision);onRestore(value);setOpen(false);});}
+  const locked=useRef(false);useWorkspaceLeaveGuard(()=>!locked.current);
+  async function operation(action:()=>Promise<void>){if(locked.current)return;locked.current=true;setBusy(true);setError('');try{await action();}catch(error){setError(error instanceof Error?error.message:'操作暂未完成。');}finally{locked.current=false;setBusy(false);}}
+  async function restore(item:CloudSnapshotRef,revision?:number){await operation(async()=>{const value=await sync.read(item.id,revision);if(onRestore(value)!==false&&!embedded)setOpen(false);});}
   async function history(item:CloudSnapshotRef,before?:number){await operation(async()=>{const result=await sync.versions(item.id,before);setSelected(item);setVersions(old=>before?[...old,...result.versions]:result.versions);setVersionNext(result.next);});}
   return <>
     {embedded&&sync.message&&<div className="wa-notice" role="status"><span>{sync.message}</span>{['error','conflict'].includes(sync.status)&&<button className="wa-text-button" disabled={busy} onClick={()=>void operation(sync.status==='conflict'?sync.copyConflict:sync.retry)}>{sync.status==='conflict'?'另存云端副本':'重试同步'}</button>}</div>}
@@ -16,8 +16,8 @@ export function CloudSnapshotsPanel({sync,onRestore,onDownload,embedded=false}:{
       <span role="status">{sync.message||''}</span>
       <div>{['error','conflict'].includes(sync.status)&&<button disabled={busy||sync.status==='pending'} onClick={()=>void operation(sync.status==='conflict'?sync.copyConflict:sync.retry)}>{sync.status==='conflict'?'另存云端副本':'重试同步'}</button>}<button onClick={()=>{setTrash(false);setSelected(null);setQuery('');setError('');setOpen(true);void sync.list();}}>云端存档</button></div>
     </aside>}
-    {open&&<div className={"cloud-snapshot-overlay no-print"+(embedded?" wa-embedded":"")}><section role={embedded?"region":"dialog"} aria-modal={embedded?undefined:true} aria-labelledby="cloud-history-title" className="cloud-snapshot-dialog">
-      <header><div><h2 id="cloud-history-title">{trash?'云端回收站':'云端批改存档'}</h2><p>保留当时的评分标准、教师修改与原稿。历史版本不会自动改分。</p></div><button onClick={()=>setOpen(false)} aria-label="关闭云端存档">×</button></header>
+    {open&&<div className={"cloud-snapshot-overlay no-print"+(embedded?" ar-cloud-embedded":"")}><section role={embedded?"region":"dialog"} aria-modal={embedded?undefined:true} aria-labelledby="cloud-history-title" className="cloud-snapshot-dialog">
+      <header><div><h2 id="cloud-history-title">{trash?'云端回收站':'云端批次档案'}</h2><p>按保存批次继续查看、编辑与导出，沿用当时的题目和评分标准。</p></div>{!embedded&&<button onClick={()=>setOpen(false)} aria-label="关闭云端存档">×</button>}</header>
       <div className="cloud-history-toolbar"><form onSubmit={event=>{event.preventDefault();setSelected(null);void sync.list({deleted:trash,query});}}><input aria-label="搜索云端存档" value={query} onChange={e=>setQuery(e.target.value)} placeholder="按名称或班级搜索"/><button type="submit">搜索</button></form><button onClick={()=>{setTrash(!trash);setSelected(null);void sync.list({deleted:!trash,query});}}>{trash?'返回存档':'回收站'}</button></div>
       {error&&<p role="alert" className="cloud-history-error">{error}</p>}
       {sync.listError&&<p role="alert" className="cloud-history-error">{sync.listError}</p>}
