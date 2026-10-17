@@ -1,5 +1,6 @@
 import type {D1Database, Fetcher, R2Bucket, MessageBatch, Queue} from '@cloudflare/workers-types';
 import {handleLegacyArchive} from './legacy-archive';
+import {handleRubricLibrary} from './rubric-library';
 import {HttpError} from './errors';
 import {handleModelApi,consumeModelJobs,recoverModelOutbox,type ModelBindings,type ModelJobMessage} from './model-jobs';
 import {handleAssets} from './assets';
@@ -120,7 +121,7 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(/^\/api\/(?:legacy-imports|reports)(?:\/|$)/.test(path)||(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports|student)(?:\/|$)/.test(path)||path.startsWith('/api/model/')))){
+      if(/^\/api\/(?:legacy-imports|reports)(?:\/|$)/.test(path)||(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports|student|rubric-templates)(?:\/|$)/.test(path)||path.startsWith('/api/model/')))){
         if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
       }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
@@ -139,6 +140,7 @@ export default {
       if(path.startsWith('/api/assets')){teacher(session);const response=await handleAssets(req,env,session.principal);if(response)return response;}
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       if(/^\/api\/(?:tasks|grading|writing-reports)(?:\/|$)/.test(path)){teacher(session);const response=await handleGrading(req,env,session,bridge,input)||await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
+      const rubricResponse=await handleRubricLibrary(req,env,session,input);if(rubricResponse)return rubricResponse;
       const modelResponse=await handleModelApi(req,env,session,input,bridge);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){

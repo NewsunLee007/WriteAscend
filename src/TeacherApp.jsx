@@ -2,6 +2,8 @@
 import React from "react";
 import EditablePaper from './report/LegacyPaper.jsx';
 import QuickGrading from './teacher/QuickGrading.jsx';
+import SchoolQuickStart from './teacher/SchoolQuickStart';
+import {rubricProblem,scaleRubricItems,genres} from './teacher/rubric-library';
 import {useTeacherCloud,CloudConnection,CloudModelSettings} from './teacher/TeacherCloud';
 import {createCloudModelTransport} from './teacher/cloud-model';
 import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
@@ -189,12 +191,16 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
         const App = () => {
             const [workspacePage,setWorkspacePage]=useState('home');
             const [requestedTaskId,setRequestedTaskId]=useState('');
+            const [requestedTaskStage,setRequestedTaskStage]=useState('brief');
+            const [quickPrivate,setQuickPrivate]=useState(false);
             const [settingsTab,setSettingsTab]=useState('models');
             const [archivesTab,setArchivesTab]=useState('current');
             const [preparationTab,setPreparationTab]=useState('prompt');
             const [showClearBatch,setShowClearBatch]=useState(false);
             const cloud = useTeacherCloud();
             const teacherStorage = cloud.storage;
+            const [rubricSelection,setRubricSelection]=useState(()=>{try{const saved=JSON.parse(teacherStorage.getItem('teacher_rubric_selection')||'null');if(saved&&genres.some(g=>g.id===saved.genre)&&typeof saved.name==='string')return saved;}catch{}return {name:'我的批阅标准',genre:'description'};});
+            useEffect(()=>{try{teacherStorage.setItem('teacher_rubric_selection',JSON.stringify(rubricSelection));}catch{}},[rubricSelection,teacherStorage]);
             const [pendingWorkspaceImport,setPendingWorkspaceImport]=useState(null);
             const [showLegacyArchive,setShowLegacyArchive]=useState(false);
             const [workspaceImportError,setWorkspaceImportError]=useState('');
@@ -220,7 +226,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [showPDFSettings, setShowPDFSettings] = useState(false);
             useEffect(()=>{if(step===1)setWorkspacePage('upload');else if(step===2){setArchivesTab('current');setWorkspacePage('reports');}else if(step===3)setWorkspacePage('analysis');},[step]);
             useEffect(()=>{if(showConfig){setWorkspacePage('settings');setSettingsTab('models');setShowConfig(false);}},[showConfig]);
-            const navigateWorkspace=page=>{setWorkspacePage(page);if(page==='quick')setStep(0);if(page==='upload')setStep(1);if(page==='reports')setStep(2);if(page==='analysis')setStep(3);if(page==='tasks')setRequestedTaskId('');};
+            const navigateWorkspace=page=>{setWorkspacePage(page);if(page==='quick')setStep(0);if(page==='upload')setStep(1);if(page==='reports')setStep(2);if(page==='analysis')setStep(3);if(page==='tasks'){setRequestedTaskId('');setRequestedTaskStage('brief');}};
 
             const [showAnalysis, setShowAnalysis] = useState(false);
             const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -339,18 +345,11 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const normalizedLoaded = { ...loaded, strictness: loadedStrictnessLabel, strictnessLevel: loadedStrictnessLevel, wordCountStrict: loaded && loaded.wordCountStrict === false ? false : true };
                 const loadedTotal = Number(loaded && loaded.total);
                 const loadedItems = Array.isArray(loaded && loaded.items) ? loaded.items : [];
-                const ensureWordCountItem = (items) => {
-                    const list = Array.isArray(items) ? items.slice() : [];
-                    const has = list.some(it => it && it.label && /词数|字数/.test(String(it.label)));
-                    if (has) return list;
-                    const idx = Math.min(3, list.length);
-                    const wcItem = { id: `c_wc_${Date.now()}`, label: '词数要求', score: 0, desc: '是否满足字数要求；可设置严格/宽松模式' };
-                    return [...list.slice(0, idx), wcItem, ...list.slice(idx)];
-                };
                 if (Number.isFinite(loadedTotal) && loadedItems.length > 0) {
-                    return { ...normalizedLoaded, items: redistributeItemScoresToTotal(ensureWordCountItem(loadedItems), loadedTotal) };
+                    const sum=loadedItems.reduce((n,c)=>n+Number(c.score||0),0);
+                    return { ...normalizedLoaded, items: Math.abs(sum-loadedTotal)<.001 ? loadedItems : scaleRubricItems(loadedItems,loadedTotal) };
                 }
-                return { ...normalizedLoaded, items: ensureWordCountItem(loadedItems) };
+                return { ...normalizedLoaded, items: loadedItems };
             };
 
             useEffect(() => {
@@ -1603,26 +1602,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 if ((item.cloud || item.legacyOriginal) && d.rubric) {
                     setRubric(JSON.parse(JSON.stringify(d.rubric)));
                 } else if (d.rubric) {
-                    const loaded = d.rubric;
-                    const loadedStrictnessLevelRaw = clampStrictnessLevel(loaded && loaded.strictnessLevel);
-                    const loadedStrictnessLevel = loadedStrictnessLevelRaw !== null ? loadedStrictnessLevelRaw : strictnessLevelFromLabel(loaded && loaded.strictness);
-                    const loadedStrictnessLabel = (loaded && loaded.strictness) ? String(loaded.strictness) : strictnessLabelFromLevel(loadedStrictnessLevel);
-                    const normalizedLoaded = { ...loaded, strictness: loadedStrictnessLabel, strictnessLevel: loadedStrictnessLevel, wordCountStrict: loaded && loaded.wordCountStrict === false ? false : true };
-                    const loadedTotal = Number(loaded && loaded.total);
-                    const loadedItems = Array.isArray(loaded && loaded.items) ? loaded.items : [];
-                    const ensureWordCountItem = (items) => {
-                        const list = Array.isArray(items) ? items.slice() : [];
-                        const has = list.some(it => it && it.label && /词数|字数/.test(String(it.label)));
-                        if (has) return list;
-                        const idx = Math.min(3, list.length);
-                        const wcItem = { id: `c_wc_${Date.now()}`, label: '词数要求', score: 0, desc: '是否满足字数要求；可设置严格/宽松模式' };
-                        return [...list.slice(0, idx), wcItem, ...list.slice(idx)];
-                    };
-                    if (Number.isFinite(loadedTotal) && loadedItems.length > 0) {
-                        setRubric({ ...normalizedLoaded, items: redistributeItemScoresToTotal(ensureWordCountItem(loadedItems), loadedTotal) });
-                    } else {
-                        setRubric({ ...normalizedLoaded, items: ensureWordCountItem(loadedItems) });
-                    }
+                    setRubric(normalizeRubricForSystem(d.rubric));
                 }
                 if (Array.isArray(d.classes)) setClasses(d.classes);
                 if (d.currentClassId) setCurrentClassId(String(d.currentClassId));
@@ -1845,14 +1825,14 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 setShowRubricBackupSuccess(true);
             };
 
-            const restoreRubricFromHistory = (item) => {
+            const restoreRubricFromHistory = (item,includeTopic=false) => {
                 if (!item) return;
                 const snap = item.snapshot || null;
                 const legacyRubric = item.rubric || null;
                 const payload = snap && typeof snap === 'object' ? snap : { rubric: legacyRubric || {} };
                 const normalized = normalizeRubricForSystem(payload.rubric);
                 if (normalized) setRubric(normalized);
-                if (payload.assignment && typeof payload.assignment === 'object') {
+                if (includeTopic && payload.assignment && typeof payload.assignment === 'object') {
                     setAssignment(p => ({
                         ...p,
                         examName: payload.assignment.examName ? String(payload.assignment.examName) : (p.examName || ''),
@@ -1861,7 +1841,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         analysis: payload.assignment.analysis ? String(payload.assignment.analysis) : (p.analysis || ''),
                         modelEssay: payload.assignment.modelEssay ? String(payload.assignment.modelEssay) : (p.modelEssay || '')
                     }));
-                } else if (item.assignmentTitle || item.examName) {
+                } else if (includeTopic && (item.assignmentTitle || item.examName)) {
                     setAssignment(p => ({
                         ...p,
                         title: p.title || (item.assignmentTitle || ''),
@@ -2921,13 +2901,15 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const handleQuickStart = () => {
                 if (files.length === 0 || isBatchProcessing) return;
                 if (!files.some(f => f.status === 'idle')) {
+                    setWorkspacePage('reports');setArchivesTab('current');
                     setStep(2);
                     setMaxStep(prev => Math.max(prev, 2));
                     return;
                 }
                 if (!String(assignment.topic || '').trim()) return alert('请先填写或识别写作要求。');
-                if (!Number.isFinite(Number(rubric.total)) || Number(rubric.total) <= 0) return alert('请设置有效的作文满分。');
+                if (rubricProblem(rubric)) return alert(rubricProblem(rubric));
                 if (cloud.mode === 'cloud' ? !modelReady : !config.apiKey) { setShowConfig(true); return; }
+                setWorkspacePage('reports');setArchivesTab('current');
                 setStep(2);
                 setMaxStep(prev => Math.max(prev, 2));
                 void startBatchGrading();
@@ -4459,7 +4441,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 );
             };
 
-            const renderPreparation=section=><TaskPreparation section={section} assignment={assignment} setAssignment={setAssignment} rubric={rubric} setRubric={setRubric} languageDifficulty={languageDifficulty} setLanguageDifficulty={setLanguageDifficulty} onPromptUpload={handlePromptImageUpload} onRecognize={extractPromptTextFromImage} onAnalyze={generateTopicAnalysis} onGenerateRubric={generateRubricDesign} onApplyGenerated={applyGeneratedRubricToSystem} design={rubricDesignState} onDesignChange={setRubricDesignState} onModelEssay={generateModelEssay} onImport={()=>setShowRubricImportModal(true)} onHistory={()=>setShowRubricHistory(true)} onBackup={openRubricBackupDialog}/>;
+            const renderPreparation=(section,options={})=><TaskPreparation selection={rubricSelection} onSelection={setRubricSelection} lockGrade={options.lockGrade===true} section={section} assignment={assignment} setAssignment={setAssignment} rubric={rubric} setRubric={setRubric} languageDifficulty={languageDifficulty} setLanguageDifficulty={setLanguageDifficulty} onPromptUpload={handlePromptImageUpload} onRecognize={extractPromptTextFromImage} onAnalyze={generateTopicAnalysis} onGenerateRubric={generateRubricDesign} onApplyGenerated={applyGeneratedRubricToSystem} design={rubricDesignState} onDesignChange={setRubricDesignState} onModelEssay={generateModelEssay} onImport={()=>setShowRubricImportModal(true)} onHistory={()=>setShowRubricHistory(true)} onBackup={openRubricBackupDialog}/>;
             return (
                 <WorkspaceShell page={workspacePage} onNavigate={navigateWorkspace} busy={isBatchProcessing}>
                     {/* Dynamic Print Styles Injection */}
@@ -4478,8 +4460,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
                     <main className="no-print wa-pages">
                       {draftError&&<p className="wa-notice" role="status">{draftError}</p>}
-                      {workspacePage==='home'&&<WorkspaceHome files={files} onNavigate={navigateWorkspace} onTask={id=>{setRequestedTaskId(id);setWorkspacePage('tasks');}}/>}
-                      {workspacePage==='tasks'&&(cloud.mode==='cloud'&&cloud.identity?<TaskWorkspace assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} blocked={!!files.length||isBatchProcessing} initialTaskId={requestedTaskId} renderPreparation={renderPreparation} onQuick={()=>navigateWorkspace('quick')} onManageBatch={()=>navigateWorkspace('upload')} onGradeChange={gradeLevel=>setRubric(p=>({...p,gradeLevel}))} onOpenReports={(task,reports,members) => {
+                      {workspacePage==='home'&&<WorkspaceHome files={files} onNavigate={navigateWorkspace} onTask={id=>{setRequestedTaskId(id);setRequestedTaskStage('brief');setWorkspacePage('tasks');}}/>}
+                      {workspacePage==='tasks'&&(cloud.mode==='cloud'&&cloud.identity?<TaskWorkspace assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} blocked={!!files.length||isBatchProcessing} initialTaskId={requestedTaskId} initialStage={requestedTaskStage} renderPreparation={renderPreparation} onQuick={()=>{setQuickPrivate(false);navigateWorkspace('quick');}} onManageBatch={()=>navigateWorkspace('upload')} onGradeChange={gradeLevel=>setRubric(p=>({...p,gradeLevel}))} onOpenReports={(task,reports,members) => {
                                 if(isBatchProcessing)throw new Error('请先暂停当前批改，再载入班级结果。');
                                 if(files.some(file=>!file.cloudBoundRef||file.cloudBoundRef.taskId!==task.id))throw new Error('当前工作台已有其他作文。请先保存结果，再到“本次作文”页中清空重选，然后载入班级结果。');
                                 if(!reports.length)return;
@@ -4506,7 +4488,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 } else setClasses(previous=>previous.map(c=>String(c.id)===String(currentClassId)?{...c,gradeLevel:value.document.rubric.gradeLevel}:c));
                                 setStep(0);
                             }}/>:<section className="wa-empty"><h2>学校写作任务</h2><p>连接学校账号后，按任教班级建立写作任务。当前可继续使用快捷批阅。</p><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>开始快捷批阅</button></section>)}
-                      {workspacePage==='quick'&&<QuickGrading
+                      {workspacePage==='quick'&&(cloud.mode==='cloud'&&files.length>0&&files.every(f=>f.cloudBoundRef)?<section className="wa-panel"><h2>班级批阅结果已载入</h2><p>当前是已有任务的学生关联报告。可继续查看结果，或回到任务收取、批阅与发布。</p><div className="wa-actions"><button className="wa-primary" onClick={()=>navigateWorkspace('reports')}>查看本批报告</button><button className="wa-secondary" onClick={()=>{setRequestedTaskId(sourceTask?.id||files[0].cloudBoundRef.taskId);setRequestedTaskStage('brief');setWorkspacePage('tasks');}}>返回班级任务</button></div></section>:cloud.mode==='cloud'&&cloud.identity&&!files.length&&!quickPrivate?<SchoolQuickStart assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} onGrade={gradeLevel=>setRubric(p=>({...p,gradeLevel}))} renderPreparation={renderPreparation} onOpen={(id,stage)=>{setRequestedTaskId(id);setRequestedTaskStage(stage);setWorkspacePage('tasks');}} onPrivate={()=>setQuickPrivate(true)} onModelSettings={()=>navigateWorkspace('settings')}/>:<><div className="wa-notice"><span>{files.length?'继续处理本批私人作文，原有报告与导出可继续使用。':'私人批阅使用本机名单；学校名单请使用 Daily 班级批阅。'}</span>{cloud.mode==='cloud'&&!files.length&&<button className="wa-text-button" onClick={()=>setQuickPrivate(false)}>返回 Daily 班级批阅</button>}</div><QuickGrading renderPreparation={renderPreparation}
                                 assignment={assignment} setAssignment={setAssignment} rubric={rubric}
                                 setRubric={updater => setRubric(prev => { const next = typeof updater === 'function' ? updater(prev) : updater; return next.total !== prev.total ? { ...next, items: redistributeItemScoresToTotal(next.items, next.total) } : next; })}
                                 classes={classes} currentClassId={currentClassId} activeClassIds={activeClassIds} setCurrentClassId={setCurrentClassId} setActiveClassIds={setActiveClassIds}
@@ -4518,7 +4500,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 onRemoveFile={id => { const old = files.find(f => f.id === id); if (old?.url) URL.revokeObjectURL(old.url); setFiles(prev => prev.filter(f => f.id !== id)); if (selectedFileId === id) setSelectedFileId(files.find(f => f.id !== id)?.id || null); }}
                                 onRetry={() => setFiles(prev => prev.map(f => f.status === 'error' ? { ...f, status: 'idle' } : f))}
                                 onStart={handleQuickStart}
-                            />}
+                            /></>)}
+                      {workspacePage==='rubrics'&&(files.length?<section className="wa-panel"><h2>先保存本批作文与结果</h2><p>本次仍有作文或报告。为保持本批标准和结果一致，请先保存需要保留的结果，再清空本次列表，之后可编辑与保存常用标准。</p><div className="wa-actions"><button className="wa-primary" onClick={()=>navigateWorkspace('reports')}>查看并保存结果</button><button className="wa-secondary" onClick={()=>navigateWorkspace('upload')}>管理本次作文</button></div></section>:renderPreparation('rubric'))}
                       {workspacePage==='prepare'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}>{[['prompt','写作要求'],['rubric','评分标准']].map(([id,label])=><button key={id} aria-pressed={preparationTab===id} onClick={()=>setPreparationTab(id)}>{label}</button>)}</nav>{renderPreparation(preparationTab)}<div className="wa-step-footer"><span>本次设置会用于快捷批阅。</span><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>完成设置，返回批阅</button></div></>}
                       {workspacePage==='upload'&&<section className="wa-legacy-surface"><div className="wa-actions" style={{marginBottom:20}}><button className="wa-secondary" onClick={()=>navigateWorkspace('quick')}>返回快捷批阅</button><button className="wa-text-button" onClick={()=>navigateWorkspace('reports')}>查看本次结果</button></div>{renderStep2()}</section>}
                       {workspacePage==='reports'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}><button aria-pressed={archivesTab==='current'} onClick={()=>setArchivesTab('current')}>本次批改 {files.filter(f=>f.result).length>0&&'· '+files.filter(f=>f.result).length+' 份'}</button>{cloud.mode==='cloud'&&<button aria-pressed={archivesTab==='cloud'} onClick={()=>setArchivesTab('cloud')}>云端存档</button>}{cloud.mode==='cloud'&&<button onClick={()=>setShowLegacyArchive(true)}>旧版批改档案</button>}</nav>{archivesTab==='current'?files.length?<section className="wa-legacy-surface">{renderStep3()}</section>:<section className="wa-empty"><h2>本次还没有批改结果</h2><p>从写作任务进入班级批阅，或直接上传作文快捷批改。历史结果可在云端存档中打开。</p><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>开始批阅</button></section>:<CloudSnapshotsPanel embedded sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value=>{applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});if(!isBatchProcessing){setArchivesTab('current');setStep(2);setMaxStep(previous=>Math.max(previous,2));}}}/>}</>}
@@ -4940,21 +4923,21 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     <Modal
                         isOpen={showRubricHistory}
                         onClose={() => setShowRubricHistory(false)}
-                        title="标准恢复"
+                        title="本机历史标准"
                         large
                     >
                         <div className="space-y-4 py-2">
-                            <div className="text-xs text-slate-500">点击某条备份即可恢复（包含：考试名称、Topic Title、题目要点、参考范文、评分标准）。</div>
+                            <div className="text-xs text-slate-500">默认只带入评价标准，保留本篇题目。需要复用旧题目与范文时，请选择“连同原题目恢复”。</div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {(Array.isArray(rubricHistory) ? rubricHistory : []).map(item => (
-                                    <div key={item.id} onClick={() => restoreRubricFromHistory(item)} className="bg-white/80 rounded-2xl border border-white shadow-sm p-4 flex flex-col gap-3 cursor-pointer hover:bg-white transition">
+                                    <div key={item.id} className="bg-white/80 rounded-2xl border border-white shadow-sm p-4 flex flex-col gap-3 cursor-pointer hover:bg-white transition">
                                         <div className="min-w-0">
                                             <div className="text-sm font-bold text-slate-800 truncate">{item.name || '未命名备份'}</div>
                                             <div className="text-[11px] text-slate-400 mt-1 truncate">{item.className || '未分班级'}{item.examName ? ` · ${item.examName}` : ''}{item.assignmentTitle ? ` · ${item.assignmentTitle}` : ''}</div>
                                             <div className="text-[11px] text-slate-400 truncate">保存时间：{formatDateTime(item.createdAt || Date.now())}</div>
                                         </div>
                                         <div className="flex justify-end gap-2">
-                                            <button onClick={(e) => { e.stopPropagation(); deleteRubricHistoryItem(item.id); }} className="btn-pure px-3 py-2 rounded-full text-xs font-bold text-red-500">删除</button>
+                                            <button className="btn-pure px-3 py-2 rounded-full text-xs font-bold" onClick={()=>restoreRubricFromHistory(item)}>仅选用标准</button><button className="btn-pure px-3 py-2 rounded-full text-xs font-bold" onClick={()=>restoreRubricFromHistory(item,true)}>连同原题目恢复</button><button onClick={(e) => { e.stopPropagation(); deleteRubricHistoryItem(item.id); }} className="btn-pure px-3 py-2 rounded-full text-xs font-bold text-red-500">删除</button>
                                         </div>
                                     </div>
                                 ))}

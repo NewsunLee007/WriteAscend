@@ -1,0 +1,47 @@
+{
+  "syntheticOnly": true,
+  "measurements": [
+    {
+      "criteria": 5,
+      "overflows": [],
+      "page": "rubric-personal",
+      "scrollWidth": 1434,
+      "width": 1434
+    },
+    {
+      "criteria": 5,
+      "overflows": [],
+      "page": "rubric-personal",
+      "scrollWidth": 762,
+      "width": 762
+    },
+    {
+      "criteria": 5,
+      "overflows": [],
+      "page": "rubric-personal",
+      "scrollWidth": 384,
+      "width": 384
+    },
+    {
+      "criteria": 5,
+      "overflows": [],
+      "page": "rubric-personal",
+      "scrollWidth": 369,
+      "width": 369
+    },
+    {
+      "page": "rubric-builtins",
+      "presets": 6,
+      "scrollWidth": 369,
+      "width": 369
+    },
+    {
+      "classes": 54,
+      "grade": "七年级",
+      "gradeReadOnly": true,
+      "page": "daily-class-prompt",
+      "scrollWidth": 369,
+      "width": 369
+    }
+  ]
+}

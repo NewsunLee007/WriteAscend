@@ -782,7 +782,7 @@ ${diffEnabled ? `6. 英语难度控制（必须严格遵守）：\n   - optimize
                 content: find(/内容|要点|信息|细节/, 0),
                 language: find(/语言|语法|拼写|标点|词汇/, 1),
                 structure: find(/结构|篇章|连贯|逻辑/, 2),
-                wordCount: find(/词数|字数/, 3),
+                wordCount: labels.find(l => /词数|字数/.test(l)) || '',
                 handwriting: find(/书写|卷面|字迹/, 4)
             };
         };

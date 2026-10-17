@@ -6,9 +6,12 @@ const baseline=fs.readFileSync(new URL('../legacy/index.html',import.meta.url),'
 const teacher=fs.readFileSync(new URL('../src/TeacherApp.jsx',import.meta.url),'utf8');
 const core=fs.readFileSync(new URL('../src/report/legacy-core.js',import.meta.url),'utf8');
 
-test('original scoring and model prompt block is retained exactly',()=>{
+test('original scoring and model prompts are retained except the explicit optional word-count dimension fix',()=>{
   const original=baseline.slice(baseline.indexOf('        const estimatePageCount'),baseline.indexOf('        // --- Components ---'));
-  assert(core.includes(original));
+  // A genre rubric may use its fourth dimension for communicative purpose.
+  // It must not receive a word-count penalty through the old positional fallback.
+  const fixed=original.replace('wordCount: find(/词数|字数/, 3),',"wordCount: labels.find(l => /词数|字数/.test(l)) || '',");
+  assert.notEqual(fixed,original);assert(core.includes(fixed));
 });
 
 test('all original teacher data and grading operations remain present after UI redesign',()=>{
@@ -16,7 +19,9 @@ test('all original teacher data and grading operations remain present after UI r
   // business operations as the baseline, without pinning presentation helpers.
   const original=baseline.slice(baseline.indexOf('        const App ='),baseline.indexOf("        const root = ReactDOM.createRoot"));
   const names=[...original.matchAll(/const (\w+) = (?:async )?\(/g)].map(m=>m[1]);
-  for(const name of names)assert(teacher.includes(`const ${name} = `),`Missing teacher operation: ${name}`);
+  // Teachers now choose their exact dimensions; reloading must not insert a
+  // hidden zero-point word-count item into a saved five-dimension template.
+  for(const name of names.filter(name=>name!=='ensureWordCountItem'))assert(teacher.includes(`const ${name} = `),`Missing teacher operation: ${name}`);
   for(const operation of ['startBatchGrading','callAI','handleStudentUpload','generateTopicAnalysis','generateRubricDesign','generateModelEssay','handlePauseBatch','exportCsvForClass','saveCurrentGradingSnapshot','generateClassAnalysis','importData','exportData'])assert(teacher.includes(`const ${operation} = `),operation);
 });
 
