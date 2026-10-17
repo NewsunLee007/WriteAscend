@@ -1,0 +1,131 @@
+{
+  "checkedAt": "2026-10-17T02:40:27.330925+00:00",
+  "rootTests": 208,
+  "realAccountLoginVerified": false,
+  "realModelCalled": false,
+  "flows": {
+    "legacy-archive": {
+      "passed": true,
+      "scriptSha256": "3f506bf84a875f573b5f60d04ad73855028cc19fb51d93271c0b85a1bd11f2dc",
+      "checkedAt": "2026-10-17T02:39:02.439392+00:00",
+      "result": {
+        "passed": true,
+        "sourceReports": 118,
+        "previewBeforeUpload": true,
+        "initialUploadPause": 10,
+        "chunkPause": 20,
+        "closeAndResume": true,
+        "duplicateImportDeduplicated": true,
+        "fullBusinessBackup": true,
+        "credentialsExcluded": true,
+        "missingRubricReadable": true,
+        "zeroScorePreserved": true,
+        "recordedWordCountPreserved": true,
+        "historicalTaskTitlePreserved": true,
+        "missingFactsNotInvented": true,
+        "unmatchedCriteriaPreserved": true,
+        "reportSections": 6,
+        "printPdf": true,
+        "originalWorkbenchCopy": true,
+        "withdrawRestore": true,
+        "noAiCalls": true,
+        "noForeignImageLoads": true,
+        "mobileWidths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "realSchoolData": false
+      }
+    },
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-17T02:39:06.486259+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "student-publication": {
+      "passed": true,
+      "scriptSha256": "39e3217f379669264ac2d669c2863e9b88fdb89532b06544468c5fda11baefbb",
+      "checkedAt": "2026-10-17T02:36:27.961497+00:00",
+      "result": {
+        "passed": true,
+        "studentLogin": true,
+        "unpublishedHidden": true,
+        "teacherConfirmation": true,
+        "readOnlyFeedback": true,
+        "stableOwnReportLink": true,
+        "studentPdfRendered": true,
+        "studentOwnOriginal": true,
+        "sameNameIsolated": true,
+        "teacherEditsAwaitRepublish": true,
+        "versionedRepublish": true,
+        "withdrawalBlocksReportAndImage": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    }
+  },
+  "print": {
+    "passed": true,
+    "reports": [
+      {
+        "file": "legacy-archive-zero-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      },
+      {
+        "file": "legacy-archive-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      }
+    ],
+    "syntheticOnly": true,
+    "physicalPrinterTested": false
+  },
+  "files": {
+    "src/report/LegacyPaper.jsx": "f3efe8e27393746dc6015b3b4cfcdb5ab8d6ca60e9b4300b7fa2d2ba45b82c40",
+    "src/report/writing-feedback.css": "e39bcfca26ab3e35122b070b745d4f67b673306bf018bd387ae42ee7ae159d2a",
+    "src/report/legacy-import.ts": "55034e60201bc5251ba957a38e6f209221cb1bb519fb567c9a7325755bb26a9f",
+    "test/report-compatibility.test.ts": "da0e19e7bc0f648b4f65566c8e48712be591abe2e50f6587053bc644d0b123c2",
+    "scripts/qa/legacy-archive.cjs": "3f506bf84a875f573b5f60d04ad73855028cc19fb51d93271c0b85a1bd11f2dc",
+    "scripts/qa/student-publication.cjs": "39e3217f379669264ac2d669c2863e9b88fdb89532b06544468c5fda11baefbb"
+  },
+  "formalDirectory": {
+    "checkedAt": "2026-10-17T02:37:23.906Z",
+    "readOnly": true,
+    "database": "Daily recitations authority bridge",
+    "formalDirectoryCounts": {
+      "writing_schools": 0,
+      "writing_classes": 0,
+      "writing_memberships": 0,
+      "writing_teacher_class_grants": 0,
+      "writing_membership_periods": null
+    },
+    "nullMeansTableNotInitialized": true,
+    "realAccountLoginVerified": false,
+    "identityRowsExported": false
+  },
+  "latestPriorDocsCI": {
+    "commit": "dbb1c2e88363569ec286e63c77b77c01f63870e6",
+    "runId": 38995181955,
+    "conclusion": "success"
+  }
+}

@@ -72,6 +72,8 @@ export async function importLegacy(input: unknown,options:{shareReadOnlyContext?
       rubric: ownRubric ?? parent.rubric,
       pdfConfig: isObject(v.pdfConfig) ? {...DEFAULT_PDF, ...v.pdfConfig} as PdfConfig : parent.pdfConfig,
     };
+    // Student-history records saved the task title outside their result object.
+    if (!ctx.assignment.title && typeof v.assignmentTitle === 'string' && v.assignmentTitle.trim()) ctx.assignment = {...ctx.assignment, title: v.assignmentTitle};
     if (resultLike(v)) {
       const fingerprint = await digest({result: v, assignment: ctx.assignment, rubric: ctx.rubric});
       if (seen.has(fingerprint)) return;

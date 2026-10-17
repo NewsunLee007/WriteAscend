@@ -52,6 +52,14 @@ test('aliases, student history and schema extensions remain usable',async()=>{
   assert.equal(bundle.reports.length,1);assert.equal(bundle.reports[0].result.highlights[0].text,'Original phrase');
   assert.equal(bundle.reports[0].result.highlights[0].comment,'真实表达');assert.equal(bundle.reports[0].result.highlights[0].extension,1);
   assert.equal(bundle.reports[0].rubric,null);
+  assert.equal(bundle.reports[0].assignment.title,'旧标题');
+});
+
+test('student-history task titles distinguish identical essays without inventing a historical rubric',async()=>{
+  const bundle=await importLegacy({studentProfiles:{'old-1':{records:[{result:sampleResult,assignmentTitle:'第一次写作',rubricTotal:20},{result:sampleResult,assignmentTitle:'第二次写作',rubricTotal:15}]}}});
+  assert.deepEqual(bundle.reports.map(r=>r.assignment.title),['第一次写作','第二次写作']);
+  assert.equal(new Set(bundle.reports.map(r=>r.fingerprint)).size,2);
+  assert(bundle.reports.every(r=>r.rubric===null));
 });
 
 test('JSON round trip keeps rubric, sections, teacher changes and scores without duplicate reports',async()=>{

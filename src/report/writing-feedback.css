@@ -6,3 +6,5 @@
 .feedback-paragraph{display:block;margin-bottom:var(--feedback-paragraph-gap,2pt)}.feedback-paragraph:last-child{margin-bottom:0}
 
 @media print{.writing-feedback .feedback-section{margin-bottom:var(--feedback-section-gap);padding-top:0}.writing-feedback .feedback-score-grid{padding-bottom:10px;margin-bottom:14px}.writing-feedback .feedback-header{margin-bottom:12px}.writing-feedback .feedback-overall{padding:12px!important}.writing-feedback .feedback-correction{padding-top:8px;padding-bottom:8px}.writing-feedback .feedback-essay{break-inside:avoid;page-break-inside:avoid}.writing-feedback .feedback-section-title{break-after:avoid;page-break-after:avoid}.writing-feedback .feedback-section-note{break-after:avoid;page-break-after:avoid}.writing-feedback .feedback-footer{margin-top:8px;padding-top:10px}}
+
+.feedback-score-grid .feedback-unrecorded{font-size:12px;font-weight:400;color:var(--feedback-muted)}

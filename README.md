@@ -22,6 +22,7 @@
 - [可复核的结构与数量证据](docs/phase-1-evidence.json)
 - [已执行的验证记录](docs/verification/README.md)
 - [当前执行记录](docs/EXECUTION.md)
+- [逐项验收状态与真实试点顺序](docs/acceptance-status.md)
 - [独立互批研究与适龄改编](docs/peer-review-research.md)
 - [同伴反馈关联手写二稿](docs/peer-feedback-revisions.md)
 - [独立互批轮次与课堂流程](docs/peer-rounds.md)

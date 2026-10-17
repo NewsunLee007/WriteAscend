@@ -96,7 +96,13 @@ export default function EditablePaper({data,assignment,rubric,studentIndex,onUpd
  const highlights=Array.isArray(localData.highlights)?localData.highlights:[],errors=Array.isArray(localData.errors)?localData.errors:[];
  const editItem=(field,index,key,value)=>handleChange(field,localData[field].map((item,i)=>i===index?{...item,[key]:value}:item));
  const originalImages=Array.isArray(localData.original_image_urls)&&localData.original_image_urls.length?localData.original_image_urls:localData.original_image_url?[localData.original_image_url]:[];
- const scoreItems=Array.isArray(rubric?.items)?rubric.items:Object.keys(localData.breakdown||{}).map(label=>({id:label,label,score:null}));
+ const scoreItems=Array.isArray(rubric?.items)?[...rubric.items]:[];
+ if(readOnly){
+  // Preserve unmatched historical labels; the original maximum cannot be inferred.
+  for(const label of Object.keys(localData.breakdown||{}))if(!scoreItems.some(item=>item.label===label))scoreItems.push({id:'recorded-'+label,label,score:null});
+ }
+ const recordedWordCount=typeof localData.word_count==='number'&&Number.isFinite(localData.word_count)&&localData.word_count>=0?localData.word_count:typeof localData.word_count==='string'&&localData.word_count.trim()?localData.word_count:'未记录';
+ const displayedWordCount=readOnly?recordedWordCount:countEnglishWords(localData.original_essay)||(localData.word_count??0);
  return <article ref={root} className="a4-wrapper writing-feedback" style={paperStyle}>
   <header className="feedback-header">
    <div className="feedback-heading"><p className="feedback-eyebrow">英语写作反馈 · 学生英语写作质量分析报告</p><h1>{assignment.title||assignment.examName||'本次英语写作'}</h1>{assignment.examName&&assignment.title&&<p className="feedback-exam">{assignment.examName}</p>}
@@ -106,8 +112,8 @@ export default function EditablePaper({data,assignment,rubric,studentIndex,onUpd
   </header>
   {localData.identity_name_mismatch&&!localData.identity_name_mismatch_verified&&!readOnly&&!identityLocked&&<aside className="feedback-identity-alert no-print"><span>识别姓名：{localData.detected_student_name||localData.identity_name_from_ai||'待核对'}。请对照原稿核对学生归属。</span><label><input type="checkbox" checked={false} onChange={()=>commit('identity_name_mismatch_verified',true)}/>已核对，确认归属正确</label></aside>}
   <div className="feedback-score-grid" style={{'--feedback-criteria':Math.min(6,scoreItems.length+1)}}>
-   {scoreItems.map(item=><div key={item.id||item.label}><span>{item.label}</span><strong>{Field({label:item.label+'得分',kind:'number',value:localData.breakdown?.[item.label]??0,onChange:e=>handleBreakdownChange(item.label,e)})}{item.score!==null&&<small>/{item.score}</small>}</strong></div>)}
-   <div><span>作文词数</span><strong>{countEnglishWords(localData.original_essay)||(localData.word_count??(rubric?0:'未记录'))}</strong><small>{rubric?'要求 '+(rubric.wordCount||'以题目为准'):'字数要求未记录'}</small></div>
+   {scoreItems.map(item=><div key={item.id||item.label}><span>{item.label}</span><strong>{Field({label:item.label+'得分',kind:'number',className:readOnly&&localData.breakdown?.[item.label]==null?'feedback-unrecorded':'',value:localData.breakdown?.[item.label]??(readOnly?'未记录':0),onChange:e=>handleBreakdownChange(item.label,e)})}{item.score!==null&&<small>/{item.score}</small>}</strong></div>)}
+   <div><span>作文词数</span><strong className={displayedWordCount==='未记录'?'feedback-unrecorded':''}>{displayedWordCount}</strong><small>{rubric?'要求 '+(rubric.wordCount||'以题目为准'):'字数要求未记录'}</small></div>
   </div>
   {pdfConfig?.showPrompt&&assignment.topic&&<section className="feedback-prompt"><h3>写作任务</h3><div className="feedback-text">{assignment.topic}</div></section>}
   <section className="feedback-section feedback-overall"><Title number={1}/>{Text({label:'总体评价',value:localData.brief_comment,onChange:e=>handleChange('brief_comment',e.target.value)})}</section>
