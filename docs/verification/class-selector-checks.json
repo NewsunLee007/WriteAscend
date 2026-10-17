@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-17T05:28:27.469Z",
+  "syntheticOnly": true,
+  "classes": 54,
+  "searchByClassGradeSemester": true,
+  "retainsSelectionAcrossSearch": true,
+  "noResultsMessage": true,
+  "reopenRetainsSelection": true,
+  "savedFilteredDraftTargets": [
+    "合成753班",
+    "合成701班"
+  ],
+  "numericalClassOrder": true,
+  "responsive": [
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "checkboxRows": [
+        84.25,
+        61.5,
+        61.5
+      ],
+      "listHeight": 280,
+      "overflow": false,
+      "width": 369
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "checkboxRows": [
+        61.5,
+        61.5,
+        61.5
+      ],
+      "listHeight": 280,
+      "overflow": false,
+      "width": 762
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "checkboxRows": [
+        61.5,
+        61.5,
+        61.5
+      ],
+      "listHeight": 280,
+      "overflow": false,
+      "width": 1434
+    }
+  ],
+  "realTeacherGrantChanged": false,
+  "realModelCalled": false,
+  "localVerification": {
+    "teacherTests": 208,
+    "peerTests": 9,
+    "teacherBuild": true,
+    "teacherWorkerDryRun": true,
+    "peerBuildAndWorkerDryRun": true
+  }
+}

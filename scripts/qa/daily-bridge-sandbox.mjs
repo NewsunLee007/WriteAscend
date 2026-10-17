@@ -41,6 +41,14 @@ db.exec(`INSERT INTO writing_schools VALUES('synthetic-school','合成测试学�
   INSERT INTO writing_classes VALUES('synthetic-school-class','synthetic-school','合成学年（仅测试）','合成学校班','合成学校班','七年级','active',1);
   INSERT INTO writing_teacher_class_grants VALUES('wordup','synthetic-teacher','synthetic-school-class','["roster.read","writing.manage","writing.grade","writing.publish"]',1,0);`);
 for(const s of students)db.prepare('INSERT INTO writing_memberships(class_id,provider,subject,started) VALUES(?,?,?,?)').run('synthetic-school-class','wordup',s.subject,'synthetic-initial');
+// Optional empty synthetic classes for checking a full-school mobile selector.
+const extraClasses=Number(process.env.SANDBOX_EXTRA_CLASSES||0);
+if(!Number.isInteger(extraClasses)||extraClasses<0||extraClasses>100)throw Error('SANDBOX_EXTRA_CLASSES must be 0–100.');
+for(let i=0;i<extraClasses;i++){
+  const id='synthetic-selector-'+i,name='合成'+(701+i)+'班';
+  db.prepare("INSERT INTO writing_classes VALUES(?,'synthetic-school','2026-1',?,?,'七年级','active',1)").run(id,name,name);
+  db.prepare("INSERT INTO writing_teacher_class_grants VALUES('wordup','synthetic-teacher',?,'[\"roster.read\",\"writing.manage\",\"writing.grade\",\"writing.publish\"]',1,0)").run(id);
+}
 const directory=path.resolve(import.meta.dirname,'../../integrations/daily/public');
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,origin);

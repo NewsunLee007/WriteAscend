@@ -4,3 +4,5 @@
 .task-member-search{width:100%;min-height:44px;border:1px solid #e1e6ef;background:white;border-radius:9px;padding:10px 12px;font-size:16px}
 
 .teacher-tasks-bar>span{min-width:0;overflow-wrap:anywhere}.teacher-task-actions{display:flex;gap:8px;flex-shrink:0}
+
+.task-class-summary{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 6px;color:#64748b;font-size:12px;line-height:1.8}.task-class-options{max-height:280px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border-block:1px solid #edf0f5}.task-class-options>label{border-bottom:1px solid #edf0f5}.task-class-options>label:last-child{border-bottom:0}.task-class-options>label>span{min-width:0;overflow-wrap:anywhere}
