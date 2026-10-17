@@ -1,0 +1,77 @@
+{
+  "sourceCommit": "0b11747f3f9ebfafed469c8d616eb6ab2fbd8215",
+  "productionVersion": "7b873d83-f40d-4f1a-a791-7c5a44aa00bd",
+  "previousProductionVersion": "cbe64bd9-5e02-4420-97e0-3cca615826a9",
+  "stagingVersion": "8689f22d-6333-4b0d-956c-61c550f46929",
+  "previousStagingVersion": "c8d65625-0524-4df4-b13a-66678e8f2279",
+  "releasedAt": "2026-10-17T12:57:46.111Z",
+  "rootTests": 251,
+  "peerTests": 9,
+  "githubRun": 39034231320,
+  "githubConclusion": "success",
+  "newDatabaseMigrations": 0,
+  "routeIdsAndRulesUnchanged": true,
+  "backups": {
+    "staging": {
+      "bytes": 25997,
+      "sha256": "daa3e2480546775d9f934c5cf6c8c2a74261b302871ffc57213f78f6bc567cdb"
+    },
+    "production": {
+      "bytes": 122031,
+      "sha256": "70a132d538d55698dd7d15f6b2f987abd5abdd6c567172c81ec951475f3a88ef"
+    }
+  },
+  "online": {
+    "passed": true,
+    "target": "production",
+    "origin": "https://writeascend.newsunenglish.com",
+    "sourceCommit": "0b11747f3f9ebfafed469c8d616eb6ab2fbd8215",
+    "version": "7b873d83-f40d-4f1a-a791-7c5a44aa00bd",
+    "assets": [
+      "/assets/index-CYsDFELa.js",
+      "/assets/rolldown-runtime-COiEfhsA.js",
+      "/assets/legacy-import-CnnmTrul.js",
+      "/assets/index-P3qYT1lf.css",
+      "/assets/WritingSheetsPanel-BDTMfUgr.js",
+      "/assets/WritingSheetsPanel-CjrmFQST.css"
+    ],
+    "anonymousDenied": [
+      "/api/tasks/11111111-1111-4111-8111-111111111111/sheets",
+      "/api/me",
+      "/api/classes",
+      "/api/student/reports",
+      "/api/model/profiles",
+      "/api/model/local-status",
+      "/api/tasks/11111111-1111-4111-8111-111111111111/sheets POST",
+      "/api/local-relay/poll POST",
+      "/api/local-relay/result POST",
+      "/api/model/personal POST"
+    ],
+    "cspUnchanged": true,
+    "loginCallbackVerified": true,
+    "checkedAt": "2026-10-17T12:57:46.111Z"
+  },
+  "layout": {
+    "sourceCommit": "0b11747f3f9ebfafed469c8d616eb6ab2fbd8215",
+    "syntheticOnly": true,
+    "pagesChecked": 2,
+    "lineCountPerPage": 18,
+    "observedLineSpacingMm": 9.496061197916664,
+    "observedFreeWritingMm": 21.844661458333334,
+    "observedPageHeightMm": 296.99892578124997,
+    "rowsEven": true,
+    "footerInsideA4Margins": true,
+    "visualInspectionPassed": true,
+    "screenshot": "output/writing-sheet-18/preview.jpg",
+    "systemPdfExportCompleted": false
+  },
+  "templateVersion": "handwriting-a4-v2-18-lines",
+  "dailyChanged": false,
+  "peerChanged": false,
+  "gradingPipelineChanged": false,
+  "existingSheetTokensRevokedByDeployment": false,
+  "remaining": [
+    "Physical paper and printer validation; system PDF export was unavailable during this UI check.",
+    "Real classroom grading, publication, peer review and handwritten revisions remain separate acceptance gates."
+  ]
+}
