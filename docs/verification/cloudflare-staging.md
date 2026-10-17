@@ -1,6 +1,6 @@
 # Cloudflare 测试环境发布与恢复验证
 
-2026-10-17。应用代码提交 `89280a7487569479142e55a3012c7d76eeffd77b` 已部署至两个独立测试 Worker。本记录保存首次发布与恢复演练时的状态；随后完成 [Daily 接入](daily-activation.md) 和 [工作区备份更新](workspace-migration.md)，最新教师版本见后者。正式域名、正式学校目录和真实收费模型尚未切换。操作说明见 [测试发布与回退](../staging-release.md)。
+2026-10-17。应用代码提交 `89280a7487569479142e55a3012c7d76eeffd77b` 已部署至两个独立测试 Worker。本记录保存首次发布与恢复演练时的状态；随后完成 [Daily 接入](daily-activation.md) 和 [工作区备份更新](workspace-migration.md)，随后完成[旧版云端档案](legacy-archive.md)，最新教师版本见该记录。正式域名、正式学校目录和真实收费模型尚未切换。操作说明见 [测试发布与回退](../staging-release.md)。
 
 ## 实际部署
 
