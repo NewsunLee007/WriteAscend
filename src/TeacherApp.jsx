@@ -8,7 +8,11 @@ import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
 import {useCloudSnapshots} from './teacher/useCloudSnapshots';
 import {CloudSnapshotsPanel} from './teacher/CloudSnapshotsPanel';
 import {createWorkspaceBackup,prepareWorkspaceBackup,persistWorkspaceRestore} from './teacher/workspace-backup';
-import {TeacherTasksPanel} from './teacher/TeacherTasksPanel';
+import WorkspaceShell,{workspacePages} from './teacher/WorkspaceShell';
+import WorkspaceHome from './teacher/WorkspaceHome';
+import TaskWorkspace from './teacher/TaskWorkspace';
+import TaskPreparation from './teacher/TaskPreparation';
+import SchoolRosterPage from './teacher/SchoolRosterPage';
 import {taskClasses,uniqueStudent} from './teacher/task-roster';
 const SchoolDirectoryPanel=React.lazy(()=>import('./teacher/SchoolDirectoryPanel'));
 const LegacyArchivePanel=React.lazy(()=>import('./teacher/LegacyArchivePanel'));
@@ -181,7 +185,14 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
         };
 
         // --- Paper Component ---
+        const SettingsPage = ({isOpen,tab,onTab,onPdf,onCsv,children}) => isOpen ? <section className="wa-settings-surface wa-legacy-surface no-print" data-tab={tab}><nav className="wa-filter-tabs">{[['models','批改与识别模型'],['exports','报告导出'],['data','备份与恢复']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>onTab(id)}>{label}</button>)}</nav>{tab==='exports'&&<section className="wa-panel"><h2>报告与成绩表</h2><p>保留逐句批改、评分依据、润色建议等完整内容，按需要调整打印排版和成绩表格式。</p><div className="wa-actions"><button className="wa-primary" onClick={onPdf}>PDF / 打印排版</button><button className="wa-secondary" onClick={onCsv}>CSV 设置与导出历史</button></div></section>}{children}</section> : null;
         const App = () => {
+            const [workspacePage,setWorkspacePage]=useState('home');
+            const [requestedTaskId,setRequestedTaskId]=useState('');
+            const [settingsTab,setSettingsTab]=useState('models');
+            const [archivesTab,setArchivesTab]=useState('current');
+            const [preparationTab,setPreparationTab]=useState('prompt');
+            const [showClearBatch,setShowClearBatch]=useState(false);
             const cloud = useTeacherCloud();
             const teacherStorage = cloud.storage;
             const [pendingWorkspaceImport,setPendingWorkspaceImport]=useState(null);
@@ -207,6 +218,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [showStudentProfiles, setShowStudentProfiles] = useState(false);
             const [showHelp, setShowHelp] = useState(false);
             const [showPDFSettings, setShowPDFSettings] = useState(false);
+            useEffect(()=>{if(step===1)setWorkspacePage('upload');else if(step===2){setArchivesTab('current');setWorkspacePage('reports');}else if(step===3)setWorkspacePage('analysis');},[step]);
+            useEffect(()=>{if(showConfig){setWorkspacePage('settings');setSettingsTab('models');setShowConfig(false);}},[showConfig]);
+            const navigateWorkspace=page=>{setWorkspacePage(page);if(page==='quick')setStep(0);if(page==='upload')setStep(1);if(page==='reports')setStep(2);if(page==='analysis')setStep(3);if(page==='tasks')setRequestedTaskId('');};
+
             const [showAnalysis, setShowAnalysis] = useState(false);
             const [lightboxSrc, setLightboxSrc] = useState(null);
             const [viewMode, setViewMode] = useState('grid');
@@ -637,11 +652,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             useEffect(() => { if (step > maxStep) setMaxStep(step); }, [step]);
 
             useEffect(() => {
-                const sectionNames = ['评分标准', '导入作文', '批改导出', '班级综合分析'];
-                const section = sectionNames[step] || '';
-                const cls = getClassNameById(currentClassId) || '未分班级';
-                document.title = `智能英语作文批改 - ${cls} - ${section}`;
-            }, [step, currentClassId, classes]);
+                document.title = `WriteAscend · ${workspacePages[workspacePage]?.[0]||'教师工作区'}`;
+            }, [workspacePage]);
 
             useEffect(() => {
                 const list = Array.isArray(classes) ? classes : [];
@@ -3859,7 +3871,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
                 return (
                     <div className="max-w-4xl mx-auto mt-8 p-10 bg-white/70 glass-pure rounded-3xl fade-in text-center">
-                        <h2 className="text-xl font-bold text-slate-800 mb-8 flex items-center justify-center gap-3"><span className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">2</span> 导入学生作文</h2>
+                        <h2 className="text-xl font-bold text-slate-800 mb-8 flex items-center justify-center gap-3">本次作文与照片</h2>
 
                         <div className="mb-8 bg-white/60 rounded-3xl p-6 border border-white/50 shadow-sm text-left">
                             <div className="flex items-start justify-between gap-4 mb-4">
@@ -3928,7 +3940,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             <div className="bg-white/60 rounded-3xl p-8 border border-white/50 shadow-sm">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="font-bold text-slate-700">已选择 {files.length} 份文件</h3>
-                                    <button onClick={() => setFiles([])} className="text-red-400 text-xs hover:underline flex items-center gap-1 font-bold"><Trash size={12}/> 清空重选</button>
+                                    <button disabled={isBatchProcessing} onClick={() => setShowClearBatch(true)} className="text-red-400 text-xs hover:underline flex items-center gap-1 font-bold"><Trash size={12}/> 清空重选</button>
                                 </div>
                                 <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6">
                                     {files.map(f => (
@@ -3970,8 +3982,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         <div className="mt-8 fade-in flex flex-col gap-6 px-8">
                             <div className="flex items-center justify-between gap-4 mb-2">
                                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <span className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">3</span>
-                                    批改导出
+                                    本次批改报告
                                 </h2>
                             </div>
                         <nav className="teacher-report-tools no-print" aria-label="报告操作">
@@ -3984,12 +3995,14 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             <div className="teacher-grading-layout flex gap-4 items-stretch h-[calc(100vh-220px)]">
                                 <div className="teacher-grading-sidebar w-64 bg-white/90 glass-iso border border-white/60 rounded-3xl flex flex-col h-full z-10 shadow-xl backdrop-blur-md overflow-hidden">
                                     <div className="p-5 border-b border-white/50">
+                                        {(isBatchProcessing||isPaused||files.some(f=>!['success'].includes(f.status)))&&<>
                                         <button onClick={startBatchGrading} disabled={isBatchProcessing || files.length === 0} className={`w-full flex justify-center items-center gap-2 py-4 rounded-2xl text-sm font-bold shadow-lg transition-all transform hover:scale-[1.02] ${isBatchProcessing ? 'bg-slate-100 text-slate-400 cursor-wait' : 'btn-pure active'}`}>
                                             {isBatchProcessing ? <Refresh className="spin" size={18}/> : <Check size={18}/>} {isBatchProcessing ? '正在智能批改...' : (isPaused ? '继续批改' : '开始批改')}
                                         </button>
                                         <button onClick={handlePauseBatch} disabled={!isBatchProcessing || pauseRequested} className="w-full mt-3 flex justify-center items-center gap-2 py-3 rounded-2xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                             {pauseRequested ? '已请求暂停' : '暂停批改'}
                                         </button>
+                                        </>}
                                         <button onClick={openSaveDialogWithDefaultName} disabled={files.filter(f => f && f.status === 'success' && f.result).length === 0} className="w-full mt-3 flex justify-center items-center gap-2 py-3 rounded-2xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                             保存批改结果
                                         </button>
@@ -3998,10 +4011,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                                 {pauseBanner}
                                             </div>
                                         )}
-                                        <label className="w-full mt-4 flex justify-center items-center gap-2 py-3 border border-dashed border-slate-300 rounded-2xl text-sm font-medium text-slate-500 hover:bg-white hover:border-slate-400 hover:text-slate-700 cursor-pointer transition bg-slate-50/50">
-                                            <FilePlus size={16}/> 添加图片
-                                            <input type="file" multiple accept="image/*" className="hidden" onChange={handleStudentUpload} />
-                                        </label>
+                                        <button className="w-full mt-3 btn-pure" onClick={()=>navigateWorkspace('upload')}>管理本次作文与照片</button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                                         {files.map((f, idx) => (
@@ -4084,7 +4094,6 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                             <div>
                                 <h2 className="text-xl font-bold text-slate-800 mb-2 flex items-center justify-start gap-2">
-                                    <span className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">4</span>
                                     班级综合分析
                                 </h2>
                                 <p className="text-slate-500 text-sm">当前班级：<span className="font-semibold text-slate-700">{cls}</span> · 已批改 <span className="font-semibold text-slate-700">{gradedCount}</span> 份</p>
@@ -4453,8 +4462,9 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 );
             };
 
+            const renderPreparation=section=><TaskPreparation section={section} assignment={assignment} setAssignment={setAssignment} rubric={rubric} setRubric={setRubric} languageDifficulty={languageDifficulty} setLanguageDifficulty={setLanguageDifficulty} onPromptUpload={handlePromptImageUpload} onRecognize={extractPromptTextFromImage} onAnalyze={generateTopicAnalysis} onGenerateRubric={generateRubricDesign} onApplyGenerated={applyGeneratedRubricToSystem} design={rubricDesignState} onDesignChange={setRubricDesignState} onModelEssay={generateModelEssay} onImport={()=>setShowRubricImportModal(true)} onHistory={()=>setShowRubricHistory(true)} onBackup={openRubricBackupDialog}/>;
             return (
-                <div className="min-h-screen flex flex-col relative">
+                <WorkspaceShell page={workspacePage} onNavigate={navigateWorkspace} busy={isBatchProcessing}>
                     {/* Dynamic Print Styles Injection */}
                     <style>{`
                         @media print {
@@ -4469,21 +4479,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                         }
                     `}</style>
 
-                    <div className="no-print">
-                        {workflowMode === 'full' ? <Stepper currentStep={step} maxStep={maxStep} steps={['评分标准', '导入作文', '批改导出', '班级分析']} onStepClick={navigateTo} onHelp={() => setShowHelp(true)} onConfig={() => setShowConfig(true)} onHome={()=>{setWorkflowMode('quick');setStep(0);}} /> : (
-                            <header className="teacher-quick-header">
-                                <a href="/"><img src="/favicon.svg" alt=""/>智能英语作文批改</a>
-                                <div>{step !== 0 && <button onClick={() => setStep(0)}>返回快速批改</button>}{step === 2 && <button onClick={() => setStep(3)}>班级分析</button>}<button onClick={() => setShowConfig(true)}>设置</button><button onClick={() => setWorkflowMode('full')}>完整工作台</button></div>
-                            </header>
-                        )}
-                        
-                        <main className={`pb-32 pt-24 ${workflowMode === 'quick' ? 'teacher-quick-main' : 'teacher-full-main'}`}>
-                            <CloudConnection busy={isBatchProcessing}/>
-                            {cloud.mode==='cloud'&&cloud.identity?.role==='admin'&&<React.Suspense fallback={null}><SchoolDirectoryPanel/></React.Suspense>}
-                            <div className="teacher-task-tools">
-                            {cloud.mode === 'cloud' && <TeacherTasksPanel assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} busy={isBatchProcessing} sourceTask={sourceTask} onOpenReports={(task,reports,members) => {
+                    <main className="no-print wa-pages">
+                      {draftError&&<p className="wa-notice" role="status">{draftError}</p>}
+                      {workspacePage==='home'&&<WorkspaceHome files={files} onNavigate={navigateWorkspace} onTask={id=>{setRequestedTaskId(id);setWorkspacePage('tasks');}}/>}
+                      {workspacePage==='tasks'&&(cloud.mode==='cloud'&&cloud.identity?<TaskWorkspace assignment={assignment} rubric={rubric} settings={{pdfConfig,csvExportConfig,languageDifficulty}} blocked={!!files.length||isBatchProcessing} initialTaskId={requestedTaskId} renderPreparation={renderPreparation} onQuick={()=>navigateWorkspace('quick')} onManageBatch={()=>navigateWorkspace('upload')} onGradeChange={gradeLevel=>setRubric(p=>({...p,gradeLevel}))} onOpenReports={(task,reports,members) => {
                                 if(isBatchProcessing)throw new Error('请先暂停当前批改，再载入班级结果。');
-                                if(files.some(file=>!file.cloudBoundRef||file.cloudBoundRef.taskId!==task.id))throw new Error('当前工作台已有其他作文。请先保存结果，再到完整工作台的“导入作文”中清空重选，然后载入班级结果。');
+                                if(files.some(file=>!file.cloudBoundRef||file.cloudBoundRef.taskId!==task.id))throw new Error('当前工作台已有其他作文。请先保存结果，再到“本次作文”页中清空重选，然后载入班级结果。');
                                 if(!reports.length)return;
                                 const document=reports[0].document;
                                 if(reports.some(item=>JSON.stringify(item.document.rubric)!==JSON.stringify(document.rubric)||JSON.stringify(item.document.assignment)!==JSON.stringify(document.assignment)))throw new Error('这些报告对应不同题目或评分标准，请按任务版本分别查看。');
@@ -4493,10 +4494,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 if(document.settings.csvExportConfig)setCsvExportConfig(document.settings.csvExportConfig);
                                 if(document.settings.languageDifficulty)setLanguageDifficulty(document.settings.languageDifficulty);
                                 const restored=reports.map((item,index)=>({id:'bound-'+item.report.id,index:index+1,name:item.document.identity.name,status:'success',result:item.document.result,url:item.document.result.original_image_url,cloudAssetIds:item.document.source.manifest.pages.map(page=>page.assetId),cloudBoundRef:{id:item.report.id,revision:item.report.revision,taskId:task.id,inputHash:item.document.provenance.inputHash},targetClassId:'daily:'+item.document.identity.classId}));
-                                setFiles(restored);setSelectedFileId(restored[0].id);setStep(2);setMaxStep(previous=>Math.max(previous,2));setPauseBanner('已载入学生关联报告，可沿用原有导出和分析。需要修改时，请打开“班级批阅”保存教师版本。');
+                                setFiles(restored);setSelectedFileId(restored[0].id);setWorkspacePage('reports');setArchivesTab('current');setStep(2);setMaxStep(previous=>Math.max(previous,2));setPauseBanner('已载入学生关联报告，可沿用原有导出和分析。需要修改时，请回到写作任务的“核对与发布”保存教师版本。');
                             }} onApply={(value,members) => {
                                 if(isBatchProcessing)return;
-                                if(files.length)throw new Error('当前批次已有作文。请先保存结果，再到完整工作台的“导入作文”中清空重选，然后载入任务，避免旧报告套用新标准。');
+                                if(files.length)throw new Error('当前批次已有作文。请先保存结果，再到“本次作文”页中清空重选，然后载入任务，避免旧报告套用新标准。');
                                 setAssignment(value.document.assignment);setRubric(value.document.rubric);setSourceTask(value.task);
                                 const settings=value.document.settings||{};
                                 if(settings.pdfConfig)setPdfConfig(settings.pdfConfig);
@@ -4507,15 +4508,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     setClasses(previous=>[...previous.filter(c=>!ids.includes(c.id)),...imported]);setCurrentClassId(ids[0]);setActiveClassIds(ids);
                                 } else setClasses(previous=>previous.map(c=>String(c.id)===String(currentClassId)?{...c,gradeLevel:value.document.rubric.gradeLevel}:c));
                                 setStep(0);
-                            }}/>}
-                            {cloud.mode === 'cloud' && <CloudSnapshotsPanel sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value => {
-                                applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});
-                                if(!isBatchProcessing){setStep(2);setMaxStep(previous => Math.max(previous,2));}
-                            }}/>}
-                            </div>
-                            {draftError && <p className="mx-auto max-w-3xl px-4 py-2 text-xs text-amber-700" role="status">{draftError}</p>}
-                            {workflowMode === 'full' && <div className="teacher-mode-bar"><div>完整工作台</div><button onClick={() => { setWorkflowMode('quick'); setStep(0); }}>切换到快速批改</button></div>}
-                            {step === 0 && (workflowMode === 'full' ? renderStep1() : <QuickGrading
+                            }}/>:<section className="wa-empty"><h2>学校写作任务</h2><p>连接学校账号后，按任教班级建立写作任务。当前可继续使用快捷批阅。</p><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>开始快捷批阅</button></section>)}
+                      {workspacePage==='quick'&&<QuickGrading
                                 assignment={assignment} setAssignment={setAssignment} rubric={rubric}
                                 setRubric={updater => setRubric(prev => { const next = typeof updater === 'function' ? updater(prev) : updater; return next.total !== prev.total ? { ...next, items: redistributeItemScoresToTotal(next.items, next.total) } : next; })}
                                 classes={classes} currentClassId={currentClassId} activeClassIds={activeClassIds} setCurrentClassId={setCurrentClassId} setActiveClassIds={setActiveClassIds}
@@ -4523,37 +4517,26 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 files={files} isBatchProcessing={isBatchProcessing} configReady={cloud.mode === 'cloud' ? modelReady : !!config.apiKey}
                                 onPromptUpload={handlePromptImageUpload} onRecognizePrompt={extractPromptTextFromImage}
                                 onUpload={handleStudentUpload} onManageStudents={() => setShowStudentMgmt(true)} onModelSettings={() => setShowConfig(true)}
-                                onAdvanced={() => { setWorkflowMode('full'); setStep(0); }} onImportRubric={() => setShowRubricImportModal(true)}
+                                onAdvanced={() => { setPreparationTab('rubric');setWorkspacePage('prepare'); }} onImportRubric={() => setShowRubricImportModal(true)}
                                 onRemoveFile={id => { const old = files.find(f => f.id === id); if (old?.url) URL.revokeObjectURL(old.url); setFiles(prev => prev.filter(f => f.id !== id)); if (selectedFileId === id) setSelectedFileId(files.find(f => f.id !== id)?.id || null); }}
                                 onRetry={() => setFiles(prev => prev.map(f => f.status === 'error' ? { ...f, status: 'idle' } : f))}
                                 onStart={handleQuickStart}
-                            />)}
-                            {step === 1 && renderStep2()}
-                            {step === 2 && renderStep3()}
-                            {step === 3 && renderStep4()}
-                        </main>
-                        
-                        {/* ISO Glass Navigation Pill */}
-                        {workflowMode === 'full' && <div className="teacher-navigation fixed bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 p-2 glass-iso rounded-full shadow-2xl transition-all hover:-translate-y-1">
-                            <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0} className="btn-pure flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm hover-glow">
-                                <ArrowLeft size={18} strokeWidth={2.5} /> 上一步
-                            </button>
-                            {step < 3 && <button onClick={() => {
-                                if(step===0 && !assignment.topic) return alert("请填写或生成题目文字稿");
-                                if(step===1 && files.length===0) return alert("请至少上传一张图片");
-                                advanceStep();
-                            }} className="btn-pure active flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm hover-glow">
-                                下一步 <ArrowRight size={18} strokeWidth={2.5} />
-                            </button>}
-                        </div>}
-                    </div>
+                            />}
+                      {workspacePage==='prepare'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}>{[['prompt','写作要求'],['rubric','评分标准']].map(([id,label])=><button key={id} aria-pressed={preparationTab===id} onClick={()=>setPreparationTab(id)}>{label}</button>)}</nav>{renderPreparation(preparationTab)}<div className="wa-step-footer"><span>本次设置会用于快捷批阅。</span><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>完成设置，返回批阅</button></div></>}
+                      {workspacePage==='upload'&&<section className="wa-legacy-surface"><div className="wa-actions" style={{marginBottom:20}}><button className="wa-secondary" onClick={()=>navigateWorkspace('quick')}>返回快捷批阅</button><button className="wa-text-button" onClick={()=>navigateWorkspace('reports')}>查看本次结果</button></div>{renderStep2()}</section>}
+                      {workspacePage==='reports'&&<><nav className="wa-filter-tabs" style={{marginBottom:20}}><button aria-pressed={archivesTab==='current'} onClick={()=>setArchivesTab('current')}>本次批改 {files.filter(f=>f.result).length>0&&'· '+files.filter(f=>f.result).length+' 份'}</button>{cloud.mode==='cloud'&&<button aria-pressed={archivesTab==='cloud'} onClick={()=>setArchivesTab('cloud')}>云端存档</button>}{cloud.mode==='cloud'&&<button onClick={()=>setShowLegacyArchive(true)}>旧版批改档案</button>}</nav>{archivesTab==='current'?files.length?<section className="wa-legacy-surface">{renderStep3()}</section>:<section className="wa-empty"><h2>本次还没有批改结果</h2><p>从写作任务进入班级批阅，或直接上传作文快捷批改。历史结果可在云端存档中打开。</p><button className="wa-primary" onClick={()=>navigateWorkspace('quick')}>开始批阅</button></section>:<CloudSnapshotsPanel embedded sync={cloudSnapshots} onDownload={downloadSavedGradingSnapshot} onRestore={value=>{applySavedGradingSnapshot({...value.snapshot,cloud:value.cloud});if(!isBatchProcessing){setArchivesTab('current');setStep(2);setMaxStep(previous=>Math.max(previous,2));}}}/>}</>}
+                      {workspacePage==='analysis'&&<section className="wa-legacy-surface">{renderStep4()}</section>}
+                      {workspacePage==='students'&&<SchoolRosterPage onPrivate={()=>setShowStudentMgmt(true)}/>}
+                      {workspacePage==='directory'&&cloud.identity?.role==='admin'&&<React.Suspense fallback={<p role="status">正在读取学校目录…</p>}><SchoolDirectoryPanel embedded/></React.Suspense>}
+                    </main>
 
+                    <Modal isOpen={showClearBatch} onClose={()=>setShowClearBatch(false)} title="清空本次作文前确认" footer={<div className="wa-actions"><button className="wa-secondary" onClick={()=>setShowClearBatch(false)}>保留本次作文</button><button className="wa-primary" disabled={isBatchProcessing||isAnalyzingClass} onClick={()=>{setFiles([]);setSelectedFileId(null);setSourceTask(null);setShowClearBatch(false);}}>确认清空本次列表</button></div>}><p className="text-sm leading-7 text-slate-600">本次列表有 {files.length} 份作文。尚未保存的快捷批阅结果会从工作区移除；已保存的云端档案和班级任务原稿继续保留。请先保存需要保留的结果。</p><button className="wa-secondary" onClick={()=>{setShowClearBatch(false);navigateWorkspace('reports');}}>返回报告并保存</button></Modal>
                     <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
                     
                     {/* Modals - Same as previous version, ensuring consistency */}
-                    <Modal isOpen={showConfig} onClose={() => setShowConfig(false)} title="系统设置" footer={<button onClick={() => setShowConfig(false)} className="btn-pure active px-6 py-2.5 rounded-full text-sm font-bold">完成</button>}>
+<SettingsPage isOpen={workspacePage==='settings'} tab={settingsTab} onTab={setSettingsTab} onPdf={()=>setShowPDFSettings(true)} onCsv={()=>setShowCsvHistory(true)}>
                          <div className="space-y-6 py-2">
-                            {cloud.mode === 'cloud' ? <CloudModelSettings temperature={config.temperature} onTemperatureChange={temperature => setConfig(prev => ({...prev,temperature}))}/> : <div className="space-y-3">
+                            <div className="wa-model-settings">{cloud.mode === 'cloud' ? <CloudModelSettings temperature={config.temperature} onTemperatureChange={temperature => setConfig(prev => ({...prev,temperature}))}/> : <div className="space-y-3">
                                 <h3 className="font-bold text-slate-700 text-sm">API 设置</h3>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">模型预设</label>
@@ -4600,9 +4583,9 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     <input type="range" min="0" max="1" step="0.05" value={typeof config.temperature === 'number' && !Number.isNaN(config.temperature) ? config.temperature : 0.3} onChange={e=>setConfig({...config, temperature: parseFloat(e.target.value)})} className="w-full" />
                                     <div className="mt-1 text-[11px] text-slate-400 ml-1">数值越低越稳定，推荐 0.3 以减少幻觉。</div>
                                 </div>
-                            </div>}
+                            </div>}</div>
                             <hr className="border-slate-100"/>
-                            <div className="space-y-3">
+                            <div className="space-y-3 wa-data-settings">
                                 <h3 className="font-bold text-slate-700 text-sm">数据管理</h3>
                                 {cloud.mode==='cloud'&&<button disabled={isBatchProcessing||isAnalyzingClass||cloud.status!=='ready'} className="btn-pure px-4 py-2 rounded-xl text-sm" onClick={()=>{setShowConfig(false);setShowLegacyArchive(true);}}>旧版批改档案</button>}
                                 <p className="text-xs leading-6 text-slate-500">备份包含当前设置、作文、学生档案及四类历史记录，不含模型密钥。还原前会先预览，确认后替换备份中包含的数据。</p>
@@ -4616,9 +4599,9 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 </div>
                             </div>
                         </div>
-                    </Modal>
+                    </SettingsPage>
 
-                    {showLegacyArchive&&cloud.identity&&<React.Suspense fallback={<div role="status" className="cloud-snapshot-overlay">正在打开旧版档案…</div>}><LegacyArchivePanel key={cloud.identity.workspaceId} workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>{setShowLegacyArchive(false);setShowConfig(true);}} onLoad={record=>{
+                    {showLegacyArchive&&cloud.identity&&<React.Suspense fallback={<div role="status" className="cloud-snapshot-overlay">正在打开旧版档案…</div>}><LegacyArchivePanel key={cloud.identity.workspaceId} workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>setShowLegacyArchive(false)} onLoad={record=>{
                         if(isBatchProcessing||isAnalyzingClass)return alert('请先完成或暂停当前批改与分析。');
                         if(files.length&&!window.confirm('工作台将切换到这份旧报告的独立副本。请先保存当前批次；原云端档案会保留。是否继续？'))return;
                         applySavedGradingSnapshot({id:createId(),name:'旧版报告副本',legacyOriginal:true,savedAt:new Date().toISOString(),data:{assignment:record.assignment,rubric:record.rubric,pdfConfig:record.pdfConfig,sourceTask:null,files:[{id:createId(),name:(record.result.student_name||'旧作文')+'.json',index:1,status:'success',result:record.result}]}});
@@ -5457,13 +5440,13 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                     })()}
 
                     <div className="print-area">
-                        <div className="no-print max-w-7xl mx-auto mt-8 px-4">
+                        <details className="no-print max-w-7xl mx-auto mt-8 px-4" style={{display:workspacePage==='reports'&&archivesTab==='current'?undefined:'none'}}><summary className="wa-secondary" style={{marginBottom:16}}>按学生预览打印报告</summary>
                             {files.filter(f => f.status === 'success').length > 0 && (
                                 <div className="bg-white/70 glass-panel rounded-3xl p-6 border border-white/80">
                                     <div className="flex items-center justify-between mb-4 gap-4">
                                         <div>
                                             <h3 className="text-sm font-bold text-slate-700">PDF 预览</h3>
-                                            <p className="text-xs text-slate-400 mt-1">点击缩略图可在浮窗中放大查看；需要连续浏览所有学生时，可点击右下角“整体预览”打开下方连续预览区域。</p>
+                                            <p className="text-xs text-slate-400 mt-1">点击缩略图可在浮窗中放大查看；需要连续浏览所有学生时，可点击报告工具栏的“整体预览”打开下方连续预览区域。</p>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -5486,16 +5469,16 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </details>
 
-                        {overallPreviewOpen && (
+                        {workspacePage==='reports'&&archivesTab==='current'&&overallPreviewOpen && (
                             <div className="no-print max-w-7xl mx-auto mt-6 mb-24 px-4">
                                 {files.filter(f => f.status === 'success').length > 0 && (
                                     <div className="bg-white/70 glass-panel rounded-3xl p-6 border border-white/80">
                                         <div className="flex items-center justify-between mb-4 gap-4">
                                             <div>
                                                 <h3 className="text-sm font-bold text-slate-700">PDF 整体预览</h3>
-                                                <p className="text-xs text-slate-400 mt-1">下方按学生顺序连续展示所有批改报告，方便滚动浏览；再次点击右下角“整体预览”可关闭本区域。</p>
+                                                <p className="text-xs text-slate-400 mt-1">下方按学生顺序连续展示所有批改报告，方便滚动浏览；再次点击报告工具栏的“整体预览”可关闭本区域。</p>
                                             </div>
                                         </div>
                                         <div className="space-y-8">
@@ -5540,7 +5523,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             </div>
                         )}
                     </div>
-                </div>
+                </WorkspaceShell>
             );
         };
 

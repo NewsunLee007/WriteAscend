@@ -1,14 +1,16 @@
+import {useWorkspaceLeaveGuard} from './workspace-navigation';
 import React,{useEffect,useRef,useState} from 'react';
 import {useTeacherCloud} from './TeacherCloud';
 import type {TaskEnvelope,TaskMember,WritingTask} from './task-contracts';
 import {buildWritingSheetHtml,newSheetToken,type SheetIssueInput,type PrintPacket} from './writing-sheet-print';
 import {writingSchoolDefaults} from '../../integrations/daily/src/writing-school-config.mjs';
 import './writing-sheets.css';
-export default function WritingSheetsPanel({task,onClose}:{task:WritingTask;onClose:()=>void}){
+export default function WritingSheetsPanel({task,onClose,embedded=false}:{task:WritingTask;onClose:()=>void;embedded?:boolean}){
   const cloud=useTeacherCloud(),workspace=cloud.identity?.workspaceId||'',storageKey='wa_sheet_pending:'+workspace+':'+task.id;
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[members,setMembers]=useState<TaskMember[]>([]),[sets,setSets]=useState<any[]>([]),[envelope,setEnvelope]=useState<TaskEnvelope|null>(null);
   const [classId,setClassId]=useState(task.targets[0]?.id||''),[selected,setSelected]=useState<string[]>([]),[search,setSearch]=useState(''),[pageCount,setPageCount]=useState(1),[draftNumber,setDraftNumber]=useState(1),[schoolLabel,setSchoolLabel]=useState(writingSchoolDefaults.schoolName);
   const [replace,setReplace]=useState(false),[pending,setPending]=useState<SheetIssueInput|null>(null),[html,setHtml]=useState(''),[packet,setPacket]=useState<PrintPacket|null>(null);
+  useWorkspaceLeaveGuard(()=>!busy);
   const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
   async function api(path:string,body?:any){const r=await fetch(path,{method:body?'POST':'GET',cache:'no-store',headers:{'Content-Type':'application/json','X-Workspace-Id':workspace},...(body?{body:JSON.stringify(body)}:{})});const value=await r.json();if(!r.ok){if(r.status===401)cloud.expired();throw Error(value.error?.message||'写作单暂时无法处理。');}return value;}
   async function run(action:()=>Promise<void>){setBusy(true);setError('');try{await action();}catch(e){if(alive.current)setError(e instanceof Error?e.message:'写作单暂时无法处理。');}finally{if(alive.current)setBusy(false);}}
@@ -34,7 +36,7 @@ export default function WritingSheetsPanel({task,onClose}:{task:WritingTask;onCl
   }
   function reset(){try{sessionStorage.removeItem(storageKey);}catch{}setPending(null);change();}
   function preview(){const popup=window.open('','_blank');if(!popup){setError('打印预览未能打开，请允许本站打开打印窗口。');return;}popup.document.open();popup.document.write(html);popup.document.close();popup.document.getElementById('print-sheets')?.addEventListener('click',()=>popup.print());}
-  return <div className="writing-sheets-overlay no-print"><section className="writing-sheets-dialog" role="dialog" aria-modal="true" aria-labelledby="writing-sheets-title"><header><div><h2 id="writing-sheets-title">个性化写作单</h2><p>{task.title} · 评分标准第 {task.version} 版</p></div><button disabled={busy} aria-label="关闭写作单" onClick={onClose}>×</button></header><div className="writing-sheets-content">
+  return <div className={"writing-sheets-overlay no-print"+(embedded?" wa-embedded":"")}><section className="writing-sheets-dialog" role={embedded?"region":"dialog"} aria-modal={embedded?undefined:true} aria-labelledby="writing-sheets-title"><header><div><h2 id="writing-sheets-title">个性化写作单</h2><p>{task.title} · 评分标准第 {task.version} 版</p></div><button disabled={busy} aria-label="关闭写作单" onClick={onClose}>×</button></header><div className="writing-sheets-content">
     {error&&<p className="sheet-error" role="alert">{error}</p>}{busy&&<p role="status">正在准备写作单，请稍候…</p>}
     {packet&&html?<section className="sheet-ready"><h3>写作单已准备好</h3><p>{packet.sets.length} 名学生，每人 {packet.pageCount} 页，第 {packet.draftNumber} 稿。另含一份完整任务说明和评价标准。</p><button className="sheet-primary" onClick={preview}>打开打印预览</button><button disabled={busy} onClick={reset}>重新选择并生成</button><p>在预览中选择 A4、单面打印、100% 大小并关闭浏览器页眉页脚，可打印或存为 PDF。保留 PDF 可直接补印相同写作单；重新签发将作废旧二维码。</p></section>:pending?<section className="sheet-ready"><h3>有一份打印准备记录</h3><p>可恢复相同二维码，避免网络重试重复签发。恢复时会核对当前教师权限和写作单状态。</p><button className="sheet-primary" disabled={busy||!envelope} onClick={()=>void run(()=>send(pending))}>恢复上次写作单</button><button disabled={busy} onClick={reset}>放弃上次打印准备</button></section>:<>
       <div className="sheet-fields"><label>打印学校页眉<input disabled={busy} aria-label="打印学校页眉" value={schoolLabel} maxLength={120} onChange={e=>{setSchoolLabel(e.target.value);change();}}/></label><label>任务班级<select disabled={busy} aria-label="写作单班级" value={classId} onChange={e=>{setClassId(e.target.value);setSelected(members.filter(m=>m.classId===e.target.value).slice(0,100).map(m=>m.id!));change();}}>{task.targets.map(c=><option key={c.id} value={c.id}>{c.name} · {c.academicYear}</option>)}</select></label><label>作文稿次<select disabled={busy} aria-label="写作单稿次" value={draftNumber} onChange={e=>{setDraftNumber(Number(e.target.value));change();}}>{Array.from({length:20},(_,i)=><option key={i+1} value={i+1}>第 {i+1} 稿</option>)}</select></label><label>每人页数<select disabled={busy} aria-label="每人写作单页数" value={pageCount} onChange={e=>{setPageCount(Number(e.target.value));change();}}>{[1,2,3,4].map(n=><option key={n} value={n}>{n} 页</option>)}</select></label></div>

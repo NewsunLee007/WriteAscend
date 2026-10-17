@@ -1,11 +1,12 @@
+import {useWorkspaceLeaveGuard} from './workspace-navigation';
 import React,{useEffect,useRef,useState} from 'react';
 import {useTeacherCloud} from './TeacherCloud';
 import './school-directory.css';
 const permissionNames:Record<string,string>={'roster.read':'读取学生名单','writing.manage':'管理写作任务','writing.grade':'批改作文','writing.publish':'发布批改结果'};
 const defaultScopes=['roster.read','writing.manage','writing.grade'];
-export default function SchoolDirectoryPanel(){
+export default function SchoolDirectoryPanel({embedded=false}:{embedded?:boolean}){
   const cloud=useTeacherCloud(),workspace=cloud.identity?.workspaceId||'';
-  const [open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[tab,setTab]=useState('sync');
+  const [open,setOpen]=useState(embedded),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[tab,setTab]=useState('sync');
   const [data,setData]=useState<any>(null),[schoolId,setSchoolId]=useState(''),[schoolName,setSchoolName]=useState(''),[year,setYear]=useState(''),[keys,setKeys]=useState<string[]>([]),[preview,setPreview]=useState<any>(null),[confirmed,setConfirmed]=useState(false);
   const [teacher,setTeacher]=useState(''),[classId,setClassId]=useState(''),[permissions,setPermissions]=useState(defaultScopes),[stop,setStop]=useState<any>(null),[stopConfirmed,setStopConfirmed]=useState(false);
   const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
@@ -13,6 +14,7 @@ export default function SchoolDirectoryPanel(){
   function chooseTeacher(value:string){setTeacher(value);setPermissions(data?.grants.find((g:any)=>g.provider==='wordup'&&g.subject===value&&g.classId===classId)?.scopes||defaultScopes);}
   function chooseClass(value:string){setClassId(value);setPermissions(data?.grants.find((g:any)=>g.provider==='wordup'&&g.subject===teacher&&g.classId===value)?.scopes||defaultScopes);}
   function invalidate(){setPreview(null);setConfirmed(false);setNotice('');}
+  useWorkspaceLeaveGuard(()=>!busy);
   async function api(action:string,body?:any){
     const response=await fetch('/api/admin/writing-directory/'+action,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Workspace-Id':workspace},cache:'no-store',...(body?{body:JSON.stringify(body)}:{})});
     let result;try{result=await response.json();}catch{throw Error('目录服务暂时无法读取，请检查连接后重试。');}
@@ -25,13 +27,14 @@ export default function SchoolDirectoryPanel(){
   }
   async function run(action:()=>Promise<void>){setBusy(true);setError('');try{await action();}catch(e){if(alive.current)setError(e instanceof Error?e.message:'目录操作暂未完成。');}finally{if(alive.current)setBusy(false);}}
   async function refresh(){const result=await api('overview');if(alive.current){const selectedClass=result.classes.some((c:any)=>c.id===classId&&c.status==='active')?classId:'';setData(result);setSchoolName(current=>current||result.defaults?.schoolName||'');setYear(current=>current||result.defaults?.academicYear||'');setClassId(selectedClass);setPermissions(result.grants.find((g:any)=>g.provider==='wordup'&&g.subject===teacher&&g.classId===selectedClass)?.scopes||defaultScopes);}}
+  useEffect(()=>{if(embedded&&cloud.identity?.role==='admin')void run(refresh);},[]);
   const input=()=>({schoolId:schoolId||null,schoolName,academicYear:year,classKeys:keys});
   const classLabel=(c:any)=>c?c.name+' · '+c.academic_year+' · '+c.schoolName:'未知班级';
   const teacherLabel=(subject:string)=>{const t=data?.teachers.find((t:any)=>t.id===subject);return (t?.name||'历史教师')+' · #'+subject.slice(-8)+(t?.status==='active'?'':'（已停用）');};
   if(cloud.identity?.role!=='admin')return null;
   return <>
-    <aside className="school-directory-bar no-print"><span>学校管理员</span><button onClick={()=>{setOpen(true);setStop(null);setPreview(null);setConfirmed(false);setNotice('');void run(refresh);}}>学校目录与教师授权</button></aside>
-    {open&&<div className="school-directory-overlay no-print"><section className="school-directory-dialog" role="dialog" aria-modal="true" aria-labelledby="school-directory-title">
+    {!embedded&&<aside className="school-directory-bar no-print"><span>学校管理员</span><button onClick={()=>{setOpen(true);setStop(null);setPreview(null);setConfirmed(false);setNotice('');void run(refresh);}}>学校目录与教师授权</button></aside>}
+    {open&&<div className={"school-directory-overlay no-print"+(embedded?" wa-embedded":"")}><section className="school-directory-dialog" role={embedded?"region":"dialog"} aria-modal={embedded?undefined:true} aria-labelledby="school-directory-title">
       <header><div><h2 id="school-directory-title">学校目录与教师授权</h2><p>只读取 WordUp 在用学校名单；确认后建立作文目录与任教权限，原账号及登录信息保持原位。</p></div><button disabled={busy} onClick={()=>setOpen(false)} aria-label="关闭学校目录">×</button></header>
       <nav className="directory-tabs">{[['sync','名册预检'],['grants','教师授权'],['classes','目录班级']].map(([id,label])=><button key={id} disabled={busy} aria-pressed={tab===id} onClick={()=>{setTab(id);setError('');setNotice('');}}>{label}</button>)}<button disabled={busy} onClick={()=>void run(async()=>{invalidate();await refresh();})}>刷新</button></nav>
       <div className="school-directory-content">{error&&<p role="alert" className="directory-error">{error}</p>}{notice&&<p role="status" className="directory-notice">{notice}</p>}{busy&&<p role="status">正在处理目录，请稍候…</p>}

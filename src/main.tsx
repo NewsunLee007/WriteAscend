@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import TeacherApp from './TeacherApp.jsx';
 import './teacher-styles.css';
 import './teacher/professional-workspace.css';
+import './teacher/workspace-shell.css';
 import {TeacherCloudProvider} from './teacher/TeacherCloud';
 
 document.body.classList.add('print-mode-batch', 'teacher-workspace');

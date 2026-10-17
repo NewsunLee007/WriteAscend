@@ -102,8 +102,43 @@
     "privateOutsideRepositories": true
   },
   "userCredentialsExported": false,
-  "teacherInteractiveLoginVerified": false,
+  "teacherInteractiveLoginVerified": true,
   "realModelCalled": false,
   "productionDomainChanged": false,
-  "authorityRuntimeDataDirectoryMatches": true
+  "authorityRuntimeDataDirectoryMatches": true,
+  "postConsolidationTeacherAcceptance": {
+    "checkedAt": "2026-10-17T06:15:19.282Z",
+    "status": 200,
+    "role": "teacher",
+    "name": "NewsunLee",
+    "active": true,
+    "classes": [
+      {
+        "name": "八（13）班",
+        "academicYear": "2026-1",
+        "students": 47,
+        "uniqueIdentities": 47,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      },
+      {
+        "name": "八（14）班",
+        "academicYear": "2026-1",
+        "students": 49,
+        "uniqueIdentities": 49,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      }
+    ],
+    "otherClassDenied": true,
+    "realTeacherLoginVerified": true
+  }
 }
