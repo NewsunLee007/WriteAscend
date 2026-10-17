@@ -2,9 +2,9 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程、学校身份和正式部署分别提供下列证据；真实教学质量和实体设备仍须独立验收，不能由测试总数替代。
 
-按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`5d4e05e`、Worker版本`a41ae96c-37dc-466b-8e7a-57906cdf5648`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程246项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`59c9684`、Worker版本`cbe64bd9-5e02-4420-97e0-3cca615826a9`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程251项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
 
-测试环境继续独立保留：教师版本`1d45ac71-5078-4dbe-8f61-a46f7d8788be`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+测试环境继续独立保留：教师版本`c8d65625-0524-4df4-b13a-66678e8f2279`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
@@ -36,6 +36,14 @@
 词数进一步核对：报告82词包含独立标题4词，正文为78词，符合用户指定60–80词；不能将含标题的统计直接当作正文超词。
 
 质量未验收通过：本篇题目60–80词、被冻结的标准80–100词，用户已确认以题目60–80词为准；AI还将历史事迹中合理的过去时判错。新增语境判断约束覆盖原工作台与后台批阅、润色及难度调整；新增任务在前后端均须统一字数再建立，旧任务及报告页显示原始冲突。既有原稿、任务标准快照和报告均未改写或发布。新规则仍需以正确字数标准重新批阅本篇、人工核对，并继续学生本人查看与互评二稿验收；不能仅凭新提示或自动测试声称误判已消除。
+
+## 已建立任务的标准修订更新
+
+已上线[标准修订入口](verification/task-standard-revisions.md)，见[正式版本及备份](verification/task-standard-revisions-release.json)。题目词数与冻结标准冲突时，禁止新批阅在错误依据下提交模型，并提供直接修订入口。已收照片、归属和旧报告保留；确认保存新版本后，当前稿次沿用原图，旧结果标为待重新批阅且不能按新标准发布。已有发布/互评交接记录或后台仍在批阅的任务受到保护。新标准不由部署静默写入。
+
+本机合成账号通过1页收取→标准第2版→仍收齐待批的实际浏览器流程，251项根工程检查和独立互批9项、构建/正式Worker检查及源提交Linux CI 39032963261通过。两环境各7项关键页面资源、10个匿名读写入口、CSP及Daily回调/S256核验通过；所有路由ID及规则保持不变，无新数据库迁移。正式真实报告内容摘要及修订号均保持原样，本篇当前仍是标准第1版、尚无发布。
+
+正式页面接管再次超时，已向用户交接“按题目修订标准→采用60–80词→保存→一键批阅”，无需重传照片。正确标准下的新报告、真实学生本人查看和课堂互批仍未完成，不以合成流程或部署成功代替质量验收。
 
 ## 下一项真实验收
 
