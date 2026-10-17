@@ -60,7 +60,7 @@ test('template edits never rewrite a task snapshot, and expired local grants can
 });
 
 test('word-count hints use explicit wording and genre dimensions never become accidental word-count penalties',()=>{
- assert.equal(suggestedWordCount('Unit 3: write about 2 activities in 80–100 words.'),'80–100 words');assert.equal(suggestedWordCount('词数：80到100词。'),'80–100 words');assert.equal(suggestedWordCount('2026年八年级第13班'),'');assert.equal(wordCountDiffers('Write in 80-100 words.','60–80 words'),true);assert.equal(wordCountDiffers('Write in 80-100 words.','80–100 words'),false);
+ assert.equal(suggestedWordCount('Unit 3: write about 2 activities in 80–100 words.'),'80–100 words');assert.equal(suggestedWordCount('词数：80到100词。'),'80–100 words');assert.equal(suggestedWordCount('2026年八年级第13班'),'');assert.equal(wordCountDiffers('Write in 80-100 words.','60–80 words'),true);assert.equal(wordCountDiffers('Write in 80-100 words.','80–100 words'),false);assert.doesNotThrow(()=>wordCountDiffers('Write in 80-100 words.',80 as any));assert.equal(wordCountDiffers('Write in 80-100 words.',null as any),true);
  for(const genre of genres){const labels=pickRubricLabels(rubricPreset(genre.id).rubric);assert.equal(labels.wordCount,'');assert.equal(labels.structure,'组织与连贯');assert.equal(labels.handwriting,'书写与规范');}
 });
 
