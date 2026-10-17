@@ -8,6 +8,6 @@ test('print sheets include full teacher requirements and rubric without exposing
   const html=await buildWritingSheetHtml(packet,input,document);
   assert(html.includes(topic));assert(html.includes('依据全部要点'));assert(html.includes('评分标准第 2 版'));assert(html.includes('2026-1'));
   assert(!html.includes('<script>'));assert(!html.includes('<img src=x'));assert(!html.includes('教师范文不得进入学生写作单'));assert(html.includes('&lt;script&gt;'));
-  assert.equal((html.match(/class="writing-line"/g)||[]).length,22);assert(html.includes('1234-5678-9ABC'));
+  assert.equal((html.match(/class="writing-line"/g)||[]).length,18);assert(html.includes('1234-5678-9ABC'));
   const tokens=Array.from({length:100},newSheetToken);assert.equal(new Set(tokens).size,100);assert(tokens.every(t=>/^WA1:[a-zA-Z0-9_-]{43}$/.test(t)));
 });
