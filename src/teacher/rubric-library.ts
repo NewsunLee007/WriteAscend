@@ -39,6 +39,7 @@ export function rubricProblem(r:any):string{
 }
 export function suggestedWordCount(topic:string){const m=String(topic||'').match(/(\d{2,4})\s*[-–—~至到]\s*(\d{2,4})\s*(?:words?\b|个?(?:单)?词)/i)||String(topic||'').match(/(?:词数|字数)\s*[：:]?\s*(\d{2,4})\s*[-–—~至到]\s*(\d{2,4})/);if(!m)return '';const a=Number(m[1]),b=Number(m[2]);return a>0&&b>=a&&b<=2000?a+'–'+b+' words':'';}
 export function wordCountDiffers(topic:string,current:string){const suggested=suggestedWordCount(topic),numbers=(v:string)=>(v.match(/\d+/g)||[]).join(',');return !!suggested&&numbers(suggested)!==numbers(current||'');}
+export function wordCountConflict(topic:string,current:string){return wordCountDiffers(topic,current)?`题目字数要求为 ${suggestedWordCount(topic)}，评分标准为 ${current||'未设置'}。`:'';}
 export function cleanRubricDocument(value:any):RubricDocument{
  const r=value?.rubric,problem=rubricProblem(r);if(problem)throw Error(problem);
  if(typeof r.gradeLevel!=='string'||!r.gradeLevel.trim()||r.gradeLevel.length>50)throw Error('请设置学生年级。');

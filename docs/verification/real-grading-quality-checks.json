@@ -1,0 +1,52 @@
+{
+  "reportRevision": 1,
+  "inputHashMatches": true,
+  "rubricHashMatches": true,
+  "recipientBindingMatches": true,
+  "rubricMaximum": 20,
+  "identityMismatch": false,
+  "identityMismatchVerified": false,
+  "difficultyStatus": "exceeded",
+  "sectionFields": {
+    "brief_comment": true,
+    "highlights": true,
+    "errors": true,
+    "content_logic": true,
+    "optimized_essay": true,
+    "standard_reference": true
+  },
+  "pipeline": [
+    {
+      "stage": "grade",
+      "state": "succeeded"
+    },
+    {
+      "stage": "difficulty-1",
+      "state": "succeeded"
+    },
+    {
+      "stage": "difficulty-2",
+      "state": "succeeded"
+    }
+  ],
+  "scoreTotalMatchesBreakdown": true,
+  "sourcePages": 1,
+  "integrity": {
+    "reportContentHashMatches": true,
+    "wordCountMatches": true,
+    "allScoresWithinCriterionBounds": true,
+    "correctionExcerptsPresent": true
+  },
+  "checkedAt": "2026-10-17T11:51:21.238383+00:00",
+  "qualityAccepted": false,
+  "studentPublishedAtCheck": false,
+  "teacherConfirmedWordCount": "60–80 words",
+  "actualHandwritingReviewed": true,
+  "recognitionReview": "Visual comparison of one original page and transcription, not an accuracy-rate benchmark",
+  "findings": [
+    "The task said 60–80 words while its frozen rubric said 80–100 words.",
+    "The model treated contextually valid historical past tense as an error; teacher review is required.",
+    "Difficulty remains above the configured heuristic threshold after two bounded rewrites."
+  ],
+  "afterFixLiveModelCall": false
+}

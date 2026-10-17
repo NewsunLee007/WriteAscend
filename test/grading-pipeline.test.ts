@@ -3,15 +3,24 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {gradeMessages,optimizedMessages,parseGradingObject,responseContent,repairJsonMessages,difficultyMessages,applyStage,nextStage,finalizeGrade,type PipelineInput} from '../src/report/grading-pipeline';
 import {SYSTEM_PROMPT_TEMPLATE,OPTIMIZED_REPAIR_PROMPT_TEMPLATE,normalizeBreakdownAgainstRubric} from '../src/report/legacy-core';
+import {withWritingContext,WRITING_CONTEXT_RULES} from '../src/report/writing-context';
 const fixture=JSON.parse(fs.readFileSync('scripts/qa/fixtures/teacher-workflow.json','utf8'));
 const input:PipelineInput={assignment:fixture.seed.assignment,rubric:fixture.seed.rubric,languageDifficulty:fixture.seed.languageDifficulty,grade:'七年级',className:'合成班',rosterText:'示例同学',images:['wa-asset:10000000-0000-4000-8000-000000000001','wa-asset:10000000-0000-4000-8000-000000000002']};
 const raw=JSON.parse(fixture.response.choices[0].message.content);
-test('background pipeline reuses the original grading and rewriting prompts and retains ordered multipage images',()=>{
- const grade=gradeMessages(input);assert.equal(grade[0].content,SYSTEM_PROMPT_TEMPLATE(input.assignment,input.rubric,'Current Class: 合成班\nRoster:\n示例同学','七年级',input.languageDifficulty));
+test('background pipeline retains original prompts with contextual judgment rules and ordered multipage images',()=>{
+ const grade=gradeMessages(input);assert.equal(grade[0].content,withWritingContext(SYSTEM_PROMPT_TEMPLATE(input.assignment,input.rubric,'Current Class: 合成班\nRoster:\n示例同学','七年级',input.languageDifficulty)));
  assert.deepEqual((grade[1].content as any[]).filter(p=>p.type==='image_url').map(p=>p.image_url.url),input.images);
- assert.equal(optimizedMessages(input,raw)[0].content,OPTIMIZED_REPAIR_PROMPT_TEMPLATE(input.assignment,input.rubric,input.grade,input.languageDifficulty));
+ assert.equal(optimizedMessages(input,raw)[0].content,withWritingContext(OPTIMIZED_REPAIR_PROMPT_TEMPLATE(input.assignment,input.rubric,input.grade,input.languageDifficulty)));
  assert.match(difficultyMessages(input,raw)[0].content,/errors\[\]\.orig 必须原样保留/);
  assert.match(repairJsonMessages('synthetic')[0].content,/RFC 8259/);
+});
+test('grading and both rewriting paths preserve contextual tense rules without replacing teacher requirements',()=>{
+ const contextual={...input,assignment:{...input.assignment,topic:'State a view and give an example from history in 60–80 words.'},rubric:{...input.rubric,tense:['一般现在时'],wordCount:'60–80 words'}};
+ for(const messages of [gradeMessages(contextual),optimizedMessages(contextual,raw),difficultyMessages(contextual,raw)])assert(String(messages[0].content).endsWith(WRITING_CONTEXT_RULES));
+ assert.match(String(gradeMessages(contextual)[0].content),/基本时态：一般现在时/);
+ assert.match(String(gradeMessages(contextual)[0].content),/60–80 words/);
+ assert.match(String(difficultyMessages(contextual,raw)[0].content),/分数与数值字段不变/);
+ assert.match(WRITING_CONTEXT_RULES,/不确定时请教师核对/);
 });
 test('server JSON parsing retains legacy tolerant parsing without logging raw essays',()=>{
  assert.equal(parseGradingObject('```json\n{“student_name”: “示例同学”, "total_score": 15,}\n```').student_name,'示例同学');

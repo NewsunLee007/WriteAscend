@@ -2,6 +2,7 @@ import type {Env} from './index';
 import {HttpError} from './errors';
 import {digest,isObject,sanitizeLegacy} from '../src/report/legacy-import';
 import type {AuthorityClass,TaskTarget,TaskDocument,TaskMember} from '../src/teacher/task-contracts';
+import {wordCountConflict} from '../src/teacher/rubric-library';
 export type TaskSession={principal:string;grant_id:string;provider:string;subject:string;role:string;classes:AuthorityClass[]};
 type Bridge=(env:Env,path:string,body:Record<string,unknown>)=>Promise<Record<string,any>>;
 type Row={id:string;owner:string;title:string;status:'draft'|'open'|'closed';revision:number;current_version:number;content_hash:string;object_key:string;rubric_hash:string;targets_json:string;activation_request:string|null;member_count:number;created:number;updated:number};
@@ -134,6 +135,8 @@ export async function handleTasks(req:Request,env:Env,session:TaskSession,bridge
     if(!Number.isInteger(body?.expectedRevision)||typeof body.rosterHash!=='string'||!/^[a-f0-9]{64}$/.test(body.rosterHash))fail(400,'请先预览并核对这次任务的学生名单。');
     const hash=await digest({action:'activate',id:row.id,expectedRevision:body.expectedRevision,rosterHash:body.rosterHash}),replay=await operation(env,session,body,hash);if(replay)return replay;
     if(row.status!=='draft'||row.revision!==body.expectedRevision)fail(409,'任务已改变，请重新读取和核对。');
+    const {document}=await readDocument(env,row),countConflict=wordCountConflict(document.assignment.topic,document.rubric.wordCount);
+    if(countConflict)fail(400,countConflict+'请在任务草稿中统一字数要求，再重新预览并建立任务。');
     const preview=await roster(env,session,row,bridge);if(preview.rosterHash!==body.rosterHash)fail(409,'学生名单已有变化，请重新预览后确认。');
     if(!preview.members.length)fail(409,'所选班级没有可关联的在用学生，请先核对学校目录。');
     const now=Date.now(),revision=row.revision+1;

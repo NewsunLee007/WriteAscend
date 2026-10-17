@@ -4,7 +4,7 @@ import {useTeacherCloud} from './TeacherCloud';
 import {useWorkspaceLeaveGuard} from './workspace-navigation';
 import {workspaceApi,workspaceMutation} from './workspace-api';
 import {uploadCloudAsset} from './cloud-assets';
-import {availableQuickClasses,initialQuickClasses,gradeName,rubricProblem} from './rubric-library';
+import {availableQuickClasses,initialQuickClasses,gradeName,rubricProblem,wordCountConflict} from './rubric-library';
 import type {AuthorityClass,WritingTask} from './task-contracts';
 type Props={assignment:any;rubric:any;settings:any;onGrade:(grade:string)=>void;renderPreparation:(section:string,options?:any)=>React.ReactNode;onOpen:(id:string,stage:'brief'|'collect')=>void;onPrivate:()=>void;onModelSettings:()=>void};
 export default function SchoolQuickStart(p:Props){
@@ -21,7 +21,7 @@ export default function SchoolQuickStart(p:Props){
  useEffect(()=>{if(grade&&p.rubric.gradeLevel!==grade)p.onGrade(grade);},[grade,p.rubric.gradeLevel]);
  useEffect(()=>{if(loaded&&classIds.length)try{cloud.storage.setItem('quick_daily_classes',JSON.stringify(classIds));}catch{}},[loaded,JSON.stringify(classIds)]);
  const classProblem=!classIds.length?'请选择 Daily 任教班级。':classIds.length>20?'一次最多选择20个班级。':grades.length!==1||semesters.length!==1?'请为同一年级、同一学期的班级建立一次批阅任务。':'';
- const promptProblem=classProblem||(!p.assignment.topic?.trim()?'请先填写本篇写作要求。':''),standardProblem=rubricProblem(p.rubric);
+ const promptProblem=classProblem||(!p.assignment.topic?.trim()?'请先填写本篇写作要求。':''),countConflict=wordCountConflict(p.assignment.topic,p.rubric.wordCount),standardProblem=rubricProblem(p.rubric)||(countConflict?countConflict+'请在评分标准中统一字数后继续。':'');
  async function review(){if(promptProblem||standardProblem){setError(promptProblem||standardProblem);return;}await run(async()=>{
   if(!saved.current||saved.current.fingerprint!==fingerprint){
    const assignment={...p.assignment};if(assignment.promptImageBase64){const match=String(assignment.promptImageBase64).match(/^data:(image\/(?:png|jpeg|jpg|webp|gif));base64,(.+)$/s);if(!match)throw Error('请使用 JPG 或 PNG 题目照片。');const blob=new Blob([Uint8Array.from(atob(match[2]),c=>c.charCodeAt(0))],{type:match[1]});assignment.cloudPromptAssetId=(await uploadCloudAsset(blob,workspace)).id;}delete assignment.promptImageBase64;delete assignment.isExtractingText;

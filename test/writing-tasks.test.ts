@@ -74,6 +74,19 @@ test('authoritative paginated roster retains same-name students by subject and a
     assert.equal((await h.request('/api/tasks/'+task.id+'/status',{requestId:crypto.randomUUID(),expectedRevision:2,status:'open'})).status,409);
   }finally{h.close();}
 });
+test('conflicting topic and rubric word counts cannot activate; correcting the draft preserves its earlier snapshot',async()=>{
+ const h=sandbox();try{
+  const payload=h.payload();payload.assignment.topic='Write a note: one opinion, an inventor example and a conclusion, 共 60-80 词。';payload.rubric.wordCount='80–100 words';
+  const task=await h.create(payload),preview=await h.request('/api/tasks/'+task.id+'/preview');
+  const failed=await h.request('/api/tasks/'+task.id+'/activate',{requestId:crypto.randomUUID(),expectedRevision:1,rosterHash:preview.body.rosterHash});
+  assert.equal(failed.status,400);assert.match(failed.body.error.message,/60–80 words/);assert.match(failed.body.error.message,/80–100 words/);
+  assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM task_members').get()!.n,0);assert.equal(h.db.prepare('SELECT status FROM writing_tasks').get()!.status,'draft');
+  const fixed=h.payload({assignment:payload.assignment,rubric:{...payload.rubric,wordCount:'60–80 words'},expectedRevision:1});
+  assert.equal((await h.request('/api/tasks/'+task.id,fixed,'PUT')).status,200);
+  const next=await h.request('/api/tasks/'+task.id+'/preview');assert.equal((await h.request('/api/tasks/'+task.id+'/activate',{requestId:crypto.randomUUID(),expectedRevision:2,rosterHash:next.body.rosterHash})).status,200);
+  assert.equal((await h.request('/api/tasks/'+task.id+'?version=1')).body.document.rubric.wordCount,'80–100 words');assert.equal((await h.request('/api/tasks/'+task.id)).body.document.rubric.wordCount,'60–80 words');
+ }finally{h.close();}
+});
 test('roster changes, page inconsistency and revocation cannot silently bind the wrong students',async()=>{
   const h=sandbox();try{
     const task=await h.create(),preview=await h.request('/api/tasks/'+task.id+'/preview');h.rows[0].name='合成改名';
