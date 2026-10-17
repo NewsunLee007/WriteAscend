@@ -38,7 +38,13 @@ test('out-of-order pages become one verified draft; repeated requests and rescan
 });
 test('concurrent pages cannot overwrite each other, and a photo cannot silently belong to a second student or page',async()=>{
   const h=await sandbox();try{
-    const a=h.payload(0,0),b=h.payload(0,1),r=await Promise.all([h.request(path,a),h.request(path,b)]);assert.deepEqual(r.map(v=>v.status).sort(),[201,409]);assert.equal((await h.request(path,r[0].status===409?a:b)).status,201);
+    // Both requests must build from the same pre-transaction snapshot. Without
+    // this barrier Linux can legitimately serialize their reads and accept both.
+    const batch=h.env.DB.batch.bind(h.env.DB);let arrived=0,release!:()=>void;
+    const ready=new Promise<void>(resolve=>{release=resolve;});
+    h.env.DB.batch=async statements=>{if(++arrived===2)release();await ready;return batch(statements);};
+    const a=h.payload(0,0),b=h.payload(0,1),r=await Promise.all([h.request(path,a),h.request(path,b)]);h.env.DB.batch=batch;
+    assert.deepEqual(r.map(v=>v.status).sort(),[201,409]);assert.equal((await h.request(path,r[0].status===409?a:b)).status,201);
     const wrong=h.payload(1,0);wrong.assetId=a.assetId;assert.equal((await h.request(path,wrong)).body.code,'photo_already_assigned');
     const replace=h.payload(0,0);assert.equal((await h.request(path,replace)).body.code,'page_changed');
     replace.expectedPageRevision=1;const updated=await h.request(path,replace);assert.equal(updated.status,201);assert.equal(updated.body.inputRevision,3);assert.equal(updated.body.pageRevision,2);
