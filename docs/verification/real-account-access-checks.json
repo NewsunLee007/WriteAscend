@@ -2,7 +2,7 @@
   "checkedAt": "2026-10-17T04:39:49.192Z",
   "realTeacherBackendLoginObserved": true,
   "browserPageContentVerified": false,
-  "administratorLoginVerified": false,
+  "administratorLoginVerified": true,
   "studentLoginVerified": false,
   "dailyIntrospection": {
     "status": 200,
@@ -57,5 +57,70 @@
   "privilegesChanged": false,
   "realModelCalled": false,
   "userCredentialsRead": false,
-  "sourceCommit": "0fc95234fab47a81d1427e90594787d11a38c6b7"
+  "sourceCommit": "0fc95234fab47a81d1427e90594787d11a38c6b7",
+  "administratorVerification": {
+    "checkedAt": "2026-10-17T05:15:55.672Z",
+    "realAdministrator": true,
+    "school": "瑞安市新纪元实验学校",
+    "academicYear": "2026-1",
+    "schools": 1,
+    "classes": 54,
+    "students": 2327,
+    "teacherGrants": 0,
+    "replay": true,
+    "replaySameClasses": true,
+    "followUpChanges": {
+      "added": 0,
+      "removed": 0,
+      "renamed": 0,
+      "transfers": 0
+    },
+    "backupVerified": true,
+    "browserUiVerified": false,
+    "roster": {
+      "checkedAt": "2026-10-17T05:16:23.889Z",
+      "realAdminServiceApi": true,
+      "classes": 54,
+      "students": 2327,
+      "pages": 54,
+      "missing": 0,
+      "duplicateSubjects": 0,
+      "duplicateNameGroups": 1,
+      "sourceUnchangedDuringCheck": true,
+      "formalCounts": {
+        "writing_schools": 1,
+        "writing_classes": 54,
+        "writing_memberships": 2327,
+        "writing_teacher_class_grants": 0,
+        "writing_membership_periods": 2327,
+        "writing_directory_operations": 1,
+        "writing_directory_audit": 1
+      },
+      "identityRowsExported": false
+    },
+    "chromeDomObserved": {
+      "role": "Daily 管理员",
+      "schoolAdminEntryVisible": true,
+      "modelConfigured": false,
+      "fullDirectoryUiVerified": false
+    },
+    "teacherGrantTargetPending": true,
+    "realModelCalled": false,
+    "studentLoginVerified": false,
+    "cloudAppSessions": [
+      {
+        "role": "admin",
+        "count": 1,
+        "activeDuringCheck": 1
+      },
+      {
+        "role": "teacher",
+        "count": 1,
+        "activeDuringCheck": 0
+      }
+    ],
+    "cloudActiveAdministratorSession": true
+  },
+  "updatedAt": "2026-10-17T05:16:23.889Z",
+  "historicalTeacherCheckAt": "2026-10-17T04:39:49.192Z"
 }
