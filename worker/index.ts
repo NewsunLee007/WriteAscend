@@ -1,3 +1,4 @@
+import {handleLocalRelay,handleLocalStatus} from './local-relay';
 import type {D1Database, Fetcher, R2Bucket, MessageBatch, Queue} from '@cloudflare/workers-types';
 import {handleLegacyArchive} from './legacy-archive';
 import {handleRubricLibrary} from './rubric-library';
@@ -81,6 +82,7 @@ export default {
         return new Response(response.body as any,{status:response.status,headers});
       }
       if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN,release:env.VERSION?{id:env.VERSION.id,tag:env.VERSION.tag||null,timestamp:env.VERSION.timestamp||null}:null});
+      const localRelay=await handleLocalRelay(req,env,input,bridge);if(localRelay)return localRelay;
       const exchange=await handlePeerExchange(req,env,input);if(exchange)return exchange;
       if(path==='/api/auth/start'&&req.method==='GET'){
         if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');
@@ -141,6 +143,7 @@ export default {
       if(path.startsWith('/api/snapshots')){teacher(session);const response=await handleSnapshots(req,env,session.principal,input);if(response)return response;}
       if(/^\/api\/(?:tasks|grading|writing-reports)(?:\/|$)/.test(path)){teacher(session);const response=await handleGrading(req,env,session,bridge,input)||await handleCollection(req,env,session,bridge,input)||await handleSheets(req,env,session,bridge,input)||await handleTasks(req,env,session,bridge,input);if(response)return response;}
       const rubricResponse=await handleRubricLibrary(req,env,session,input);if(rubricResponse)return rubricResponse;
+      const localStatus=await handleLocalStatus(req,env,session);if(localStatus)return localStatus;
       const modelResponse=await handleModelApi(req,env,session,input,bridge);
       if(modelResponse)return modelResponse;
       if(path==='/api/classes'&&req.method==='GET'){

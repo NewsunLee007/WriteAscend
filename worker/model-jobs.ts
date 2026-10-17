@@ -26,7 +26,7 @@ export interface ModelBindings {
 }
 type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string;tokenParameter:'max_tokens'|'max_completion_tokens';sendTemperature:boolean;provider?:string;personal?:PersonalModel};
 type Principal={principal:string;grant_id:string;role:string;classes?:Array<{id:string;scopes:string[]}>};
-type Job={id:string;work_permit_id:string|null;work_expires:number|null;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
+export type Job={id:string;work_permit_id:string|null;work_expires:number|null;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('');
@@ -149,12 +149,15 @@ async function boundedText(response:Response,max:number){
   return text+decoder.decode();
 }
 
-export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:Env,verify:VerifyGrant){
+export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:Env,verify:VerifyGrant,relay?:{profileId:string;dispatch:(job:{id:string;lease:string;payload:unknown;timeoutMs:number})=>void}){
   for(const message of batch.messages){
     const id=message.body?.jobId;
     if(typeof id!=='string'||!/^[-a-f0-9]{36}$/.test(id)){message.ack();continue;}
     let row=await getJob(env,id);
     if(!row||['succeeded','failed','uncertain'].includes(row.state)){message.ack();continue;}
+    const localProfile=/^personal_[a-f0-9]{32}$/.test(row.profile_id)?await readPersonalModel(env,row.owner,row.profile_id):null;
+    if(localProfile?.provider==='local-relay'&&relay?.profileId!==row.profile_id){message.ack();continue;}
+    if(relay&&relay.profileId!==row.profile_id){message.ack();continue;}
     const current=Date.now();
     if(row.state==='sending'&&row.lease_until<=current){
       await env.DB.prepare("UPDATE model_jobs SET state='uncertain',error_status=409,error_message='模型处理结果暂未确认。请先核对任务结果，再决定是否重新批改。',updated=? WHERE id=? AND state='sending' AND lease_until<=?").bind(current,id,current).run();
@@ -177,16 +180,13 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       const hydrated=await hydrateAssetImages(env,row.owner,validated),{temperature,...messages}=hydrated;
       const payload={...messages,...(profile.sendTemperature?{temperature}:{}),model:profile.model,[profile.tokenParameter]:profile.maxTokens,stream:false};
       const request=prepareProviderRequest(profile.personal?.provider||profile.provider||'custom',profile.model,profile.apiUrl,payload);
-      const linked=await env.DB.prepare('SELECT g.* FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=? AND b.owner=?').bind(id,row.owner).first<GradingRun>();
-      const authority=linked?.work_permit_id?await inspectWork(env,row.owner,linked.work_permit_id,runWorkScope(linked),verify):row.work_permit_id?await inspectWork(env,row.owner,row.work_permit_id,{type:'model-job',jobId:row.id,requestHash:row.request_hash,profileId:row.profile_id,profileRevision:envelope.profileRevision},verify):await verify(env,'introspect',{grantId:row.grant_id});
-      if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
-      await requireJobClass(env,id,authority.classes||[],true);
-      await assertWorkNotRevoked(env,linked?.grant_id||row.grant_id);
+      await authorizeModelJob(env,row,envelope.profileRevision,verify);
       const currentProfile=await resolveProfile(env,row.owner,row.profile_id);if(!currentProfile||!available(env,currentProfile)||await revision(currentProfile)!==envelope.profileRevision)fail(409,'模型配置已更改或移除，请核对后重新批阅。');
       const providerKey=currentProfile.personal?await personalModelKey(env,currentProfile.personal):keyFor(env,currentProfile)!;
       const profileGuard=profile.personal?" AND EXISTS(SELECT 1 FROM personal_model_profiles WHERE id=? AND owner=? AND status='active' AND execution_revision=?)":'',profileBinds=profile.personal?[profile.id,row.owner,envelope.profileRevision]:[];
       const sending=await env.DB.prepare("UPDATE model_jobs SET state='sending',lease_until=?,updated=? WHERE id=? AND state='preparing' AND lease_token=? AND lease_until>?"+profileGuard).bind(Date.now()+profile.timeoutMs+60000,Date.now(),id,token,Date.now(),...profileBinds).run();
       if(!sending.meta.changes){if(profile.personal){const value=await readPersonalModel(env,row.owner,profile.id);if(!value||value.execution_revision!==envelope.profileRevision)fail(409,'模型配置已更改或移除，请核对后重新批阅。');}message.retry({delaySeconds:15});continue;}
+      if(profile.personal?.provider==='local-relay'){relay!.dispatch({id,lease:token,payload:request.payload,timeoutMs:profile.timeoutMs});message.ack();continue;}
       let response:Response;
       try{
         response=await fetch(request.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+providerKey},body:JSON.stringify(request.payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
@@ -235,6 +235,14 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       await finish(env,id,token,'failed',status,error instanceof HttpError?error.message:'批改任务暂时无法处理，请稍后重试。');message.ack();
     }
   }
+}
+
+export async function authorizeModelJob(env:Env,row:Job,profileRevision:string,verify:WorkBridge,dispatch=true){
+ const linked=await env.DB.prepare('SELECT g.* FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=? AND b.owner=?').bind(row.id,row.owner).first<GradingRun>();
+      const authority=linked?.work_permit_id?await inspectWork(env,row.owner,linked.work_permit_id,runWorkScope(linked),verify):row.work_permit_id?await inspectWork(env,row.owner,row.work_permit_id,{type:'model-job',jobId:row.id,requestHash:row.request_hash,profileId:row.profile_id,profileRevision},verify):await verify(env,'introspect',{grantId:row.grant_id});
+      if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
+      await requireJobClass(env,row.id,authority.classes||[],dispatch);
+      await assertWorkNotRevoked(env,linked?.grant_id||row.grant_id);
 }
 
 export async function recoverModelOutbox(env:Env){
@@ -302,7 +310,7 @@ export async function enqueueModelJob(env:Env,session:Principal,value:unknown,bi
     return json(safeJob((await getJob(env,id))!),202);
 }
 
-async function requireJobClass(env:Env,id:string,classes:Array<{id:string;scopes:string[]}>,dispatch=false){
+export async function requireJobClass(env:Env,id:string,classes:Array<{id:string;scopes:string[]}>,dispatch=false){
  const binding=await env.DB.prepare('SELECT b.class_id,b.step_id,g.current_step_id,g.state FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=?').bind(id).first<{class_id:string;step_id:string;current_step_id:string;state:string}>();
  if(binding&&!classes.some(c=>c.id===binding.class_id&&['roster.read','writing.grade'].every(scope=>c.scopes.includes(scope))))fail(403,'此班级的作文批改权限已变化。');
  if(binding&&dispatch&&(!['queued','running'].includes(binding.state)||binding.current_step_id!==binding.step_id))fail(409,'班级批阅运行已暂停或步骤已改变。');

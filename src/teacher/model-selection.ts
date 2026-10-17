@@ -1,4 +1,4 @@
-export type TeacherModelProfile={id:string;label:string;model:string;supportsImages?:boolean;purposes?:('grading'|'ocr')[];helpUrl?:string;source?:'personal'|'system';available?:boolean;configurationVersion?:string;sendTemperature?:boolean;ocrSpecialist?:boolean};
+export type TeacherModelProfile={id:string;label:string;model:string;supportsImages?:boolean;purposes?:('grading'|'ocr')[];helpUrl?:string;transport?:'cloud'|'local-relay';source?:'personal'|'system';available?:boolean;configurationVersion?:string;sendTemperature?:boolean;ocrSpecialist?:boolean};
 export function supportsPurpose(profile:TeacherModelProfile,purpose:'grading'|'ocr'){
   // Existing server catalogs predate capability metadata and were all image models.
   return profile.available!==false&&profile.supportsImages!==false&&(!profile.purposes||profile.purposes.includes(purpose));
