@@ -75,7 +75,7 @@
   ],
   "rootTests": 200,
   "peerTests": 9,
-  "githubLinuxVerified": false,
+  "githubLinuxVerified": true,
   "realSchoolData": false,
   "cloudDeployed": false,
   "logSha256": {
@@ -86,5 +86,128 @@
     "ci-clean-teacher-3.log": "882f5fce6b81c8aa429193715dfb47e603e0e35fc839bf4ae2e78f74ded48e26",
     "ci-clean-peer-1.log": "d3eae052a64fc3686c453cc9429f6c19b04cd4c4e46a9a49217d9a34561ea9a3",
     "ci-clean-peer-2.log": "428e550e75370c0d164914b9845c63ed7eb153882cc000e0fcd4ade21dabfb63"
+  },
+  "github": {
+    "runId": 38991291135,
+    "url": "https://github.com/NewsunLee007/WriteAscend/actions/runs/38991291135",
+    "headSha": "f0b3a930a43af8d4fd29c8e0ea3cec7e8ab7ac9d",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117274032934,
+        "name": "Teacher grading and shared integration",
+        "url": "https://github.com/NewsunLee007/WriteAscend/actions/runs/38991291135/job/117274032934",
+        "status": "completed",
+        "conclusion": "success",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "startedAt": "2026-10-17T01:32:22Z",
+        "completedAt": "2026-10-17T01:32:55Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked teacher dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify original grading and integration rules",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build teacher application",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check teacher Worker without deploying",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117274033310,
+        "name": "Independent peer review",
+        "url": "https://github.com/NewsunLee007/WriteAscend/actions/runs/38991291135/job/117274033310",
+        "status": "completed",
+        "conclusion": "success",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "startedAt": "2026-10-17T01:32:22Z",
+        "completedAt": "2026-10-17T01:32:37Z",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked peer dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify peer rubric and assignment rules",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and check independent Worker without deploying",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ]
+  },
+  "githubLogCopiesSha256": {
+    "117274032934": "3dd23a66fe1300b645460c386bd727f72a963ea1bb9e5b9fbb90aa63158f2c55",
+    "117274033310": "8e0b2741baa1249e0505da3b34be19ed1d743e324b95abb7a607b8e35b67e38a"
+  },
+  "workflowDelivery": {
+    "connection": "existing-authorized-GitHub-app",
+    "reviewedTree": "068d5a54c8a9c709a3127d56bd63e0b995014c41",
+    "nonForcedRefUpdate": true,
+    "newPermissionsGranted": false
   }
 }

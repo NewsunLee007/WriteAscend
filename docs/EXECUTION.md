@@ -133,4 +133,4 @@ Daily 正式桥接仍关闭，未修改其配置/重启或写入正式目录；�
 
 ## 2026-10-17 自动回归检查
 
-新增教师与独立互批的GitHub Linux检查作业，各用自己的lockfile安装，执行原评分/身份/版本/数据保护测试、构建和Worker dry-run，不部署或使用学校/模型凭据。先在新Git归档目录和空npm缓存下重新安装，交替隐藏另一项目依赖验证独立性：教师200项、互批9项及两套构建/Worker检查通过。实际GitHub作业待推送后核验，详见 [自动检查](continuous-verification.md)。
+新增教师与独立互批的GitHub Linux检查作业，各用自己的lockfile安装，执行原评分/身份/版本/数据保护测试、构建和Worker dry-run，不部署或使用学校/模型凭据。先在新Git归档目录和空npm缓存下重新安装，交替隐藏另一项目依赖验证独立性：教师200项、互批9项及两套构建/Worker检查通过。实际 [GitHub运行 #1](https://github.com/NewsunLee007/WriteAscend/actions/runs/38991291135) 两个Ubuntu24.04作业均成功，日志200/9项和构建/dry-run已逐项核对，详见 [自动检查](continuous-verification.md)。现有GitHub应用权限完成工作流提交，不需要扩大本机PAT权限；仅更新草稿分支，未合并或部署。
