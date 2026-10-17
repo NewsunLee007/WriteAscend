@@ -83,5 +83,185 @@
     "path": "output/workspace-backup-preview-mobile.png",
     "sha256": "d744c08575e61a7ce4d8a5eabdd9b82d9e46ecd9252846d35a6dbb8437ae33ac",
     "visuallyReviewed": true
+  },
+  "deployment": {
+    "teacherSourceCommit": "a57f65e5fcc4d6e5cd074e64817a05bac0eef55c",
+    "teacherRelease": {
+      "id": "661b2419-5b80-41a8-b64a-8b91d7e6aa92",
+      "tag": null,
+      "timestamp": "2026-10-17T01:16:11.623723Z"
+    },
+    "teacherPreviousVersion": "39197e00-78ce-4b21-9a17-cb174efdab41",
+    "peerRelease": {
+      "id": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+      "tag": null,
+      "timestamp": "2026-10-17T00:47:36.937352Z"
+    },
+    "peerRedeployed": false,
+    "peerAssetsMatchOriginalDeployment": true,
+    "assets": {
+      "passed": true,
+      "checkedAt": "2026-10-17T01:17:32.746Z",
+      "sourceCommit": "a57f65e5fcc4d6e5cd074e64817a05bac0eef55c",
+      "origin": "https://writeascend-staging.317792050.workers.dev",
+      "checks": [
+        {
+          "path": "index.html",
+          "route": "/",
+          "bytes": 629,
+          "sha256": "8ea1a4dd6124d25a65736c18e6fe2bacd9277a912e26d2e776c87ff24498f345",
+          "matches": true
+        },
+        {
+          "path": "assets/index-BXihXjqv.js",
+          "route": "/assets/index-BXihXjqv.js",
+          "bytes": 541953,
+          "sha256": "87f36310d491eb15783a8e5d5f8cb8fbf984c71b14f198d85d042caa4c8c9443",
+          "matches": true
+        },
+        {
+          "path": "assets/rolldown-runtime-COiEfhsA.js",
+          "route": "/assets/rolldown-runtime-COiEfhsA.js",
+          "bytes": 1116,
+          "sha256": "174e7e98105b02138bee9b4c62dfc8a01980db395f9e6c916db999c091115562",
+          "matches": true
+        },
+        {
+          "path": "assets/index-CKVBTryf.css",
+          "route": "/assets/index-CKVBTryf.css",
+          "bytes": 89836,
+          "sha256": "7501bffe14db37e6d56c73a69e06b82bd573db9b3bbd5f6578d474d61b98ef39",
+          "matches": true
+        }
+      ]
+    },
+    "publicPages": {
+      "passed": true,
+      "scriptSha256": "bdc86d582a33ac6738d8e947a2fd81910e7f857a754e963e6a50ace730985f19",
+      "checkedAt": "2026-10-17T01:16:35.914436+00:00",
+      "result": {
+        "passed": true,
+        "cloudPages": [
+          {
+            "kind": "teacher",
+            "origin": "https://writeascend-staging.317792050.workers.dev",
+            "release": {
+              "id": "661b2419-5b80-41a8-b64a-8b91d7e6aa92",
+              "tag": null,
+              "timestamp": "2026-10-17T01:16:11.623723Z"
+            },
+            "loginConfigured": true,
+            "anonymousMe": 401,
+            "responsiveWidths": [
+              375,
+              390,
+              768,
+              1440
+            ],
+            "csp": true,
+            "anonymousProtection": [
+              {
+                "path": "/api/me",
+                "status": 401
+              },
+              {
+                "path": "/api/classes",
+                "status": 401
+              },
+              {
+                "path": "/api/student/reports",
+                "status": 401
+              },
+              {
+                "path": "/api/tasks",
+                "status": 401
+              },
+              {
+                "path": "/api/integrations/writing-peer/status",
+                "status": 401
+              }
+            ]
+          },
+          {
+            "kind": "peer",
+            "origin": "https://newsun-writing-peer-staging.317792050.workers.dev",
+            "release": {
+              "id": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+              "tag": null,
+              "timestamp": "2026-10-17T00:47:36.937352Z"
+            },
+            "loginConfigured": true,
+            "anonymousMe": 401,
+            "responsiveWidths": [
+              375,
+              390,
+              768,
+              1440
+            ],
+            "csp": true,
+            "anonymousProtection": [
+              {
+                "path": "/api/me",
+                "status": 401
+              },
+              {
+                "path": "/api/rounds",
+                "status": 401
+              },
+              {
+                "path": "/api/integrations/writeascend/revision-basis",
+                "status": 401
+              }
+            ]
+          }
+        ],
+        "schoolLoginVerified": false,
+        "studentRecordsVerified": false
+      }
+    },
+    "loginRejectionPaths": {
+      "passed": true,
+      "scriptSha256": "b66a07d56bc05a8e028c85fce658db1bb2dd71216bb96df90a036477b365e6c0",
+      "checkedAt": "2026-10-17T01:16:50.481223+00:00",
+      "result": {
+        "passed": true,
+        "checkedAt": "2026-10-17T01:16:49.865Z",
+        "checks": [
+          {
+            "kind": "teacher",
+            "configured": true,
+            "schoolContextAnonymous": 401,
+            "accountRole": "teacher",
+            "invalidCodeCallbackStatus": 400,
+            "sessionCreated": false,
+            "transactionCleanup": 200
+          },
+          {
+            "kind": "student",
+            "configured": true,
+            "schoolContextAnonymous": 401,
+            "accountRole": "student",
+            "invalidCodeCallbackStatus": 400,
+            "sessionCreated": false,
+            "transactionCleanup": 200
+          },
+          {
+            "kind": "peer",
+            "configured": true,
+            "schoolContextAnonymous": 401,
+            "accountRole": "student",
+            "invalidCodeCallbackStatus": 401,
+            "sessionCreated": false,
+            "transactionCleanup": 200
+          }
+        ],
+        "realAccountLoginVerified": false,
+        "studentDirectoryChanged": false
+      }
+    },
+    "dailyRestartedAgain": false,
+    "newMigrations": 0,
+    "productionDomainChanged": false,
+    "deploymentLogSha256": "f779b429ff1f7978522967cc93f5149f8fdefe546ce09dcb980f227bf587e517"
   }
 }
