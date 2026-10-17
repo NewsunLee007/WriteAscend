@@ -1,6 +1,6 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from 'react';
-import {sanitizeLegacy} from '../report/legacy-import';
-import {legacyKeys,workspaceStorage,type WorkspaceStorage} from './workspace-storage';
+import {workspaceStorage,type WorkspaceStorage} from './workspace-storage';
+import {needsLocalMigration,migrateLocalWorkspace} from './workspace-backup';
 import {chooseGradingModel,chooseOcrModel,supportsPurpose,type TeacherModelProfile} from './model-selection';
 import PersonalModels from './PersonalModels';
 import {checkImageModel} from './model-check';
@@ -35,8 +35,7 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
       if(me.role==='student'){setIdentity(me);setProfiles([]);setMigration(false);setStatus('ready');setMessage('');return;}
       const namespace=workspaceStorage(me.workspaceId);
       try{
-        const existing=legacyKeys.some(key=>namespace.getItem(key)!==null);
-        setMigration(!existing&&!namespace.getItem('migration_decision')&&legacyKeys.some(key=>localStorage.getItem(key)!==null));
+        setMigration(needsLocalMigration(localStorage,namespace));
       }catch{}
       setIdentity(me);
       const modelResponse=await fetch('/api/model/profiles',{cache:'no-store'});
@@ -75,13 +74,8 @@ export function TeacherCloudProvider({children}:{children:React.ReactNode}){
   }
   function decideMigration(importData:boolean){
     try{
-      if(importData)for(const key of legacyKeys){
-        const raw=localStorage.getItem(key);if(raw===null)continue;
-        let safe=raw;
-        if(key!=='writeascend_teacher_mode')safe=JSON.stringify(sanitizeLegacy(JSON.parse(raw)).value);
-        storage.setItem(key,safe);
-      }
-      storage.setItem('migration_decision',importData?'imported':'fresh');setMigration(false);setGeneration(g=>g+1);setMessage('');
+      migrateLocalWorkspace(localStorage,storage,importData);
+      setMigration(false);setGeneration(g=>g+1);setMessage('');
     }catch{setMessage('本机数据未能完整读取，原数据仍保留。请先下载旧版备份后再导入。');}
   }
   const value:Cloud={mode,status,message,identity,profiles,profileId,ocrProfileId:chooseOcrModel(profiles,profileId,ocrChoice),ocrChoice,setOcrProfileId,setProfileId,storage,refresh,expired:()=>setStatus('expired'),logout};

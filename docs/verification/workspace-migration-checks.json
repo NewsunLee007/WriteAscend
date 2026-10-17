@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-10-17T01:14:46.045Z",
+  "rootTests": 200,
+  "newWorkspaceTests": 9,
+  "realStudentData": false,
+  "realAccountLoginVerified": false,
+  "formalDirectoryChanged": false,
+  "flows": {
+    "workspace-backup": {
+      "passed": true,
+      "scriptSha256": "d7dd13aceabd481ec77ca9478d647c960329131fae5033bce1cddddba9c8892f",
+      "checkedAt": "2026-10-17T01:14:06.546474+00:00",
+      "result": {
+        "passed": true,
+        "previewBeforeMutation": true,
+        "preRestoreBackup": true,
+        "fullHistoryKinds": 4,
+        "credentialsExcluded": true,
+        "accountMismatchBlocked": true,
+        "quotaFailureRolledBack": true,
+        "reportRetained": true,
+        "malformedFileRejected": true,
+        "reload": true,
+        "mobileWidths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "realStudentData": false
+      }
+    },
+    "workspace-local-migration": {
+      "passed": true,
+      "scriptSha256": "ae6aca065e04f0caca1615700c9b861e09f717424f3813d8084accbe14618bb7",
+      "checkedAt": "2026-10-17T01:14:08.715985+00:00",
+      "result": {
+        "passed": true,
+        "quotaFailureRolledBack": true,
+        "sourceRetained": true,
+        "refreshShowsRetry": true,
+        "retryPreservesHistory": true,
+        "credentialsExcluded": true,
+        "realStudentData": false
+      }
+    },
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-17T01:14:13.023277+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "logout-migration": {
+      "passed": true,
+      "scriptSha256": "f22f82c4aa035125fda48479f2e33dbaa4f75ad8507504c886ce7ac874f7fb4a",
+      "checkedAt": "2026-10-17T01:14:15.937488+00:00",
+      "result": {
+        "passed": true,
+        "logoutClearsMigrationGateAcrossTabs": true
+      }
+    }
+  },
+  "files": {
+    "src/TeacherApp.jsx": "cca605846e61c71ff440637937a47e29a144d21e58edc7be470b94980bdeaa6e",
+    "src/teacher/TeacherCloud.tsx": "6b4696e0ffc1072725f8d1bed14f39e5fc2566f2e0f1214e0679aba9cb1b859b",
+    "src/teacher/workspace-backup.ts": "79f2096f56560e08b7b79a1cdf5ca2435a806ee172c8083bf8a2fe1b000a118d",
+    "src/teacher-styles.css": "144d64c3515a40a020b971f3c506d0940a4d8844d9fbce25459596409eca2505",
+    "test/workspace-backup.test.ts": "40016ed53333bc50f1aeae59823967e663a8babb1de3556a1c0dc228e8cea9b5",
+    "scripts/qa/run-browser.py": "ec03bfce8273f9d67e5df995b6395de5e8f895f105a80087a70c60cdf4779268"
+  },
+  "logs": {
+    "workspace-backup-tests.log": "e0be0ee516aedb6a4a97ae3e3d3db6eb49e92b8a7c59b7a64d485ffea48df754",
+    "workspace-backup-build.log": "71840e7a5a1975d5b349b57324d8b8691806023c0ca577361235f118d806a3f0",
+    "workspace-backup-worker-check.log": "73ce3022ba5a5838b746a4a500adc1a62637ce5799436a9b0371618e4b94dd2f"
+  },
+  "mobilePreview": {
+    "path": "output/workspace-backup-preview-mobile.png",
+    "sha256": "d744c08575e61a7ce4d8a5eabdd9b82d9e46ecd9252846d35a6dbb8437ae33ac",
+    "visuallyReviewed": true
+  }
+}

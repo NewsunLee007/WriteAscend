@@ -9,6 +9,7 @@
 /* Teacher workflow remains the application entry. Responsive changes are additive. */
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #b7b9f2;outline-offset:2px}
 button{touch-action:manipulation}
+.teacher-workspace .workspace-backup-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 main.teacher-quick-main{padding-top:0!important}
 @media(max-width:640px){
   .teacher-workspace .teacher-stepper{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:10px 12px;gap:8px}

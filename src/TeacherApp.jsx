@@ -7,6 +7,7 @@ import {createCloudModelTransport} from './teacher/cloud-model';
 import {useWorkspaceDraft} from './teacher/useWorkspaceDraft';
 import {useCloudSnapshots} from './teacher/useCloudSnapshots';
 import {CloudSnapshotsPanel} from './teacher/CloudSnapshotsPanel';
+import {createWorkspaceBackup,prepareWorkspaceBackup,persistWorkspaceRestore} from './teacher/workspace-backup';
 import {TeacherTasksPanel} from './teacher/TeacherTasksPanel';
 import {taskClasses,uniqueStudent} from './teacher/task-roster';
 const SchoolDirectoryPanel=React.lazy(()=>import('./teacher/SchoolDirectoryPanel'));
@@ -78,10 +79,10 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             if (!isOpen) return null;
             return (
                 <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-md fade-in" style={{zIndex: 100}}>
-                    <div className={`bg-white/95 glass-panel rounded-3xl shadow-2xl w-full ${large ? 'max-w-4xl' : 'max-w-md'} p-6 max-h-[90vh] flex flex-col`}>
+                    <div role="dialog" aria-modal="true" aria-label={title} className={`bg-white/95 glass-panel rounded-3xl shadow-2xl w-full ${large ? 'max-w-4xl' : 'max-w-md'} p-6 max-h-[90vh] flex flex-col`}>
                         <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
                             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">{title}</h2>
-                            <button onClick={onClose} className="text-slate-400 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-full p-1.5 transition"><X size={20}/></button>
+                            <button aria-label={'关闭'+title} onClick={onClose} className="text-slate-400 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-full p-1.5 transition"><X size={20}/></button>
                         </div>
                         <div className="overflow-y-auto flex-1 pr-2">{children}</div>
                         {footer && <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">{footer}</div>}
@@ -182,6 +183,12 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
         const App = () => {
             const cloud = useTeacherCloud();
             const teacherStorage = cloud.storage;
+            const [pendingWorkspaceImport,setPendingWorkspaceImport]=useState(null);
+            const [workspaceImportError,setWorkspaceImportError]=useState('');
+            const [workspaceImportBusy,setWorkspaceImportBusy]=useState(false);
+            const workspaceImportLive=useRef(true);
+            const workspaceImportRequest=useRef(0);
+            useEffect(()=>{workspaceImportLive.current=true;return()=>{workspaceImportLive.current=false;workspaceImportRequest.current++;};},[]);
             const modelReady = cloud.mode === 'cloud' ? cloud.status === 'ready' && !!cloud.profileId : null;
             const [workflowMode, setWorkflowMode] = useState(() => {
                 try { return teacherStorage.getItem('writeascend_teacher_mode') === 'full' ? 'full' : 'quick'; }
@@ -239,6 +246,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const [printMode, setPrintMode] = useState('batch');
             const [analysisData, setAnalysisData] = useState(null);
             const [isAnalyzingClass, setIsAnalyzingClass] = useState(false);
+            const workspaceImportActivity=useRef(false);
+            workspaceImportActivity.current=isBatchProcessing||isAnalyzingClass;
             const [analysisHistory, setAnalysisHistory] = useState([]);
             const [analysisPreview, setAnalysisPreview] = useState({ open: false, item: null });
             const [showAnalysisGenerateDialog, setShowAnalysisGenerateDialog] = useState(false);
@@ -3112,61 +3121,82 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
 
             const handlePrint = (mode) => { setPrintMode(mode); setTimeout(() => window.print(), 200); };
             const exportData = () => { 
-                const data = { config, assignment, rubric, classes, currentClassId, activeClassIds, languageDifficulty, pdfConfig, studentProfiles, files: files.map(f => ({...f, file: null, url: null})) };
+                const data = createWorkspaceBackup({ config, assignment, rubric, classes, currentClassId, activeClassIds, languageDifficulty, pdfConfig, csvExportConfig, studentProfiles, files: files.map(f => ({...f, file: null, url: null})) },{csvExportHistory,savedGradingResults,rubricHistory,analysisHistory});
                 const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `SmartGrader_Backup_${new Date().toISOString().slice(0,10)}.json`;
                 a.click();
+                setTimeout(()=>URL.revokeObjectURL(url),1000);
             }; 
-            const importData = (e) => { 
-                const file = e.target.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const d = JSON.parse(ev.target.result);
-                        if(d.config) setConfig(d.config);
-                        if(d.assignment) setAssignment(d.assignment);
-                        if (d.rubric) {
-                            const loaded = d.rubric;
-                            const loadedStrictnessLevelRaw = clampStrictnessLevel(loaded && loaded.strictnessLevel);
-                            const loadedStrictnessLevel = loadedStrictnessLevelRaw !== null ? loadedStrictnessLevelRaw : strictnessLevelFromLabel(loaded && loaded.strictness);
-                            const loadedStrictnessLabel = (loaded && loaded.strictness) ? String(loaded.strictness) : strictnessLabelFromLevel(loadedStrictnessLevel);
-                            const normalizedLoaded = { ...loaded, strictness: loadedStrictnessLabel, strictnessLevel: loadedStrictnessLevel };
-                            const loadedTotal = Number(loaded && loaded.total);
-                            const loadedItems = Array.isArray(loaded && loaded.items) ? loaded.items : [];
-                            if (Number.isFinite(loadedTotal) && loadedItems.length > 0) {
-                                setRubric({ ...normalizedLoaded, items: redistributeItemScoresToTotal(loadedItems, loadedTotal) });
-                            } else {
-                                setRubric(normalizedLoaded);
-                            }
-                        }
-                        if (Array.isArray(d.classes)) setClasses(d.classes);
-                        if (d.currentClassId) setCurrentClassId(String(d.currentClassId));
-                        if (Array.isArray(d.activeClassIds)) setActiveClassIds(d.activeClassIds);
-                        if (d.languageDifficulty && typeof d.languageDifficulty === 'object') setLanguageDifficulty(p => ({ ...p, ...d.languageDifficulty }));
-                        if (d.studentProfiles && typeof d.studentProfiles === 'object') setStudentProfiles(d.studentProfiles);
-                        if(d.pdfConfig) setPdfConfig(d.pdfConfig);
-                        if (Array.isArray(d.files)) {
-                            const restored = d.files.map((f, idx) => ({
-                                id: (f && f.id) ? f.id : Math.random().toString(36).slice(2, 9),
-                                file: null,
-                                url: '',
-                                name: (f && f.name) ? String(f.name) : `导入文件${idx + 1}`,
-                                status: (f && f.status) ? String(f.status) : (f && f.result ? 'success' : 'idle'),
-                                index: Number(f && f.index) || (idx + 1),
-                                inferredStudentRawName: (f && f.inferredStudentRawName) ? String(f.inferredStudentRawName) : '',
-                                inferredStudentName: (f && f.inferredStudentName) ? String(f.inferredStudentName) : '',
-                                inferredClassName: (f && f.inferredClassName) ? String(f.inferredClassName) : '',
-                                inferredClassId: (f && f.inferredClassId) ? String(f.inferredClassId) : '',
-                                result: (f && f.result) ? f.result : null
-                            }));
-                            setFiles(restored);
-                        }
-                        alert("数据还原成功！");
-                    } catch(err) { alert("文件格式错误"); }
-                };
-                reader.readAsText(file);
+            const applyImportedWorkspace = (prepared) => {
+                const d=prepared.data;
+                let restoredRubric=rubric;
+                if(d.rubric){
+                    const loaded=d.rubric,levelRaw=clampStrictnessLevel(loaded.strictnessLevel);
+                    const level=levelRaw!==null?levelRaw:strictnessLevelFromLabel(loaded.strictness);
+                    restoredRubric={...loaded,strictness:loaded.strictness?String(loaded.strictness):strictnessLabelFromLevel(level),strictnessLevel:level,items:redistributeItemScoresToTotal(loaded.items,Number(loaded.total))};
+                }
+                const core={config:d.config?{...config,...d.config,...(cloud.mode==='cloud'?{apiKey:''}:{})}:config,
+                    assignment:d.assignment||assignment,rubric:restoredRubric,classes:d.classes||classes,
+                    currentClassId:d.currentClassId?String(d.currentClassId):currentClassId,activeClassIds:d.activeClassIds||activeClassIds,
+                    languageDifficulty:{...languageDifficulty,...d.languageDifficulty},pdfConfig:d.pdfConfig||pdfConfig,csvExportConfig:d.csvExportConfig||csvExportConfig};
+                persistWorkspaceRestore(teacherStorage,core,prepared);
+                setConfig(core.config);setAssignment(core.assignment);setRubric(core.rubric);setClasses(core.classes);
+                setCurrentClassId(core.currentClassId);setActiveClassIds(core.activeClassIds);setLanguageDifficulty(core.languageDifficulty);
+                setPdfConfig(core.pdfConfig);setCsvExportConfig(core.csvExportConfig);
+                if(d.studentProfiles)setStudentProfiles(d.studentProfiles);
+                if (Array.isArray(d.files)) {
+                    const restored = d.files.map((f, idx) => ({
+                        id: (f && f.id) ? f.id : Math.random().toString(36).slice(2, 9),
+                        file: null,
+                        url: '',
+                        name: (f && f.name) ? String(f.name) : `导入文件${idx + 1}`,
+                        status: (f && f.status) ? String(f.status) : (f && f.result ? 'success' : 'idle'),
+                        index: Number(f && f.index) || (idx + 1),
+                        inferredStudentRawName: (f && f.inferredStudentRawName) ? String(f.inferredStudentRawName) : '',
+                        inferredStudentName: (f && f.inferredStudentName) ? String(f.inferredStudentName) : '',
+                        inferredClassName: (f && f.inferredClassName) ? String(f.inferredClassName) : '',
+                        inferredClassId: (f && f.inferredClassId) ? String(f.inferredClassId) : '',
+                        result: (f && f.result) ? f.result : null
+                    }));
+                    setFiles(restored);
+                    setSelectedFileId(restored[0]?.id||null);
+                }
+                const h=prepared.histories;
+                if(h.csvExportHistory) setCsvExportHistory(h.csvExportHistory);
+                if(h.savedGradingResults) setSavedGradingResults(h.savedGradingResults);
+                if(h.rubricHistory) setRubricHistory(h.rubricHistory);
+                if(h.analysisHistory) setAnalysisHistory(h.analysisHistory);
+                setActiveCloudSnapshot(null);setSourceTask(null);setSaveToCurrentCloud(false);
+                lastSavedLocalIdRef.current='';lastSavedAtRef.current='';
+                setStep(0);setMaxStep((d.files||files).length?2:0);
+                setPendingWorkspaceImport(null);
+                alert("数据还原成功！未随备份保存的原图需重新选择；旧版姓名与学号不会自动关联学校学生账号。");
+            };
+            const importData = async (e) => {
+                const file=e.target.files?.[0];e.target.value='';
+                if(!file||isBatchProcessing||isAnalyzingClass)return;
+                const request=++workspaceImportRequest.current;
+                setWorkspaceImportError('');setPendingWorkspaceImport(null);
+                try{
+                    if(file.size>32*1024*1024)throw Error('备份超过32MB，请在原系统分批导出后恢复。');
+                    const prepared=prepareWorkspaceBackup(JSON.parse(await file.text()));
+                    if(workspaceImportLive.current&&workspaceImportRequest.current===request)setPendingWorkspaceImport({...prepared,fileName:file.name});
+                }catch(error){if(workspaceImportLive.current&&workspaceImportRequest.current===request)setWorkspaceImportError(error instanceof SyntaxError?'文件不是有效的 JSON 备份，请重新选择原系统导出的文件。':error instanceof Error?error.message:'文件读取失败，请重试。');}
+            };
+            const confirmWorkspaceImport = async () => {
+                if(!pendingWorkspaceImport||workspaceImportBusy||isBatchProcessing||isAnalyzingClass)return;
+                setWorkspaceImportBusy(true);setWorkspaceImportError('');
+                try{
+                    if(cloud.mode==='cloud'){
+                        const response=await fetch('/api/me',{cache:'no-store'}),me=await response.json();
+                        if(!response.ok||me.workspaceId!==cloud.identity?.workspaceId||!['teacher','admin'].includes(me.role))throw Error('当前账号已变化，请重新登录后再恢复。');
+                    }
+                    if(!workspaceImportLive.current)return;
+                    if(workspaceImportActivity.current)throw Error('当前有批改或分析正在执行，请完成后再恢复。');
+                    applyImportedWorkspace(pendingWorkspaceImport);
+                }catch(error){if(workspaceImportLive.current)setWorkspaceImportError(error instanceof Error?error.message:'暂时无法核对账号，请稍后重试。');}
+                finally{if(workspaceImportLive.current)setWorkspaceImportBusy(false);}
             };
             const addClass = (name) => {
                 const n = (name || '').toString().trim();
@@ -4572,15 +4602,32 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             <hr className="border-slate-100"/>
                             <div className="space-y-3">
                                 <h3 className="font-bold text-slate-700 text-sm">数据管理</h3>
+                                <p className="text-xs leading-6 text-slate-500">备份包含当前设置、作文、学生档案及四类历史记录，不含模型密钥。还原前会先预览，确认后替换备份中包含的数据。</p>
+                                {workspaceImportError&&!pendingWorkspaceImport&&<p role="alert" className="text-sm text-red-600">{workspaceImportError}</p>}
                                 <div className="flex gap-3">
                                     <button onClick={exportData} className="flex-1 btn-pure flex items-center justify-center gap-2 py-3 rounded-xl text-sm"><Download size={16}/> 备份数据</button>
                                     <label className="flex-1 btn-pure flex items-center justify-center gap-2 py-3 rounded-xl text-sm cursor-pointer hover:bg-white">
                                         <UploadCloud size={16}/> 还原数据
-                                        <input type="file" className="hidden" accept=".json" onChange={importData} />
+                                        <input aria-label="还原工作区备份" type="file" className="hidden" accept=".json" disabled={isBatchProcessing||isAnalyzingClass||workspaceImportBusy} onChange={importData} />
                                     </label>
                                 </div>
                             </div>
                         </div>
+                    </Modal>
+
+                    <Modal isOpen={!!pendingWorkspaceImport} onClose={()=>{if(!workspaceImportBusy){setPendingWorkspaceImport(null);setWorkspaceImportError('');}}} title="恢复备份前核对" footer={<div className="flex flex-wrap gap-3"><button disabled={workspaceImportBusy} onClick={exportData} className="btn-pure px-5 py-2.5 rounded-full text-sm">先备份当前工作区</button><button disabled={workspaceImportBusy||isBatchProcessing||isAnalyzingClass} onClick={()=>void confirmWorkspaceImport()} className="btn-pure active px-5 py-2.5 rounded-full text-sm">{workspaceImportBusy?'正在核对账号…':'确认恢复备份'}</button></div>}>
+                        {pendingWorkspaceImport&&<div className="space-y-5 text-sm leading-7 text-slate-600">
+                            <p className="break-all font-semibold text-slate-800">{pendingWorkspaceImport.fileName}</p>
+                            <dl className="workspace-backup-summary">{[
+                                ['作文',pendingWorkspaceImport.summary.files+' 份（已批改 '+pendingWorkspaceImport.summary.reports+' 份）'],
+                                ['本机班级',pendingWorkspaceImport.summary.classes+' 个'],
+                                ['学生档案',pendingWorkspaceImport.summary.profiles+' 份'],
+                                ['历史记录',pendingWorkspaceImport.summary.history+' 条'],
+                            ].map(([label,value])=><div key={label} className="rounded-2xl bg-slate-50 p-4"><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 font-semibold text-slate-800">{value}</dd></div>)}</dl>
+                            <p>确认后，将替换当前工作区中备份包含的设置、作文和历史记录。建议先下载当前工作区备份。</p>
+                            <p>已排除 {pendingWorkspaceImport.removedCredentialFields} 个认证字段。未随备份保存的原图需重新选择；旧姓名和本机学号仍作为历史信息保留，学校账号归属需另行核对。</p>
+                            {workspaceImportError&&<p role="alert" className="text-red-600">{workspaceImportError}</p>}
+                        </div>}
                     </Modal>
 
                     <Modal isOpen={showRubricImportModal} onClose={() => setShowRubricImportModal(false)} title="评分标准导入（可选）" large footer={<button onClick={() => setShowRubricImportModal(false)} className="btn-pure active px-6 py-2.5 rounded-full text-sm font-bold">关闭</button>}>
