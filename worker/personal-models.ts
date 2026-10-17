@@ -2,7 +2,7 @@ import type {Env} from './index';
 import {HttpError} from './errors';
 import {digest} from '../src/report/legacy-import';
 import {localRelayProvider} from '../src/teacher/local-models';
-import {modelProviders,modelProtocol} from '../src/teacher/model-providers';
+import {modelProviders,modelProtocol,modelCapabilityIssue} from '../src/teacher/model-providers';
 export type PersonalModel={id:string;owner:string;label:string;provider:string;api_url:string;model:string;supports_images:number;purposes_json:string;max_tokens:number;timeout_ms:number;token_parameter:'max_tokens'|'max_completion_tokens';send_temperature:number;credential_cipher:string|null;credential_key_id:string|null;credential_revision:number;execution_revision:string;revision:number;status:string;created:number;updated:number};
 type Who={principal:string;role:string;grant_id:string};
 type ReadInput=(req:Request,max?:number)=>Promise<unknown>;
@@ -27,7 +27,7 @@ export function validatePersonalEndpoint(value:string,env:Env,protocol='chat'){
  const local=env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:')&&url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname);
  if(url.username||url.password||url.search||url.hash||url.port&&!local||url.protocol!=='https:'&&!local)fail(400,'接口须使用不带密钥、查询参数或跳转片段的 HTTPS 地址。');
  if(!local){const host=url.hostname.toLowerCase();if(!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host)||/(?:^|\.)(?:localhost|local|internal|lan|home|invalid|test|example|onion)$/.test(host)||[env.PUBLIC_ORIGIN,env.DAILY_ORIGIN].some(v=>{try{return new URL(v).hostname===host;}catch{return false;}}))fail(400,'请使用模型服务商的公网域名。');}
- url.pathname=url.pathname.replace(/\/+$/,'');if(protocol==='mistral-ocr'){url.pathname=url.pathname.replace(/\/(?:chat\/completions|ocr)$/,'')+'/ocr';}else if(!url.pathname.endsWith('/chat/completions'))url.pathname+='/chat/completions';if(url.href.length>500||/\/(?:sk-[^/]+|AIza[^/]+)/.test(url.pathname))fail(400,'接口地址过长或包含密钥，请把密钥填在独立输入框。');return url.href;
+ url.pathname=url.pathname.replace(/\/+$/,'');if(protocol==='anthropic'){url.pathname=url.pathname.replace(/\/(?:chat\/completions|messages)$/,'')+'/messages';}else if(protocol==='mistral-ocr'){url.pathname=url.pathname.replace(/\/(?:chat\/completions|ocr)$/,'')+'/ocr';}else if(!url.pathname.endsWith('/chat/completions'))url.pathname+='/chat/completions';if(url.href.length>500||/\/(?:sk-[^/]+|AIza[^/]+)/.test(url.pathname))fail(400,'接口地址过长或包含密钥，请把密钥填在独立输入框。');return url.href;
 }
 export async function readPersonalModel(env:Env,owner:string,id:string){if(!privateId.test(id))return null;return env.DB.prepare("SELECT * FROM personal_model_profiles WHERE id=? AND owner=? AND status='active'").bind(id,owner).first<PersonalModel>();}
 export function personalAvailable(env:Env,row:PersonalModel){return row.status==='active'&&!!row.credential_cipher&&canReadCredential(env,row);}
@@ -46,8 +46,9 @@ async function mutate(env:Env,who:Who,id:string|undefined,body:any,remove:boolea
  else{
   const keys=vault(env);if(!keys.ready)fail(503,'个人模型密钥托管尚未启用，请联系管理员。');
   const provider=body.provider==='local-relay'?localRelayProvider:modelProviders.find(p=>p.id===body.provider);if(!provider)fail(400,'请选择模型服务商。');
-  const label=text(body.label,'配置名称',80),model=text(body.model,'模型型号'),apiUrl=provider.id==='local-relay'?localRelayProvider.apiUrl:validatePersonalEndpoint(body.apiUrl||provider.apiUrl,env,modelProtocol(provider.id,model)),supportsImages=body.supportsImages??true,purposes=body.purposes||['grading','ocr'],maxTokens=body.maxTokens??10000,timeoutMs=body.timeoutMs??180000,tokenParameter=body.tokenParameter||provider.tokenParameter,sendTemperature=body.sendTemperature??provider.sendTemperature;
+  const label=text(body.label,'配置名称',80),model=text(body.model,'模型型号'),apiUrl=provider.id==='local-relay'?localRelayProvider.apiUrl:validatePersonalEndpoint(body.apiUrl||provider.apiUrl,env,'wireFormat' in provider&&provider.wireFormat==='anthropic'?'anthropic':modelProtocol(provider.id,model)),supportsImages=body.supportsImages??true,purposes=body.purposes||['grading','ocr'],maxTokens=body.maxTokens??10000,timeoutMs=body.timeoutMs??180000,tokenParameter=body.tokenParameter||provider.tokenParameter,sendTemperature=body.sendTemperature??provider.sendTemperature;
   if(typeof supportsImages!=='boolean'||!Array.isArray(purposes)||!purposes.length||purposes.length>2||new Set(purposes).size!==purposes.length||purposes.some(v=>!['grading','ocr'].includes(v))||!Number.isInteger(maxTokens)||maxTokens<512||maxTokens>24000||!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>300000||!['max_tokens','max_completion_tokens'].includes(tokenParameter)||typeof sendTemperature!=='boolean')fail(400,'模型图片能力、用途或高级参数不正确。');
+  const capabilityIssue=modelCapabilityIssue(provider.id,model,supportsImages);if(capabilityIssue)fail(400,capabilityIssue);
   if(modelProtocol(provider.id,model)!=='chat'&&(purposes.includes('grading')||!supportsImages))fail(400,'专用 OCR 模型只能用于图片文字识别，不能用于作文评分。');
   let secret=typeof body.apiKey==='string'?body.apiKey.trim():'';if(secret&&(secret.length<8||secret.length>4096||/[^\x21-\x7e]/.test(secret)||[label,model,apiUrl].some(v=>v.includes(secret))))fail(400,'请核对密钥，只将其填写在独立密钥输入框。');if(!secret&&body.credentialProfileId){const source=await readPersonalModel(env,who.principal,body.credentialProfileId);if(!source||source.provider!==provider.id||new URL(source.api_url).origin!==new URL(apiUrl).origin)fail(400,'只能复用本人同一供应商与服务域名的密钥。');secret=await personalModelKey(env,source);}
   if(provider.id==='local-relay'&&secret&&!/^[A-Za-z0-9_-]{43}$/.test(secret))fail(400,'本地连接凭据格式不正确，请重新生成。');

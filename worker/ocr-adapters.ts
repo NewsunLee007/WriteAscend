@@ -1,3 +1,4 @@
+import {anthropicRequest} from './chat-provider-adapters';
 import {HttpError} from './errors';
 import {modelProtocol} from '../src/teacher/model-providers';
 type Payload={messages:any[];[key:string]:any};
@@ -5,7 +6,16 @@ type Task='identity'|'topic'|'check';
 export function ocrTask(payload:Payload):Task|null{const system=payload.messages.filter(m=>m.role==='system').map(m=>m.content).filter(c=>typeof c==='string').join('\n');if(system.includes('WA_IDENTITY_OCR_V1.'))return 'identity';if(system.includes('WA_VISION_CHECK_V1.'))return 'check';if(system.includes('你是一个OCR与文本提取引擎。')&&system.includes('完整题目文字稿'))return 'topic';return null;}
 export function prepareProviderRequest(provider:string,model:string,apiUrl:string,payload:Payload){
  const protocol=modelProtocol(provider,model);
- if(protocol==='chat'){const output={...payload};if(provider==='siliconflow')delete output.response_format;if(provider==='qwen'&&/^qwen3\.[5-9]-/.test(model))output.enable_thinking=false;return {url:apiUrl,payload:output,protocol,task:null};}
+ if(protocol==='chat'){
+  const output={...payload};
+  if(provider==='anthropic')return {...anthropicRequest(apiUrl,output),protocol,task:null};
+  if(['siliconflow','doubao','hunyuan','minimax'].includes(provider))delete output.response_format;
+  if(provider==='qwen'&&/^qwen3\.[5-9]-/.test(model))output.enable_thinking=false;
+  if(provider==='deepseek'||provider==='doubao')output.thinking={type:'disabled'};
+  if(provider==='moonshot'){delete output.temperature;if(model==='kimi-k3')output.reasoning_effort='low';else if(model==='kimi-k2.6')output.thinking={type:'disabled'};}
+  if(provider==='minimax'){output.reasoning_split=true;if(model==='MiniMax-M3')output.thinking={type:'disabled'};}
+  return {url:apiUrl,payload:output,protocol,task:null};
+ }
  const task=ocrTask(payload);if(!task)throw new HttpError(400,'专用 OCR 只处理题目文字、纸面身份和图片检查。作文批改请选择通用视觉模型。');
  const images=payload.messages.flatMap(m=>Array.isArray(m.content)?m.content.filter((p:any)=>p.type==='image_url').map((p:any)=>p.image_url.url):[]);if(images.length!==1)throw new HttpError(400,'专用 OCR 每次处理一张图片，请分张识别。');
  if(protocol==='mistral-ocr')return {url:apiUrl,payload:{model,document:{type:'image_url',image_url:images[0]},include_image_base64:false},protocol,task};

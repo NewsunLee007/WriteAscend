@@ -15,7 +15,7 @@ export async function discoverModels(req:Request,env:Env,who:{principal:string;r
  const fallback={source:'builtin',checkedAt:modelCatalogCheckedAt,models:curatedModels(provider.id,purpose),total:provider.models.length};
  if(provider.id==='custom')return json({...fallback,message:'自定义接口的模型能力需人工核对，请填写确切的视觉型号。'});
  let secret=typeof body.apiKey==='string'?body.apiKey.trim():'';
- const endpoint=body.apiUrl?validatePersonalEndpoint(body.apiUrl,env,provider.id==='mistral'?'mistral-ocr':'chat'):provider.apiUrl;
+ const endpoint=body.apiUrl?validatePersonalEndpoint(body.apiUrl,env,provider.wireFormat==='anthropic'?'anthropic':provider.id==='mistral'?'mistral-ocr':'chat'):provider.apiUrl;
  if(!secret&&body.credentialProfileId){const saved=await readPersonalModel(env,who.principal,body.credentialProfileId);if(!saved||saved.provider!==provider.id||new URL(saved.api_url).origin!==new URL(endpoint).origin)throw new HttpError(400,'密钥与供应商不匹配，请重新选择或输入密钥。');secret=await personalModelKey(env,saved);}
  if(!provider.modelsUrl)return json({...fallback,message:'该服务商尚无已核实的账户目录接口，已刷新官方精选。其他已开通的视觉型号可手动填写。'});
  if(!secret)return json({...fallback,message:'已载入内置精选。填写或选择密钥后自动查询账户目录。'});
@@ -24,18 +24,18 @@ export async function discoverModels(req:Request,env:Env,who:{principal:string;r
  // requests stay on the selected endpoint origin; redirects are never followed.
  const url=new URL(endpoint),official=new URL(provider.apiUrl);
  let listUrl=provider.modelsUrl;
- if(url.origin!==official.origin||provider.id==='qwen'&&url.hostname!==official.hostname){listUrl=provider.id==='qwen'&&url.hostname.endsWith('.aliyuncs.com')?url.origin+'/api/v1/models':url.origin+url.pathname.replace(/\/(?:chat\/completions|ocr)$/,'')+'/models';}
+ if(url.origin!==official.origin||provider.id==='qwen'&&url.hostname!==official.hostname){listUrl=provider.id==='qwen'&&url.hostname.endsWith('.aliyuncs.com')?url.origin+'/api/v1/models':url.origin+url.pathname.replace(/\/(?:chat\/completions|ocr|messages)$/,'')+'/models';}
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode([who.principal,provider.id,purpose,listUrl,secret].join('\n')))),b=>b.toString(16).padStart(2,'0')).join('');
  const hit=cached.get(hash);if(hit&&hit.expires>Date.now()&&!body.force)return json(hit.result);
  const ids:string[]=[];let total=0;
  try{
   for(let page=1;page<=2;page++){
    const target=new URL(listUrl);if(provider.id==='qwen'){target.searchParams.set('page_no',String(page));target.searchParams.set('page_size','100');target.searchParams.set('name','qwen');}
-   const response=await fetch(target,{headers:{Authorization:'Bearer '+secret,Accept:'application/json'},redirect:'manual',signal:AbortSignal.timeout(12000)});
+   const response=await fetch(target,{headers:provider.wireFormat==='anthropic'?{'x-api-key':secret,'anthropic-version':'2023-06-01',Accept:'application/json'}:{Authorization:'Bearer '+secret,Accept:'application/json'},redirect:'manual',signal:AbortSignal.timeout(12000)});
    if(!response.ok){await response.body?.cancel();if([401,403].includes(response.status))throw new HttpError(400,'目录鉴权未通过，请核对密钥、地域和账户权限。');if(response.status===429)throw new HttpError(429,'供应商目录刷新过于频繁，请稍后重试。');throw new HttpError(502,'供应商暂未提供可读取的目录，内置精选仍可选择。');}
    const value=await readBounded(response),rows=Array.isArray(value)?value:Array.isArray(value.data)?value.data:Array.isArray(value.output?.models)?value.output.models:Array.isArray(value.models)?value.models:Array.isArray(value.data?.models)?value.data.models:null;
    if(!rows)throw new HttpError(502,'供应商目录格式暂不支持，内置精选仍可选择。');
-   total+=rows.length;for(const row of rows){const id=typeof row==='string'?row:row?.id||row?.model||row?.name;const input=row?.inference_metadata?.request_modality,output=row?.inference_metadata?.response_modality;const noImage=Array.isArray(input)&&!input.includes('Image'),noText=Array.isArray(output)&&!output.includes('Text');if(typeof id==='string'&&id.length<=120&&!id.includes(secret)&&!noImage&&!noText&&(row?.capabilities?.vision!==false||row?.capabilities?.ocr===true||typeof id==='string'&&!!modelRecommendation(provider.id,id)?.specialist))ids.push(id.replace(/^models\//,''));}
+   total+=rows.length;for(const row of rows){const id=typeof row==='string'?row:row?.id||row?.model||row?.name;const input=row?.input_modalities||row?.architecture?.input_modalities||row?.inference_metadata?.request_modality,output=row?.output_modalities||row?.architecture?.output_modalities||row?.inference_metadata?.response_modality;const noImage=(Array.isArray(input)&&!input.some((v:unknown)=>String(v).toLowerCase()==='image'))||row?.capabilities?.image_input?.supported===false,noText=Array.isArray(output)&&!output.some((v:unknown)=>String(v).toLowerCase()==='text');if(typeof id==='string'&&id.length<=120&&!id.includes(secret)&&!noImage&&!noText&&(provider.id==='hunyuan'?(!row?.status||row.status==='online'):!['offline','retired','deleted','disabled'].includes(String(row?.status).toLowerCase()))&&(row?.capabilities?.vision!==false||row?.capabilities?.ocr===true||typeof id==='string'&&!!modelRecommendation(provider.id,id)?.specialist))ids.push(id.replace(/^models\//,''));}
    if(provider.id!=='qwen'||rows.length<100)break;
   }
  }catch(error){if(error instanceof HttpError)throw error;throw new HttpError(502,'供应商目录连接超时或中断，可重试或继续使用内置精选。');}

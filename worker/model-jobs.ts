@@ -1,3 +1,4 @@
+import {providerHeaders,normalizeChatResponse} from './chat-provider-adapters';
 import {providerById,modelProtocol} from '../src/teacher/model-providers';
 import {prepareProviderRequest,normalizeOcrResponse} from './ocr-adapters';
 import {discoverModels} from './model-discovery';
@@ -189,7 +190,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       if(profile.personal?.provider==='local-relay'){relay!.dispatch({id,lease:token,payload:request.payload,timeoutMs:profile.timeoutMs});message.ack();continue;}
       let response:Response;
       try{
-        response=await fetch(request.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+providerKey},body:JSON.stringify(request.payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
+        response=await fetch(request.url,{method:'POST',headers:providerHeaders(profile.personal?.provider||profile.provider||'custom',providerKey),body:JSON.stringify(request.payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
       }catch{
         await finish(env,id,token,'uncertain',409,'模型处理结果暂未确认。请先核对任务结果，再决定是否重新批改。');message.ack();continue;
       }
@@ -206,7 +207,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       }
       let text:string;
       try{
-        text=await boundedText(response,2*1024*1024);
+        text=normalizeChatResponse(profile.personal?.provider||profile.provider||'custom',await boundedText(response,2*1024*1024));
         if(request.task)text=normalizeOcrResponse(text,request.task);
         const secret=providerKey;
         if(text.includes(secret))text=text.split(secret).join('[redacted]');
