@@ -2,14 +2,15 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程和测试部署已经提供下列证据；真实学校账号、真实教学质量与正式上线仍须分别验收，不能由测试总数替代。
 
-当前教师测试版源提交`6da9016`，版本`4a3b7b47-4d69-4592-b087-a73b2905665f`；独立互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。根工程222项、互批9项及该源提交Linux CI通过。本轮界面细节、精选模型目录、密钥复用与专业OCR见[最新验证](verification/model-ui-upgrade.md)，线上部署与回退依据见[发布记录](verification/model-ui-release.json)。报告保留见[展示验证](verification/report-fidelity-checks.json)。
+当前教师测试版源提交`4a46344`，版本`c3518d4d-696f-4445-a117-5e13f16d7c8b`；独立互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。根工程230项、互批9项及该源提交Linux CI通过。本轮Daily快捷批阅三步准备、六类内置标准和教师云端个性化标准库见[最新验证](verification/rubric-workflow.md)，线上迁移、部署及回退见[发布记录](verification/rubric-workflow-release.json)。模型与专业OCR见[模型验证](verification/model-ui-upgrade.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
-| 保留教师大模型一键批阅及原主要功能 | [教师功能基线](scope-and-feature-baseline.md)、[教师流程](verification/teacher-workflow.md)，原提示和评分规则兼容测试；本轮教师浏览器回归通过 | 现任教师以真实班级完整完成一次任务 |
+| 保留教师大模型一键批阅及原主要功能 | [教师功能基线](scope-and-feature-baseline.md)、[教师流程](verification/teacher-workflow.md)，原提示与评分兼容测试，可选词数维度定位已明确修复；本轮合成教师浏览器回归通过 | 现任教师以真实班级完整完成一次任务 |
 | 优化报告且保留主要内容、编辑和导出 | [保留清单](export-preservation.md)、[旧档案](verification/legacy-archive.md)、[展示复核](verification/report-fidelity-checks.json)，六区内容、原词数/分数、题目、旧维度及缺失数据；两类A4逐页检查 | 用户原设备历史备份、真实长作文和实体打印验收 |
 | 专业简洁、手机操作高效 | [设计核对](ui-design-review.md)、[界面证据](verification/ui-review-browser.json)，375–1440px及触摸目标检查 | 学校网络下的iPhone/Android，相机授权、键盘、相册、弱网与打印 |
 | 可配置模型、OCR前置检查及帮助 | [个人模型](verification/personal-models.md)、[实现](personal-models.md)、[精选目录与专用OCR](model-catalog-and-ocr.md)，加密托管、官方申请入口、自动刷新及用途筛选、图片协议检查与模拟模型回归 | 真实服务商密钥/型号、实际手写OCR、评分与反馈质量及费用 |
+| Daily默认班级、按体裁选标准并保存教师个性化修改 | [标准库与统一准备流程](teacher-rubric-library.md)、[合成验收](verification/rubric-workflow.md)，后端持久化、版本隔离、恢复与重试去重；正式任务保留标准快照 | 真实教师跨设备选用、班级模板与课堂词数要求试点 |
 | Daily/WordUp统一身份与学校名册 | [桥接](verification/writing-bridge.md)、[目录](verification/school-directory.md)、[实际接入](verification/daily-activation.md)；[真实管理员目录初始化及54班逐项核对](verification/real-account-access.md)，普通教师越权拒绝 | 真实学生会话、指定教师完整任务交互及云端目录页面操作 |
 | 瑞安市新纪元实验学校、2026-1/2026-2格式 | 真实管理员核验后已备份并初始化瑞安市新纪元实验学校/2026-1：54班2327人；重复提交去重、后续预检零变更 | 后续学期与转班试点 |
 | 个性化手写写作单、扫码关联 | [写作单](verification/writing-sheets.md)、[收作业](verification/writing-collection.md)，版本、页码、重扫、作废、多页及本地待传 | 实际打印/复印、真实手写、混页与拿错纸的手机试点 |
