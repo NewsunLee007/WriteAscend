@@ -1,0 +1,90 @@
+{
+  "checkedAt": "2026-10-17T01:28:58.974Z",
+  "applicationSourceCommit": "39c1f628b89169eb2cae43a83ca37259ce1efaf5",
+  "localPlatform": "darwin",
+  "nodeVersion": "v22.22.3",
+  "freshTrackedCheckout": true,
+  "initialNpmCacheEmpty": true,
+  "otherApplicationDependenciesHidden": true,
+  "installs": [
+    {
+      "application": "teacher",
+      "exitCode": 0,
+      "elapsedSeconds": 42.91
+    },
+    {
+      "application": "peer",
+      "exitCode": 0,
+      "elapsedSeconds": 13.76
+    }
+  ],
+  "checks": [
+    {
+      "application": "teacher",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.41,
+      "log": "ci-clean-teacher-1.log"
+    },
+    {
+      "application": "teacher",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.7,
+      "log": "ci-clean-teacher-2.log"
+    },
+    {
+      "application": "teacher",
+      "command": [
+        "npm",
+        "run",
+        "worker:check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.89,
+      "log": "ci-clean-teacher-3.log"
+    },
+    {
+      "application": "peer",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.31,
+      "log": "ci-clean-peer-1.log"
+    },
+    {
+      "application": "peer",
+      "command": [
+        "npm",
+        "run",
+        "worker:check:staging"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.17,
+      "log": "ci-clean-peer-2.log"
+    }
+  ],
+  "rootTests": 200,
+  "peerTests": 9,
+  "githubLinuxVerified": false,
+  "realSchoolData": false,
+  "cloudDeployed": false,
+  "logSha256": {
+    "ci-clean-install-teacher.log": "f8291e14bb45deed4ba0584e85350498792b40bef0eb3b59cb76de04c62feaf5",
+    "ci-clean-install-peer.log": "7009be8ed2ea887f1392604497b45b6cd24d492f5db56836d8d1a0743335b483",
+    "ci-clean-teacher-1.log": "cfece50b8f625df7d028b960b795cacec7b2538922854083abab3301f0859e83",
+    "ci-clean-teacher-2.log": "900380aebe700f34db00b59eb6f76b98c3d38e4cdff66f1d5d19fe25449cc5c0",
+    "ci-clean-teacher-3.log": "882f5fce6b81c8aa429193715dfb47e603e0e35fc839bf4ae2e78f74ded48e26",
+    "ci-clean-peer-1.log": "d3eae052a64fc3686c453cc9429f6c19b04cd4c4e46a9a49217d9a34561ea9a3",
+    "ci-clean-peer-2.log": "428e550e75370c0d164914b9845c63ed7eb153882cc000e0fcd4ade21dabfb63"
+  }
+}
