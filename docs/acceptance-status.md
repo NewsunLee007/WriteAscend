@@ -2,7 +2,7 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程和测试部署已经提供下列证据；真实学校账号、真实教学质量与正式上线仍须分别验收，不能由测试总数替代。
 
-当前教师测试版源提交`0fc9523`，版本`3424251a-e994-4d93-ad68-2245a237613c`；独立互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。根工程208项及两项目Linux CI通过，具体版本/资源/范围见[最新验证](verification/report-fidelity-checks.json)。
+当前教师测试版源提交`889f21f`，版本`aba81b1e-61cb-40c3-966f-7ef360e30ebb`；独立互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。根工程208项及两项目Linux CI通过，报告保留见[展示验证](verification/report-fidelity-checks.json)，本轮班级选择与实际发布见[最新验证](verification/class-selector.md)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |

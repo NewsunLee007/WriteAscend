@@ -63,5 +63,103 @@
     "teacherBuild": true,
     "teacherWorkerDryRun": true,
     "peerBuildAndWorkerDryRun": true
+  },
+  "staging": {
+    "passed": true,
+    "checkedAt": "2026-10-17T05:31:10.061Z",
+    "gitCommit": "889f21f86fd5f45c24630fed2fd410f24ca4869a",
+    "applications": [
+      {
+        "kind": "teacher",
+        "release": "aba81b1e-61cb-40c3-966f-7ef360e30ebb",
+        "loginConfigured": true,
+        "assets": [
+          {
+            "path": "/",
+            "sha256Matches": true
+          },
+          {
+            "path": "/assets/index-ohANPdks.js",
+            "sha256Matches": true
+          },
+          {
+            "path": "/assets/rolldown-runtime-COiEfhsA.js",
+            "sha256Matches": true
+          },
+          {
+            "path": "/assets/index-BFZwGknL.css",
+            "sha256Matches": true
+          }
+        ],
+        "anonymousProtected": [
+          {
+            "path": "/api/me",
+            "status": 401
+          },
+          {
+            "path": "/api/classes",
+            "status": 401
+          },
+          {
+            "path": "/api/tasks",
+            "status": 401
+          },
+          {
+            "path": "/api/student/reports",
+            "status": 401
+          },
+          {
+            "path": "/api/admin/writing-directory/overview",
+            "status": 401
+          },
+          {
+            "path": "/api/legacy-imports",
+            "status": 401
+          }
+        ],
+        "machineAnonymousStatus": 401
+      },
+      {
+        "kind": "peer",
+        "release": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+        "loginConfigured": true,
+        "assets": [
+          {
+            "path": "/",
+            "sha256Matches": true
+          },
+          {
+            "path": "/assets/index-D50hf-eb.js",
+            "sha256Matches": true
+          },
+          {
+            "path": "/assets/index-CD5FMhBD.css",
+            "sha256Matches": true
+          }
+        ],
+        "anonymousProtected": [
+          {
+            "path": "/api/me",
+            "status": 401
+          },
+          {
+            "path": "/api/rounds",
+            "status": 401
+          }
+        ],
+        "machineAnonymousStatus": 401
+      }
+    ],
+    "authenticatedSchoolUiVerified": false,
+    "realModelCalled": false,
+    "productionDomainChanged": false,
+    "previousTeacherVersion": "3424251a-e994-4d93-ad68-2245a237613c",
+    "backupVerified": true,
+    "newDatabaseMigration": false,
+    "ci": {
+      "runId": 39006432741,
+      "conclusion": "success",
+      "sourceCommit": "889f21f86fd5f45c24630fed2fd410f24ca4869a"
+    }
   }
 }
