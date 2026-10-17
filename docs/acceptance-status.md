@@ -1,17 +1,17 @@
 # 升级验收状态
 
-2026-10-17。整个目标尚未完成。代码、合成流程和测试部署已经提供下列证据；真实学校账号、真实教学质量与正式上线仍须分别验收，不能由测试总数替代。
+2026-10-17。整个目标尚未完成。代码、合成流程、学校身份和正式部署分别提供下列证据；真实教学质量和实体设备仍须独立验收，不能由测试总数替代。
 
-按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`99cc6e2`、Worker版本`74b3df81-649f-4bc6-99cd-c20c8ef3b111`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程233项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`ba89047`、Worker版本`52298aad-7db6-4d6f-97f0-59a3a96ad0fb`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程239项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
 
-测试环境继续独立保留：教师版本`c3518d4d-696f-4445-a117-5e13f16d7c8b`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+测试环境继续独立保留：教师版本`3d4adf1a-a972-4302-8f25-ecfc11154f94`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
 | 保留教师大模型一键批阅及原主要功能 | [教师功能基线](scope-and-feature-baseline.md)、[教师流程](verification/teacher-workflow.md)，原提示与评分兼容测试，可选词数维度定位已明确修复；本轮合成教师浏览器回归通过 | 现任教师以真实班级完整完成一次任务 |
 | 优化报告且保留主要内容、编辑和导出 | [保留清单](export-preservation.md)、[旧档案](verification/legacy-archive.md)、[展示复核](verification/report-fidelity-checks.json)，六区内容、原词数/分数、题目、旧维度及缺失数据；两类A4逐页检查 | 用户原设备历史备份、真实长作文和实体打印验收 |
 | 专业简洁、手机操作高效 | [设计核对](ui-design-review.md)、[界面证据](verification/ui-review-browser.json)，375–1440px及触摸目标检查 | 学校网络下的iPhone/Android，相机授权、键盘、相册、弱网与打印 |
-| 可配置模型、OCR前置检查及帮助 | [个人模型](verification/personal-models.md)、[实现](personal-models.md)、[精选目录与专用OCR](model-catalog-and-ocr.md)，加密托管、官方申请入口、自动刷新及用途筛选、图片协议检查与模拟模型回归 | 真实服务商密钥/型号、实际手写OCR、评分与反馈质量及费用 |
+| 可配置模型、OCR前置检查及帮助 | [个人模型](verification/personal-models.md)、[实现](personal-models.md)、[精选目录与专用OCR](model-catalog-and-ocr.md)，加密托管、官方申请入口、自动刷新及用途筛选、图片协议检查与模拟模型回归；[本地模型](local-models.md)支持电脑出站领取任务及手机发起、自动筛选视觉型号、断网结果恢复 | 真实服务商密钥/型号、实际手写OCR、评分与反馈质量及费用 |
 | Daily默认班级、按体裁选标准并保存教师个性化修改 | [标准库与统一准备流程](teacher-rubric-library.md)、[合成验收](verification/rubric-workflow.md)，后端持久化、版本隔离、恢复与重试去重；正式任务保留标准快照 | 真实教师跨设备选用、班级模板与课堂词数要求试点 |
 | Daily/WordUp统一身份与学校名册 | [桥接](verification/writing-bridge.md)、[目录](verification/school-directory.md)、[实际接入](verification/daily-activation.md)；[真实管理员目录初始化及54班逐项核对](verification/real-account-access.md)，普通教师越权拒绝 | 真实学生会话、指定教师完整任务交互及云端目录页面操作 |
 | 瑞安市新纪元实验学校、2026-1/2026-2格式 | 真实管理员核验后已备份并初始化瑞安市新纪元实验学校/2026-1：54班2327人；重复提交去重、后续预检零变更 | 后续学期与转班试点 |
