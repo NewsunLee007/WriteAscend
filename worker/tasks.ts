@@ -2,7 +2,7 @@ import type {Env} from './index';
 import {HttpError} from './errors';
 import {digest,isObject,sanitizeLegacy} from '../src/report/legacy-import';
 import type {AuthorityClass,TaskTarget,TaskDocument,TaskMember} from '../src/teacher/task-contracts';
-import {wordCountConflict} from '../src/teacher/rubric-library';
+import {wordCountConflict,rubricProblem} from '../src/teacher/rubric-library';
 export type TaskSession={principal:string;grant_id:string;provider:string;subject:string;role:string;classes:AuthorityClass[]};
 type Bridge=(env:Env,path:string,body:Record<string,unknown>)=>Promise<Record<string,any>>;
 type Row={id:string;owner:string;title:string;status:'draft'|'open'|'closed';revision:number;current_version:number;content_hash:string;object_key:string;rubric_hash:string;targets_json:string;activation_request:string|null;member_count:number;created:number;updated:number};
@@ -86,6 +86,62 @@ async function roster(env:Env,session:TaskSession,row:Row,bridge:Bridge){
   members.sort((a,b)=>(a.classId+'\n'+a.subject).localeCompare(b.classId+'\n'+b.subject,'en'));
   return {members,rosterHash:await digest({targets,members})};
 }
+async function reviseStandard(env:Env,session:TaskSession,row:Row,body:any,bridge:Bridge){
+  if(!Number.isSafeInteger(body?.expectedRevision)||body.expectedRevision<1||body.teacherConfirmed!==true||typeof body.reason!=='string'||body.reason.trim().length<5||body.reason.length>500)fail(400,'请核对新标准、说明修订原因，并确认旧报告需按新标准重批。');
+  const targets=JSON.parse(row.targets_json) as TaskTarget[];
+  if(!targets.length)fail(409,'任务班级信息不完整，请先核对学校任务。');
+  async function fresh(){
+    const live=await bridge(env,'introspect',{grantId:session.grant_id});
+    if(!live.active||live.provider!==session.provider||live.subject!==session.subject||live.role!==session.role||!Array.isArray(live.classes))fail(401,'学校账号授权已变化，请重新登录。');
+    const classes=authorized(live.classes,targets.map(c=>c.id));
+    if(classes.some(c=>!c.scopes.includes('writing.grade')))fail(403,'修订本次标准需要本任务全部班级的批阅权限。');
+    return classes;
+  }
+  const classes=await fresh(),original=await readDocument(env,row);
+  const {document}=prepare({assignment:original.document.assignment,rubric:body.rubric,settings:body.settings??original.document.settings,classIds:targets.map(c=>c.id),title:row.title},classes);
+  // A standard revision must not refresh the frozen task roster or its labels.
+  document.targets=original.document.targets;
+  const standardProblem=rubricProblem(document.rubric);if(standardProblem)fail(400,standardProblem);
+  const countConflict=wordCountConflict(document.assignment.topic,document.rubric.wordCount);if(countConflict)fail(400,countConflict+'请先统一字数要求。');
+  const reason=body.reason.trim(),hash=await digest({action:'standard-revision',id:row.id,expectedRevision:body.expectedRevision,document,reason});
+  const previous=await operation(env,session,body,hash);if(previous)return previous;
+  if(row.status!=='open'||row.revision!==body.expectedRevision)fail(409,'任务已改变；请重新读取正在进行的任务后再修订。');
+  const contentHash=await digest({title:row.title,document});if(contentHash===row.content_hash)fail(400,'标准尚未改变，不需要创建新版本。');
+  const publishedSql='SELECT 1 FROM writing_publications WHERE task_id=?';
+  if(await env.DB.prepare(publishedSql).bind(row.id).first())fail(409,'本任务已有学生发布记录，请保留原评价依据，并另建任务使用新标准。');
+  if(await env.DB.prepare('SELECT 1 FROM writing_peer_exports WHERE task_id=?').bind(row.id).first())fail(409,'本任务已经交接互评材料，请保留本轮依据，并另建任务使用新标准。');
+  if(await env.DB.prepare("SELECT 1 FROM grading_runs WHERE task_id=? AND state IN ('queued','running')").bind(row.id).first())fail(409,'本任务仍有后台批阅，请先完成或暂停，再修订标准。');
+  const drafts=(await env.DB.prepare('SELECT d.id,d.revision,d.input_hash,i.manifest_json FROM writing_drafts d JOIN writing_submissions s ON s.id=d.submission_id JOIN writing_draft_inputs i ON i.draft_id=d.id AND i.revision=d.revision WHERE s.task_id=? ORDER BY d.id').bind(row.id).all<{id:string;revision:number;input_hash:string;manifest_json:string}>()).results;
+  const heads=await env.DB.prepare('SELECT COUNT(*) AS n,COALESCE(SUM(d.revision),0) AS revision_sum FROM writing_drafts d JOIN writing_submissions s ON s.id=d.submission_id WHERE s.task_id=?').bind(row.id).first<{n:number;revision_sum:number}>();
+  if(!heads||heads.n!==drafts.length||heads.revision_sum!==drafts.reduce((n,d)=>n+d.revision,0))fail(409,'收取记录正在变化，请刷新任务后重试。');
+  const version=row.current_version+1,revision=row.revision+1,rubricHash=await digest(document.rubric),now=Date.now(),updates=[];
+  for(const d of drafts){
+    const manifest=JSON.parse(d.manifest_json);
+    if(await digest(manifest)!==d.input_hash||manifest.taskId!==row.id||manifest.taskVersion!==row.current_version||manifest.rubricHash!==row.rubric_hash)fail(409,'已收原稿与本次标准版本不一致，请先核对稿次。');
+    const next={...manifest,taskVersion:version,rubricHash};updates.push({id:d.id,revision:d.revision+1,inputHash:await digest(next),manifest:next});
+  }
+  const key='writing-tasks/'+await digest(session.principal)+'/'+row.id+'/'+contentHash+'.json';
+  await env.FILES.put(key,JSON.stringify(document),{httpMetadata:{contentType:'application/json'}});
+  await fresh();
+  const claimId='standard-'+await digest({owner:session.principal,requestId:body.requestId}),claimTarget=JSON.stringify({taskId:row.id,fromVersion:row.current_version,toVersion:version,reason,retainedDrafts:drafts.length,attempt:crypto.randomUUID()});
+  const binds=[claimId,session.principal,claimTarget],claimed="EXISTS(SELECT 1 FROM workspace_audit WHERE id=? AND actor=? AND target=? AND action='writing-standard-revision')";
+  // The per-attempt audit marker prevents a concurrent retry from replaying
+  // mutations after newer photos have arrived. The complete batch is atomic.
+  const statements=[
+    env.DB.prepare(`INSERT OR IGNORE INTO workspace_audit SELECT ?,?,'writing-standard-revision',?,? FROM writing_tasks WHERE id=? AND owner=? AND revision=? AND status='open' AND NOT EXISTS(SELECT 1 FROM grading_runs WHERE task_id=? AND state IN ('queued','running')) AND NOT EXISTS(${publishedSql}) AND NOT EXISTS(SELECT 1 FROM writing_peer_exports WHERE task_id=?) AND (SELECT COUNT(*) FROM writing_drafts d JOIN writing_submissions s ON s.id=d.submission_id WHERE s.task_id=?)=? AND (SELECT COALESCE(SUM(d.revision),0) FROM writing_drafts d JOIN writing_submissions s ON s.id=d.submission_id WHERE s.task_id=?)=?`).bind(claimId,session.principal,claimTarget,new Date(now).toISOString(),row.id,session.principal,row.revision,row.id,row.id,row.id,row.id,heads.n,row.id,heads.revision_sum),
+    env.DB.prepare(`INSERT OR IGNORE INTO writing_task_operations SELECT ?,?,?,?,?,? WHERE ${claimed}`).bind(session.principal,body.requestId,hash,row.id,revision,now,...binds),
+    env.DB.prepare(`UPDATE writing_tasks SET revision=?,current_version=?,content_hash=?,object_key=?,rubric_hash=?,updated=? WHERE id=? AND revision=? AND ${claimed}`).bind(revision,version,contentHash,key,rubricHash,now,row.id,row.revision,...binds),
+    env.DB.prepare(`INSERT OR IGNORE INTO rubric_versions SELECT id,?,?,?, ?,? FROM writing_tasks WHERE id=? AND revision=? AND ${claimed}`).bind(version,contentHash,rubricHash,key,now,row.id,revision,...binds),
+    env.DB.prepare(`UPDATE task_members SET task_version=? WHERE task_id=? AND ${claimed}`).bind(version,row.id,...binds),
+    env.DB.prepare(`UPDATE writing_sheet_sets SET status='revoked' WHERE task_id=? AND status='active' AND ${claimed}`).bind(row.id,...binds),
+  ];
+  for(let offset=0;offset<updates.length;offset+=100){const chunk=JSON.stringify(updates.slice(offset,offset+100));statements.push(
+    env.DB.prepare(`INSERT OR IGNORE INTO writing_draft_inputs SELECT json_extract(value,'$.id'),json_extract(value,'$.revision'),json_extract(value,'$.inputHash'),json_extract(value,'$.manifest'),? FROM json_each(?) WHERE ${claimed}`).bind(now,chunk,...binds),
+    env.DB.prepare(`UPDATE writing_drafts SET task_version=?,rubric_hash=?,revision=(SELECT json_extract(value,'$.revision') FROM json_each(?) WHERE json_extract(value,'$.id')=writing_drafts.id),input_hash=(SELECT json_extract(value,'$.inputHash') FROM json_each(?) WHERE json_extract(value,'$.id')=writing_drafts.id),updated=? WHERE id IN(SELECT json_extract(value,'$.id') FROM json_each(?)) AND ${claimed}`).bind(version,rubricHash,chunk,chunk,now,chunk,...binds),
+  );}
+  await env.DB.batch(statements);
+  const accepted=await operation(env,session,body,hash);if(!accepted)fail(409,'任务、收取或发布状态已变化，请重新读取后修订。');return accepted;
+}
 export async function handleTasks(req:Request,env:Env,session:TaskSession,bridge:Bridge,readInput:(req:Request,max?:number)=>Promise<unknown>):Promise<Response|null>{
   const url=new URL(req.url),path=url.pathname;if(!/^\/api\/tasks(?:\/|$)/.test(path))return null;
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
@@ -95,7 +151,7 @@ export async function handleTasks(req:Request,env:Env,session:TaskSession,bridge
     const rows=await env.DB.prepare('SELECT * FROM writing_tasks WHERE owner=? AND (updated<? OR (updated=? AND id<?)) ORDER BY updated DESC,id DESC LIMIT 26').bind(session.principal,before,before,id).all<Row>();
     const items=rows.results.slice(0,25),last=items.at(-1);return json({tasks:items.map(summary),next:rows.results.length>25&&last?btoa(JSON.stringify([last.updated,last.id])):null});
   }
-  const match=path.match(/^\/api\/tasks\/([a-f0-9-]{36})(?:\/(preview|activate|members|status|versions))?$/);
+  const match=path.match(/^\/api\/tasks\/([a-f0-9-]{36})(?:\/(preview|activate|members|status|versions|standard))?$/);
   if(path==='/api/tasks'&&req.method==='POST'||match&&!match[2]&&req.method==='PUT'){
     const body=await readInput(req,1024*1024) as any,{title,document}=prepare(body,session.classes);
     if(match&&(!Number.isInteger(body.expectedRevision)||body.expectedRevision<1))fail(400,'请提供当前任务版本。');
@@ -120,6 +176,7 @@ export async function handleTasks(req:Request,env:Env,session:TaskSession,bridge
   }
   if(!match)fail(404,'任务接口不存在。');
   const row=await ownerRow(env,session,match[1]);
+  if(match[2]==='standard'&&req.method==='POST')return reviseStandard(env,session,row,await readInput(req,1024*1024),bridge);
   if(!match[2]&&req.method==='GET'){
     const version=Number(url.searchParams.get('version')||row.current_version);if(!Number.isSafeInteger(version)||version<1)fail(400,'任务标准版本不正确。');return json(await readDocument(env,row,version));
   }
