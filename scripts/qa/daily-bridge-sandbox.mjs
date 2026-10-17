@@ -82,6 +82,10 @@ const server=http.createServer(async(req,res)=>{
   if(url.pathname==='/api/integrations/writeascend/report-events'&&dropNextFeedbackResponse){dropNextFeedbackResponse=false;await bridge.handle(req,{writeHead(){},end(){res.destroy();}},url);return;}
   if(url.pathname==='/sandbox/metrics'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({modelCalls,credentialCalls,heldWorkChecks,workPermits:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_work_permits'").get()?db.prepare('SELECT COUNT(*) n FROM writing_work_permits').get().n:0,interactiveGrants:db.prepare('SELECT COUNT(*) n FROM writing_bridge_grants WHERE expires>? AND revoked=0').get(Date.now()).n,feedbackEvents:db.prepare("SELECT 1 FROM sqlite_schema WHERE name='writing_feedback_events'").get()?db.prepare('SELECT COUNT(*) n FROM writing_feedback_events WHERE (? IS NULL OR draft_id=?)').get(url.searchParams.get('draftId'),url.searchParams.get('draftId')).n:0}));return;}
   if(['/sandbox/use-other','/sandbox/use-admin','/sandbox/use-teacher','/sandbox/use-student0','/sandbox/use-student1','/sandbox/use-guest'].includes(url.pathname)){const mode=url.pathname.slice('/sandbox/use-'.length);res.setHeader('Set-Cookie','wordup_session=synthetic-browser-'+mode+'; Path=/; HttpOnly; SameSite=Lax');res.writeHead(200).end('Synthetic account switched.');return;}
+  if(url.pathname==='/v1/models'&&req.method==='GET'){
+    if(!req.headers.authorization?.startsWith('Bearer synthetic-')){res.writeHead(401).end();return;}
+    res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({data:[{id:'qwen3.8-flash'},{id:'qwen3.8-max'},{id:'qwen3.5-ocr'},{id:'qwen-vl-ocr-latest'},{id:'qwen-image'},{id:'qwen-tts'},{id:'unreviewed-text-model'}]}));return;
+  }
   if(url.pathname==='/v1/chat/completions'&&req.method==='POST'){
     if(!['Bearer synthetic-local-model-key','Bearer synthetic-personal-model-key-A','Bearer synthetic-personal-model-key-B'].includes(req.headers.authorization)){res.writeHead(401).end();return;}
     let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>20*1024*1024){res.writeHead(413).end();return;}}

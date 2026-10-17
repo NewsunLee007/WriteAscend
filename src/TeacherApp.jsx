@@ -4098,7 +4098,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                 </h2>
                                 <p className="text-slate-500 text-sm">当前班级：<span className="font-semibold text-slate-700">{cls}</span> · 已批改 <span className="font-semibold text-slate-700">{gradedCount}</span> 份</p>
                             </div>
-                            <div className="flex flex-wrap gap-2 no-print">
+                            <div className="wa-analysis-tools flex flex-wrap gap-2 no-print">
                                 <button onClick={() => setShowStudentMgmt(true)} className="btn-pure px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2"><Settings size={14}/> 学生管理</button>
                                 <button onClick={() => setShowStudentProfiles(true)} className="btn-pure px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2"><Settings size={14}/> 学生档案</button>
                                 <button onClick={openSaveDialogWithDefaultName} disabled={!canExport} className="btn-pure px-4 py-2 rounded-full text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed">保存结果</button>
@@ -4119,7 +4119,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                     </div>
                                     <div className="space-y-3">
                                         <div className="text-xs font-bold text-slate-500 ml-1">分析侧重</div>
-                                        <select value={analysisConfig.focus} onChange={e => setAnalysisConfig({ ...analysisConfig, focus: e.target.value })} className="w-full p-3 bg-white/70 input-breath rounded-2xl text-sm font-bold outline-none text-slate-700 cursor-pointer">
+                                        <select aria-label="分析侧重" value={analysisConfig.focus} onChange={e => setAnalysisConfig({ ...analysisConfig, focus: e.target.value })} className="w-full p-3 bg-white/70 input-breath rounded-2xl text-sm font-bold outline-none text-slate-700 cursor-pointer">
                                             <option>全面分析</option><option>侧重语法纠错</option><option>侧重内容创意</option><option>侧重篇章结构</option><option>自定义</option>
                                         </select>
                                             {analysisConfig.focus === '自定义' && (
@@ -4131,7 +4131,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                                 />
                                             )}
                                         <div className="text-xs font-bold text-slate-500 ml-1">表达语气</div>
-                                        <select value={analysisConfig.tone} onChange={e => setAnalysisConfig({ ...analysisConfig, tone: e.target.value })} className="w-full p-3 bg-white/70 input-breath rounded-2xl text-sm font-bold outline-none text-slate-700 cursor-pointer">
+                                        <select aria-label="分析表达语气" value={analysisConfig.tone} onChange={e => setAnalysisConfig({ ...analysisConfig, tone: e.target.value })} className="w-full p-3 bg-white/70 input-breath rounded-2xl text-sm font-bold outline-none text-slate-700 cursor-pointer">
                                             <option>专业客观</option><option>热情鼓励</option><option>严肃严谨</option><option>自定义</option>
                                         </select>
                                             {analysisConfig.tone === '自定义' && (
@@ -4157,10 +4157,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                             <div className="text-slate-800 font-bold">分析报告列表</div>
                                             <div className="text-xs text-slate-500 mt-1">点击“查看”会以浮窗打开报告内容。</div>
                                         </div>
-                                        <button onClick={openAnalysisGenerateDialog} disabled={isAnalyzingClass} className="btn-primary active px-6 py-3 rounded-2xl text-sm font-bold shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            {isAnalyzingClass ? <Refresh className="spin" size={16}/> : <PieChart size={16} />}
-                                            {isAnalyzingClass ? "AI 正在分析..." : "生成新报告"}
-                                        </button>
+
                                     </div>
 
                                     <div className="space-y-3">
@@ -4183,8 +4180,8 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                                         {analysisList.length === 0 && (
                                             <div className="text-center text-slate-400 py-14">
                                                 <div className="text-sm font-bold mb-2">暂无分析报告</div>
-                                                <div className="text-xs">点击右上角“生成新报告”。</div>
-                                                {gradedCount === 0 && <div className="mt-3 text-xs text-rose-500 font-bold">当前还没有可用于统计的批改结果</div>}
+                                                <div className="text-xs">在上方设置分析侧重后生成报告。</div>
+                                                {gradedCount === 0 && <div className="mt-3 text-xs text-slate-500">本次暂无批改结果，也可选择已保存的批次生成分析</div>}
                                             </div>
                                         )}
                                     </div>

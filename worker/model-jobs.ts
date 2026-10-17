@@ -1,3 +1,6 @@
+import {providerById,modelProtocol} from '../src/teacher/model-providers';
+import {prepareProviderRequest,normalizeOcrResponse} from './ocr-adapters';
+import {discoverModels} from './model-discovery';
 import {handlePersonalModels,personalCatalog,readPersonalModel,personalAvailable,personalModelKey,type PersonalModel} from './personal-models';
 import type {MessageBatch,Queue} from '@cloudflare/workers-types';
 import {issueWork,inspectWork,assertWorkNotRevoked,runWorkScope,stableWorkId,type WorkBridge} from './work-permits';
@@ -21,7 +24,7 @@ export interface ModelBindings {
   MODEL_PENDING_LIMIT?:string;
   [key:`MODEL_KEY_${string}`]:string|undefined;
 }
-type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string;tokenParameter:'max_tokens'|'max_completion_tokens';sendTemperature:boolean;personal?:PersonalModel};
+type Profile={id:string;label:string;apiUrl:string;model:string;keyBinding:string;maxTokens:number;timeoutMs:number;supportsImages:boolean;purposes:('grading'|'ocr')[];helpUrl?:string;tokenParameter:'max_tokens'|'max_completion_tokens';sendTemperature:boolean;provider?:string;personal?:PersonalModel};
 type Principal={principal:string;grant_id:string;role:string;classes?:Array<{id:string;scopes:string[]}>};
 type Job={id:string;work_permit_id:string|null;work_expires:number|null;owner:string;grant_id:string;profile_id:string;request_hash:string;state:string;request_key:string;result_key:string|null;attempts:number;lease_token:string|null;lease_until:number;error_status:number|null;error_message:string|null;created:number;updated:number};
 type VerifyGrant=(env:Env,path:string,body:unknown)=>Promise<Record<string,any>>;
@@ -50,13 +53,14 @@ function profiles(env:Env):Profile[]{
     if(!Array.isArray(purposes)||!purposes.length||purposes.length>2||new Set(purposes).size!==purposes.length||purposes.some((v:unknown)=>!['grading','ocr'].includes(v as string)))fail(503,'模型用途配置不正确，请联系管理员。');
     let helpUrl:string|undefined;
     if(p.helpUrl!==undefined){try{const help=new URL(p.helpUrl);if(help.protocol!=='https:'||help.username||help.password||help.search||help.hash)throw Error();helpUrl=help.href;}catch{fail(503,'模型帮助链接配置不正确，请联系管理员。');}}
-    const tokenParameter=p.tokenParameter||'max_tokens',sendTemperature=p.sendTemperature??true;if(!['max_tokens','max_completion_tokens'].includes(tokenParameter)||typeof sendTemperature!=='boolean')fail(503,'云端模型协议参数不正确，请联系管理员。');
-    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs,supportsImages:p.supportsImages!==false,purposes,helpUrl,tokenParameter,sendTemperature};
+    const provider=p.provider?providerById(p.provider):undefined;if(p.provider&&!provider)fail(503,'云端模型服务商配置不正确，请联系管理员。');if(provider&&modelProtocol(provider.id,p.model)!=='chat'&&(purposes.includes('grading')||p.supportsImages===false))fail(503,'专用 OCR 模型不能配置为作文批阅。');
+    const tokenParameter=p.tokenParameter||provider?.tokenParameter||'max_tokens',sendTemperature=p.sendTemperature??provider?.sendTemperature??true;if(!['max_tokens','max_completion_tokens'].includes(tokenParameter)||typeof sendTemperature!=='boolean')fail(503,'云端模型协议参数不正确，请联系管理员。');
+    return {id:p.id,label:p.label,apiUrl:url.href,model:p.model,keyBinding,maxTokens,timeoutMs,supportsImages:p.supportsImages!==false,purposes,helpUrl,tokenParameter,sendTemperature,...(provider?{provider:provider.id}:{})};
   });
 }
 function keyFor(env:Env,p:Profile){return p.keyBinding==='MODEL_API_KEY'?env.MODEL_API_KEY:env[p.keyBinding as `MODEL_KEY_${string}`];}
-export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model,supportsImages:p.supportsImages,purposes:p.purposes,sendTemperature:p.sendTemperature,...(p.helpUrl?{helpUrl:p.helpUrl}:{})}));}
-const revision=(p:Profile)=>p.personal?Promise.resolve(p.personal.execution_revision):sha(JSON.stringify({apiUrl:p.apiUrl,model:p.model,keyBinding:p.keyBinding,maxTokens:p.maxTokens,timeoutMs:p.timeoutMs,...(p.tokenParameter!=='max_tokens'||!p.sendTemperature?{tokenParameter:p.tokenParameter,sendTemperature:p.sendTemperature}:{})}));
+export function modelCatalog(env:Env){return profiles(env).filter(p=>!!keyFor(env,p)).map(p=>({id:p.id,label:p.label,model:p.model,supportsImages:p.supportsImages,purposes:p.purposes,sendTemperature:p.sendTemperature,ocrSpecialist:modelProtocol(p.provider||'custom',p.model)!=='chat',...(p.helpUrl?{helpUrl:p.helpUrl}:{})}));}
+const revision=(p:Profile)=>p.personal?Promise.resolve(p.personal.execution_revision):sha(JSON.stringify({apiUrl:p.apiUrl,model:p.model,...(p.provider?{provider:p.provider}:{}),keyBinding:p.keyBinding,maxTokens:p.maxTokens,timeoutMs:p.timeoutMs,...(p.tokenParameter!=='max_tokens'||!p.sendTemperature?{tokenParameter:p.tokenParameter,sendTemperature:p.sendTemperature}:{})}));
 async function resolveProfile(env:Env,owner:string,id:string):Promise<Profile|undefined>{
  if(/^personal_[a-f0-9]{32}$/.test(id)){const row=await readPersonalModel(env,owner,id);return row?{id:row.id,label:row.label,apiUrl:row.api_url,model:row.model,keyBinding:'personal',maxTokens:row.max_tokens,timeoutMs:row.timeout_ms,supportsImages:!!row.supports_images,purposes:JSON.parse(row.purposes_json),tokenParameter:row.token_parameter,sendTemperature:!!row.send_temperature,personal:row}:undefined;}
  return profiles(env).find(p=>p.id===id);
@@ -111,6 +115,7 @@ export async function handleModelApi(req:Request,env:Env,session:Principal,readI
   const path=new URL(req.url).pathname;
   if(!path.startsWith('/api/model/'))return null;
   if(!['teacher','admin'].includes(session.role))fail(403,'此操作需要教师账号。');
+  const discovery=await discoverModels(req,env,session,readInput);if(discovery)return discovery;
   const settings=await handlePersonalModels(req,env,session,readInput);if(settings)return settings;
   if(path==='/api/model/profiles'&&req.method==='GET')return json({profiles:await catalogFor(env,session.principal)});
   if(path==='/api/model/jobs'&&req.method==='POST'){
@@ -171,6 +176,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       if(await sha(JSON.stringify({payload:validated,profileRevision:envelope.profileRevision}))!==row.request_hash)fail(409,'已保存的模型请求内容校验未通过，请联系管理员核对存档。');
       const hydrated=await hydrateAssetImages(env,row.owner,validated),{temperature,...messages}=hydrated;
       const payload={...messages,...(profile.sendTemperature?{temperature}:{}),model:profile.model,[profile.tokenParameter]:profile.maxTokens,stream:false};
+      const request=prepareProviderRequest(profile.personal?.provider||profile.provider||'custom',profile.model,profile.apiUrl,payload);
       const linked=await env.DB.prepare('SELECT g.* FROM model_job_bindings b JOIN grading_runs g ON g.id=b.run_id WHERE b.job_id=? AND b.owner=?').bind(id,row.owner).first<GradingRun>();
       const authority=linked?.work_permit_id?await inspectWork(env,row.owner,linked.work_permit_id,runWorkScope(linked),verify):row.work_permit_id?await inspectWork(env,row.owner,row.work_permit_id,{type:'model-job',jobId:row.id,requestHash:row.request_hash,profileId:row.profile_id,profileRevision:envelope.profileRevision},verify):await verify(env,'introspect',{grantId:row.grant_id});
       if(authority.active!==true||authority.provider+':'+authority.subject!==row.owner||!['teacher','admin'].includes(authority.role)||!authority.scopes?.includes('writing.personal'))fail(403,'账号授权已变化，已停止这次批改。');
@@ -183,7 +189,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       if(!sending.meta.changes){if(profile.personal){const value=await readPersonalModel(env,row.owner,profile.id);if(!value||value.execution_revision!==envelope.profileRevision)fail(409,'模型配置已更改或移除，请核对后重新批阅。');}message.retry({delaySeconds:15});continue;}
       let response:Response;
       try{
-        response=await fetch(profile.apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+providerKey},body:JSON.stringify(payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
+        response=await fetch(request.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+providerKey},body:JSON.stringify(request.payload),redirect:'manual',signal:AbortSignal.timeout(profile.timeoutMs)});
       }catch{
         await finish(env,id,token,'uncertain',409,'模型处理结果暂未确认。请先核对任务结果，再决定是否重新批改。');message.ack();continue;
       }
@@ -201,6 +207,7 @@ export async function consumeModelJobs(batch:MessageBatch<ModelJobMessage>,env:E
       let text:string;
       try{
         text=await boundedText(response,2*1024*1024);
+        if(request.task)text=normalizeOcrResponse(text,request.task);
         const secret=providerKey;
         if(text.includes(secret))text=text.split(secret).join('[redacted]');
         try{JSON.parse(text);}catch{
