@@ -2,7 +2,9 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程和测试部署已经提供下列证据；真实学校账号、真实教学质量与正式上线仍须分别验收，不能由测试总数替代。
 
-当前教师测试版源提交`4a46344`，版本`c3518d4d-696f-4445-a117-5e13f16d7c8b`；独立互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。根工程230项、互批9项及该源提交Linux CI通过。本轮Daily快捷批阅三步准备、六类内置标准和教师云端个性化标准库见[最新验证](verification/rubric-workflow.md)，线上迁移、部署及回退见[发布记录](verification/rubric-workflow-release.json)。模型与专业OCR见[模型验证](verification/model-ui-upgrade.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`99cc6e2`、Worker版本`74b3df81-649f-4bc6-99cd-c20c8ef3b111`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程233项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+
+测试环境继续独立保留：教师版本`c3518d4d-696f-4445-a117-5e13f16d7c8b`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
@@ -19,7 +21,7 @@
 | Daily反馈打通 | [摘要同步](verification/daily-feedback.md)，独立outbox、去重、版本拒旧、失败重试与撤回 | 真实发布事件在Daily个人入口正确显示且不覆盖旧数据 |
 | 学生互批为独立项目、依据科学框架并关联教师标准 | [研究](peer-review-research.md)、[轮次](verification/peer-rounds.md)、独立包/Worker/D1/Cookie；提示与原rubric版本相连 | 真实课堂提示理解、评阅质量、匿名分配与教师异常处理试点；原创学生量表不声称已完成本校效度验证 |
 | 同伴反馈、作者回应和自主手写二稿 | [同伴二稿](verification/peer-feedback-revisions.md)、[自主修订](verification/student-revisions.md)，反馈/稿次绑定、教师接收与后续原批阅 | 真实学生完成评阅、回应、手写修订、教师核对及新版本反馈 |
-| GitHub代码、Cloudflare迁移、可回滚上线 | 草稿PR、独立Linux CI、[实际测试发布/恢复](verification/cloudflare-staging.md)及后续版本记录，D1/R2与指定版本演练 | 真实学校试点全部通过后，准备正式域名/回调配置、最新数据备份与核对，再实施正式切换和恢复验证 |
+| GitHub代码、Cloudflare迁移、可回滚上线 | 草稿PR、独立Linux CI、[实际测试发布/恢复](verification/cloudflare-staging.md)、[正式域名切换](verification/production-domain.md)，D1/R2备份与指定版本演练 | 已按用户明确授权完成正式域名、回调和独立资源切换；后续真实课堂及有业务数据时的完整恢复试点 |
 
 ## 下一项真实验收
 
@@ -27,6 +29,6 @@
 
 用户已指定两账号归并、首批教师班级和发布权限，备份副本演练及实际账号/任教授权检查通过，见[首批账号核对](verification/pilot-account.md)。该教师登录及两班权限已核验，接下来依次完成写作单与手机收取、真实模型批阅和发布，由学生验证本人报告、独立互批及手写二稿。模型密钥只在网页设置输入，真实模型、纸张/设备和课堂结果分别留证，存在问题先修复再扩大班级范围。
 
-正式域名尚未切换。前述真实验收缺失时，不以修改DNS或合并草稿PR来宣称目标完成。原代码、旧浏览器数据与独立备份继续保留。此清单不代表之后无需修复试点发现的问题。
+正式域名已按用户明确授权于2026-10-17切换至新版，Daily正式回调生效，DNS及其他域名路由保持原样。原代码、旧浏览器数据与私有备份继续保留；本次正式部署完成不代表整个教学目标、真实模型质量和实体设备验收全部完成，草稿PR尚未合并。
 
 教师端已按工作台、任务、快捷批阅、档案、学情、班级、模型设置重新组织，任务内分阶段执行，见[新版界面验证](verification/workspace-redesign.md)。
