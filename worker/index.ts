@@ -15,6 +15,7 @@ import {handleGrading,advanceGradingRun,advanceRunForModelJob,recoverGradingRuns
 
 export interface Env extends ModelBindings {
   DB: D1Database; FILES: R2Bucket; ASSETS: Fetcher;
+  VERSION?:{id:string;tag?:string;timestamp?:string};
   FEEDBACK_EVENTS?: Queue<{eventId:string}>;
   PUBLIC_ORIGIN: string; DAILY_ORIGIN: string; BRIDGE_SERVICE_TOKEN?: string;
   PEER_ORIGIN?: string; PEER_EXCHANGE_TOKEN?: string; PEER_SERVICE?:Fetcher;
@@ -78,7 +79,7 @@ export default {
         headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
         return new Response(response.body as any,{status:response.status,headers});
       }
-      if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN});
+      if(path==='/api/health'&&req.method==='GET')return json({ok:true,service:'writeascend',version:2,cloud:true,loginConfigured:!!env.BRIDGE_SERVICE_TOKEN,release:env.VERSION?{id:env.VERSION.id,tag:env.VERSION.tag||null,timestamp:env.VERSION.timestamp||null}:null});
       const exchange=await handlePeerExchange(req,env,input);if(exchange)return exchange;
       if(path==='/api/auth/start'&&req.method==='GET'){
         if(!env.BRIDGE_SERVICE_TOKEN)throw new HttpError(503,'统一登录正在接入，请稍后重试。');

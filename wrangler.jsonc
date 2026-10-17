@@ -8,9 +8,7 @@
     "directory": "dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": [
-      "/api/*"
-    ]
+    "run_worker_first": true
   },
   "observability": {
     "enabled": true
@@ -68,6 +66,9 @@
         "crons": [
           "* * * * *"
         ]
+      },
+      "version_metadata": {
+        "binding": "VERSION"
       }
     },
     "staging": {
@@ -76,7 +77,9 @@
       "preview_urls": false,
       "vars": {
         "PUBLIC_ORIGIN": "https://writeascend-staging.317792050.workers.dev",
-        "DAILY_ORIGIN": "https://daily.newsunenglish.com"
+        "DAILY_ORIGIN": "https://daily.newsunenglish.com",
+        "PEER_ORIGIN": "https://newsun-writing-peer-staging.317792050.workers.dev",
+        "MODEL_VAULT_KEY_ID": "staging-personal-v1"
       },
       "d1_databases": [
         {
@@ -124,7 +127,17 @@
         "crons": [
           "* * * * *"
         ]
+      },
+      "services": [
+        {
+          "binding": "PEER_SERVICE",
+          "service": "newsun-writing-peer-staging"
+        }
+      ],
+      "version_metadata": {
+        "binding": "VERSION"
       }
     }
-  }
+  },
+  "account_id": "41c0024342aae8d7b6a8b67c7def1d3e"
 }

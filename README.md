@@ -8,6 +8,7 @@
 
 运行 `npm install` 后使用 `npm run dev` 在 `http://127.0.0.1:5186/` 预览。默认快速批改与右上角“完整工作台”共用原评分、模型调用、结果、档案和导出逻辑。`npm test` 验证评分逻辑与历史兼容，`npm run peer:test` 与 `npm run peer:check` 单独检查互批核心，`npm run build` 验证生产构建。浏览器回归脚本和已验证范围见 [教师流程验证](docs/verification/teacher-workflow.md)。
 
+- [Cloudflare 测试发布与回退](docs/staging-release.md)
 - [第一阶段审计结论](docs/phase-1-audit.md)
 - [具体改造规格](docs/implementation-spec.md)
 - [批改报告保留与补齐清单](docs/export-preservation.md)

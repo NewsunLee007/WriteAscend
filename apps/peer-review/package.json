@@ -10,7 +10,8 @@
     "worker:check": "npm run build && tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env development --dry-run",
     "worker:dev": "wrangler dev --env development --port 8793 --local",
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit -p tsconfig.json && vite build"
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "worker:check:staging": "npm run build && tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env staging --dry-run"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
