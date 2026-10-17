@@ -11,6 +11,7 @@ import {createWorkspaceBackup,prepareWorkspaceBackup,persistWorkspaceRestore} fr
 import {TeacherTasksPanel} from './teacher/TeacherTasksPanel';
 import {taskClasses,uniqueStudent} from './teacher/task-roster';
 const SchoolDirectoryPanel=React.lazy(()=>import('./teacher/SchoolDirectoryPanel'));
+const LegacyArchivePanel=React.lazy(()=>import('./teacher/LegacyArchivePanel'));
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INITIAL_RUBRIC, GRADE_LEVELS, TENSES, STRICTNESS_LEVELS, DIFFICULTY_LEVELS, GRADE_DIFFICULTY_TABLE, resolveGradeDifficultyProfile, clampRatio, resolveEffectiveDifficultyProfile, tokenizeEnglishWords, splitEnglishSentences, countSyllables, computeFleschKincaidGradeLevel, computeEnglishDifficultyStats, collectEnglishFieldsForDifficultyCheck, validateDifficultyForGrade, SYSTEM_PROMPT_TEMPLATE, OPTIMIZED_REPAIR_PROMPT_TEMPLATE, clampNumber, roundToHalf, sumItemMax, redistributeItemScoresToTotal, normalizeHighlights, normalizeErrorsForRubric, normalizeForWordCount, countEnglishWords, countEnglishWordsForScoring, normalizeForSimilarity, diceSimilarity, isOptimizedTooSimilarToReference, parseWordCountRequirement, clampStrictnessLevel, strictnessLabelFromLevel, strictnessLevelFromLabel, strictnessFactorFromLevel, strictnessFactor, strictnessScoreShift, buildScoreAnchorText, classifyErrorWeight, estimateParagraphCount, countConnectors, pickRubricLabels, addPointsToBreakdown, subtractPointsFromBreakdown, calibrateResultScoresAgainstEvidence, normalizeBreakdownAgainstRubric, didTeacherEditScores, normalizeTeacherEditedScoresAgainstRubric, RUBRIC_PARSE_PROMPT_SYSTEM, RUBRIC_DESIGN_PROMPT_SYSTEM, EXTRACT_PROMPT_TEXT_SYSTEM, ANALYZE_TOPIC_TEXT_SYSTEM } from "./report/legacy-core.js";
 
@@ -184,6 +185,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
             const cloud = useTeacherCloud();
             const teacherStorage = cloud.storage;
             const [pendingWorkspaceImport,setPendingWorkspaceImport]=useState(null);
+            const [showLegacyArchive,setShowLegacyArchive]=useState(false);
             const [workspaceImportError,setWorkspaceImportError]=useState('');
             const [workspaceImportBusy,setWorkspaceImportBusy]=useState(false);
             const workspaceImportLive=useRef(true);
@@ -1586,7 +1588,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                 const d = item.data || {};
                 setSourceTask(d.sourceTask || null);
                 if (d.assignment) setAssignment(d.assignment);
-                if (item.cloud && d.rubric) {
+                if ((item.cloud || item.legacyOriginal) && d.rubric) {
                     setRubric(JSON.parse(JSON.stringify(d.rubric)));
                 } else if (d.rubric) {
                     const loaded = d.rubric;
@@ -4602,6 +4604,7 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             <hr className="border-slate-100"/>
                             <div className="space-y-3">
                                 <h3 className="font-bold text-slate-700 text-sm">数据管理</h3>
+                                {cloud.mode==='cloud'&&<button disabled={isBatchProcessing||isAnalyzingClass||cloud.status!=='ready'} className="btn-pure px-4 py-2 rounded-xl text-sm" onClick={()=>{setShowConfig(false);setShowLegacyArchive(true);}}>旧版批改档案</button>}
                                 <p className="text-xs leading-6 text-slate-500">备份包含当前设置、作文、学生档案及四类历史记录，不含模型密钥。还原前会先预览，确认后替换备份中包含的数据。</p>
                                 {workspaceImportError&&!pendingWorkspaceImport&&<p role="alert" className="text-sm text-red-600">{workspaceImportError}</p>}
                                 <div className="flex gap-3">
@@ -4614,6 +4617,13 @@ import { estimatePageCount, indentParagraphs, getEffectivePdfConfigForPages, INI
                             </div>
                         </div>
                     </Modal>
+
+                    {showLegacyArchive&&cloud.identity&&<React.Suspense fallback={<div role="status" className="cloud-snapshot-overlay">正在打开旧版档案…</div>}><LegacyArchivePanel key={cloud.identity.workspaceId} workspace={cloud.identity.workspaceId} onExpired={cloud.expired} onClose={()=>{setShowLegacyArchive(false);setShowConfig(true);}} onLoad={record=>{
+                        if(isBatchProcessing||isAnalyzingClass)return alert('请先完成或暂停当前批改与分析。');
+                        if(files.length&&!window.confirm('工作台将切换到这份旧报告的独立副本。请先保存当前批次；原云端档案会保留。是否继续？'))return;
+                        applySavedGradingSnapshot({id:createId(),name:'旧版报告副本',legacyOriginal:true,savedAt:new Date().toISOString(),data:{assignment:record.assignment,rubric:record.rubric,pdfConfig:record.pdfConfig,sourceTask:null,files:[{id:createId(),name:(record.result.student_name||'旧作文')+'.json',index:1,status:'success',result:record.result}]}});
+                        setStep(2);setMaxStep(3);setShowLegacyArchive(false);setShowConfig(false);
+                    }}/></React.Suspense>}
 
                     <Modal isOpen={!!pendingWorkspaceImport} onClose={()=>{if(!workspaceImportBusy){setPendingWorkspaceImport(null);setWorkspaceImportError('');}}} title="恢复备份前核对" footer={<div className="flex flex-wrap gap-3"><button disabled={workspaceImportBusy} onClick={exportData} className="btn-pure px-5 py-2.5 rounded-full text-sm">先备份当前工作区</button><button disabled={workspaceImportBusy||isBatchProcessing||isAnalyzingClass} onClick={()=>void confirmWorkspaceImport()} className="btn-pure active px-5 py-2.5 rounded-full text-sm">{workspaceImportBusy?'正在核对账号…':'确认恢复备份'}</button></div>}>
                         {pendingWorkspaceImport&&<div className="space-y-5 text-sm leading-7 text-slate-600">

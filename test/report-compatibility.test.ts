@@ -4,6 +4,14 @@ import {importLegacy, sanitizeLegacy, reportCsv, exportReportBundle} from '../sr
 import {sampleBackup, sampleResult, sampleRubric, sampleAssignment} from '../src/report/fixtures';
 import {normalizeTeacherEditedScoresAgainstRubric, normalizeBreakdownAgainstRubric, countEnglishWordsForScoring} from '../src/report/legacy-core.js';
 
+test('large read-only imports share assignment context while preserving each report and the editable import contract',async()=>{
+  const source={...sampleBackup,assignment:{...sampleBackup.assignment,topic:'长题目'.repeat(1000)},files:Array.from({length:150},(_,i)=>({result:{...sampleResult,student_name:'合成'+i}}))};
+  const shared=await importLegacy(source,{shareReadOnlyContext:true}),isolated=await importLegacy(source);
+  assert.equal(shared.reports.length,150);assert.equal(shared.reports[0].assignment,shared.reports[149].assignment);assert.equal(shared.reports[0].rubric,shared.reports[149].rubric);
+  assert.deepEqual(JSON.parse(JSON.stringify(shared)),JSON.parse(JSON.stringify(isolated)));
+  isolated.reports[0].assignment.title='独立修改';assert.notEqual(isolated.reports[149].assignment.title,'独立修改');assert.equal(shared.reports[149].result.student_name,'合成149');
+});
+
 test('legacy backup preserves teacher scores, every report section and unknown business fields',async()=>{
   const input=structuredClone(sampleBackup);
   Object.assign(input.files[0].result,{total_score:13.5,word_count:222,extension:{teacherNote:'保留人工判断'}});

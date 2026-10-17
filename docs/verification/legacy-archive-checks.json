@@ -1,0 +1,115 @@
+{
+  "checkedAt": "2026-10-17T02:25:25.611688+00:00",
+  "rootTests": 207,
+  "peerTestsPreviouslyVerified": 9,
+  "realAccountLoginVerified": false,
+  "formalDirectoryChanged": false,
+  "realModelCalled": false,
+  "flows": {
+    "legacy-archive": {
+      "passed": true,
+      "scriptSha256": "f7cc79e7964b6d2dc8126b31285c71c0c661b60a54e4d0647b298464cd01e4b5",
+      "checkedAt": "2026-10-17T02:23:08.566060+00:00",
+      "result": {
+        "passed": true,
+        "sourceReports": 118,
+        "previewBeforeUpload": true,
+        "initialUploadPause": 10,
+        "chunkPause": 20,
+        "closeAndResume": true,
+        "duplicateImportDeduplicated": true,
+        "fullBusinessBackup": true,
+        "credentialsExcluded": true,
+        "missingRubricReadable": true,
+        "zeroScorePreserved": true,
+        "reportSections": 6,
+        "printPdf": true,
+        "originalWorkbenchCopy": true,
+        "withdrawRestore": true,
+        "noAiCalls": true,
+        "noForeignImageLoads": true,
+        "mobileWidths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "realSchoolData": false
+      }
+    },
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-17T02:23:31.157497+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "workspace-backup": {
+      "passed": true,
+      "scriptSha256": "d7dd13aceabd481ec77ca9478d647c960329131fae5033bce1cddddba9c8892f",
+      "checkedAt": "2026-10-17T02:23:35.839895+00:00",
+      "result": {
+        "passed": true,
+        "previewBeforeMutation": true,
+        "preRestoreBackup": true,
+        "fullHistoryKinds": 4,
+        "credentialsExcluded": true,
+        "accountMismatchBlocked": true,
+        "quotaFailureRolledBack": true,
+        "reportRetained": true,
+        "malformedFileRejected": true,
+        "reload": true,
+        "mobileWidths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "realStudentData": false
+      }
+    }
+  },
+  "print": {
+    "passed": true,
+    "reports": [
+      {
+        "file": "legacy-archive-zero-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      },
+      {
+        "file": "legacy-archive-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      }
+    ],
+    "syntheticOnly": true,
+    "physicalPrinterTested": false
+  },
+  "files": {
+    "worker/legacy-archive.ts": "169eff0fe95eed9ecfa29e80a0e67697e0cd56ddd5a927d79b68e7d4b474d58a",
+    "worker/index.ts": "8a0e94f7d007bff4b0b8df7dd6243296af5605d92a29ab033c8d53529928791f",
+    "migrations/0016_legacy_archive.sql": "ee51e16f633ca49e7c51068095bd1a82df1c6a0abe4eeba1bdaff446e4e107c5",
+    "src/TeacherApp.jsx": "8ae60ee7a14bfa6e46fb0723330d56029a9e7519b6f723b0557a547b04f4b287",
+    "src/teacher/LegacyArchivePanel.tsx": "28379e5cca3d8dec25b92db410cbf9cb321a533f04d11a81be0fcddb3a39d316",
+    "src/teacher/legacy-archive-print.ts": "1f741806d0402b0f696900cbf6bbcf0c0a7351728c53cbd3b62ac868916b166f",
+    "src/teacher/legacy-archive.css": "6fb98623215ed9eb2e2096f535b701db84eb67233ab0ba1fa510dcebd520471e",
+    "src/report/LegacyPaper.jsx": "2063469fb618b6126974aa1ae7b22dfb2de3fddee55f2464700a28509dd00942",
+    "src/report/legacy-import.ts": "57fe0d2866ef48a9671aa94975b346e930d2702847d5c3fb229febfe3a3eea42",
+    "test/legacy-archive.test.ts": "c486937d88102c9b5a415ba9692f86c10d702db1399af6aa118f047eda76d993",
+    "test/report-compatibility.test.ts": "b0a43164b9d4487bc99ae08a9c1155b7791c94a758b8b4e4d4145d8bdd07834f",
+    "scripts/qa/legacy-archive.cjs": "f7cc79e7964b6d2dc8126b31285c71c0c661b60a54e4d0647b298464cd01e4b5",
+    "scripts/qa/verify-legacy-print.py": "ce8851a408040a5488c689892b7d596c7c460f2d67c8f2e1e904861f72f5dba4"
+  }
+}

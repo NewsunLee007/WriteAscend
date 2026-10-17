@@ -1,5 +1,5 @@
 import type {D1Database, Fetcher, R2Bucket, MessageBatch, Queue} from '@cloudflare/workers-types';
-import {importLegacy, sanitizeLegacy} from '../src/report/legacy-import';
+import {handleLegacyArchive} from './legacy-archive';
 import {HttpError} from './errors';
 import {handleModelApi,consumeModelJobs,recoverModelOutbox,type ModelBindings,type ModelJobMessage} from './model-jobs';
 import {handleAssets} from './assets';
@@ -120,7 +120,7 @@ export default {
         return json({ok:true},200,{'Set-Cookie':cookie('wa_session','',0)});
       }
       const session=await authenticate(req,env);
-      if(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports|student)(?:\/|$)/.test(path)||path.startsWith('/api/model/'))){
+      if(/^\/api\/(?:legacy-imports|reports)(?:\/|$)/.test(path)||(req.method!=='GET'&&(/^\/api\/(?:assets|snapshots|tasks|admin|grading|writing-reports|student)(?:\/|$)/.test(path)||path.startsWith('/api/model/')))){
         if(req.headers.get('X-Workspace-Id')!==await sha(session.principal))throw new HttpError(403,'当前登录工作区已变化，请刷新后再操作。');
       }
       if(path==='/api/me'&&req.method==='GET')return json({authenticated:true,workspaceId:await sha(session.principal),name:session.display_name,role:session.role,scopes:session.scopes});
@@ -152,53 +152,7 @@ export default {
         if(after.length>200)throw new HttpError(400,'分页位置无效。');
         return json(await bridge(env,'roster',{grantId:session.grant_id,classId:rosterMatch[1],after}));
       }
-      if(path==='/api/reports'&&req.method==='GET'){
-        teacher(session);const limit=25,offset=Math.max(0,Math.min(100000,Number(url.searchParams.get('offset'))||0));
-        const rows=await env.DB.prepare('SELECT id,payload,revision,updated FROM private_reports WHERE owner=? ORDER BY updated DESC,id LIMIT ? OFFSET ?').bind(session.principal,limit+1,offset).all<{id:string;payload:string;revision:number;updated:string}>();
-        return json({reports:rows.results.slice(0,limit).map(r=>({...JSON.parse(r.payload),cloudId:r.id,revision:r.revision})),nextOffset:rows.results.length>limit?offset+limit:null});
-      }
-      if(path==='/api/legacy-imports'&&req.method==='POST'){
-        teacher(session);const payload=await input(req);let bundle;
-        try{bundle=await importLegacy(payload);}catch(e){throw new HttpError(400,e instanceof Error?e.message:'备份格式不正确。');}
-        if(bundle.reports.length>100)throw new HttpError(413,'每批最多导入 100 份结果，请分批处理。');
-        const now=new Date().toISOString(),id=crypto.randomUUID();
-        // Keep reports private and unlinked; source-local student IDs never become authority IDs.
-        const archiveKey='legacy/'+await sha(session.principal)+'/'+bundle.fingerprint+'.json';
-        await env.FILES.put(archiveKey,JSON.stringify(bundle.sanitizedPayload),{httpMetadata:{contentType:'application/json'}});
-        const queries=bundle.reports.flatMap(r=>[
-          env.DB.prepare('INSERT OR IGNORE INTO private_reports(id,owner,fingerprint,payload,revision,created,updated) VALUES(?,?,?,?,1,?,?)').bind(crypto.randomUUID(),session.principal,r.fingerprint,JSON.stringify(r),now,now),
-          env.DB.prepare('INSERT OR IGNORE INTO private_report_revisions SELECT id,owner,revision,payload,updated FROM private_reports WHERE owner=? AND fingerprint=?').bind(session.principal,r.fingerprint),
-        ]);
-        queries.push(env.DB.prepare('INSERT OR IGNORE INTO legacy_import_batches VALUES(?,?,?,?,?,?)').bind(id,session.principal,bundle.fingerprint,bundle.reports.length,archiveKey,now));
-        await env.DB.batch(queries);
-        return json({ok:true,reportCount:bundle.reports.length,removedCredentialFields:bundle.removedCredentialFields},201);
-      }
-      const match=path.match(/^\/api\/reports\/([a-zA-Z0-9-]+)$/);
-      if(match&&req.method==='PATCH'){
-        teacher(session);const body=await input(req,1024*1024) as any;
-        if(!body||!Number.isInteger(body.revision)||!body.result||typeof body.result!=='object'||Array.isArray(body.result))throw new HttpError(400,'请提供结果及原版本号。');
-        const row=await env.DB.prepare('SELECT payload,revision FROM private_reports WHERE id=? AND owner=?').bind(match[1],session.principal).first<{payload:string;revision:number}>();
-        if(!row)throw new HttpError(404,'报告不存在。');if(row.revision!==body.revision)throw new HttpError(409,'报告已在其他设备修改，请重新读取。');
-        const previous=JSON.parse(row.payload);
-        const safe=sanitizeLegacy(body.result).value as Record<string,unknown>;
-        for(const key of ['student_id','class_id','original_essay'])if(safe[key]!==previous.result[key])throw new HttpError(400,'此接口不能更改原稿或学生归属。');
-        const editable=['student_name','class_name','student_no','brief_comment','total_score','breakdown','highlights','errors','content_logic','optimized_essay','identity_name_mismatch_verified'];
-        const edited={...previous.result};for(const key of editable)if(key in safe)edited[key]=safe[key];
-        const scoreChanged=JSON.stringify(edited.breakdown)!==JSON.stringify(previous.result.breakdown)||edited.total_score!==previous.result.total_score;
-        if(scoreChanged){
-          const rubric=previous.rubric;
-          if(!rubric||!Number.isFinite(edited.total_score)||edited.total_score<0||edited.total_score>rubric.total)throw new HttpError(400,'分数不在评分标准范围内。');
-          let sum=0;for(const criterion of rubric.items){const value=edited.breakdown?.[criterion.label];if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>criterion.score||value*2!==Math.round(value*2))throw new HttpError(400,'分项分数须符合满分和半分要求。');sum+=value;}
-          if(Math.abs(sum-edited.total_score)>0.001)throw new HttpError(400,'总分须与分项分数相符。');
-        }
-        const next={...previous,result:edited,modified:true};const now=new Date().toISOString();
-        const updates=await env.DB.batch([
-          env.DB.prepare('UPDATE private_reports SET payload=?,revision=revision+1,updated=? WHERE id=? AND owner=? AND revision=?').bind(JSON.stringify(next),now,match[1],session.principal,body.revision),
-          env.DB.prepare('INSERT OR IGNORE INTO private_report_revisions SELECT id,owner,revision,payload,updated FROM private_reports WHERE id=? AND owner=?').bind(match[1],session.principal),
-        ]);
-        if(!updates[0].meta.changes)throw new HttpError(409,'报告已在其他设备修改，请重新读取。');
-        return json({ok:true,revision:body.revision+1});
-      }
+      const legacyResponse=await handleLegacyArchive(req,env,session,input);if(legacyResponse)return legacyResponse;
       throw new HttpError(404,'接口不存在。');
     }catch(e){
       if(!(e instanceof HttpError)&&env.PUBLIC_ORIGIN.startsWith('http://127.0.0.1:'))console.warn('Local Worker failure:',e instanceof Error?e.message:'unknown');

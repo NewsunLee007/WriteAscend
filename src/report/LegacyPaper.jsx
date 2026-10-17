@@ -4,7 +4,8 @@ import {Plus,Trash} from 'lucide-react';
 import {clampNumber,roundToHalf,countEnglishWords,indentParagraphs} from './legacy-core.js';
 import './writing-feedback.css';
 const headings=['总体评价 (Overall Comment)','优秀表达 (Excellent Expressions)','诊断与提升 (Correction)','内容优化建议 (Content Optimization Suggestions)','升级版习作 (Revised)','标准参考范文 (Model)'];
-export default function EditablePaper({data,assignment,rubric,studentIndex,onUpdate,readOnly=false,identityLocked=false,onDraftChange=/** @type {((value: any) => void) | null} */(null),pdfConfig}){
+export default function EditablePaper({data,assignment,rubric,studentIndex,onUpdate=/** @type {((value: any) => void) | null} */(null),readOnly=false,identityLocked=false,onDraftChange=/** @type {((value: any) => void) | null} */(null),pdfConfig}){
+ readOnly=readOnly||!rubric;
  const [localData,setLocalData]=useState(data),root=useRef(null);
  useEffect(()=>setLocalData(data),[data]);
  useEffect(()=>{for(const field of root.current?.querySelectorAll('textarea')||[]){field.style.height='auto';field.style.height=field.scrollHeight+'px';}},[localData,readOnly]);
@@ -77,7 +78,7 @@ export default function EditablePaper({data,assignment,rubric,studentIndex,onUpd
  const blur=()=>{if(!readOnly)onUpdate?.(localData);};
  const Field=({label,value,onChange,kind='text',locked=false,className=''})=>{
   const safe=value??'';
-  if(readOnly||locked)return <span className={'feedback-value '+className}>{safe||'—'}</span>;
+  if(readOnly||locked)return <span className={'feedback-value '+className}>{safe===''?'—':typeof safe==='string'||typeof safe==='number'?safe:String(safe)}</span>;
   return <input aria-label={label} type={kind} step={kind==='number'?'0.5':undefined} value={safe} onChange={onChange} onBlur={blur} className={className}/>;
  };
  const paragraphs=value=>String(value||'暂无').replace(/\r\n?/g,'\n').split(/\n\s*\n+/).map((text,index)=><span key={index} className="feedback-paragraph">{text}</span>);
@@ -95,17 +96,18 @@ export default function EditablePaper({data,assignment,rubric,studentIndex,onUpd
  const highlights=Array.isArray(localData.highlights)?localData.highlights:[],errors=Array.isArray(localData.errors)?localData.errors:[];
  const editItem=(field,index,key,value)=>handleChange(field,localData[field].map((item,i)=>i===index?{...item,[key]:value}:item));
  const originalImages=Array.isArray(localData.original_image_urls)&&localData.original_image_urls.length?localData.original_image_urls:localData.original_image_url?[localData.original_image_url]:[];
+ const scoreItems=Array.isArray(rubric?.items)?rubric.items:Object.keys(localData.breakdown||{}).map(label=>({id:label,label,score:null}));
  return <article ref={root} className="a4-wrapper writing-feedback" style={paperStyle}>
   <header className="feedback-header">
    <div className="feedback-heading"><p className="feedback-eyebrow">英语写作反馈 · 学生英语写作质量分析报告</p><h1>{assignment.title||assignment.examName||'本次英语写作'}</h1>{assignment.examName&&assignment.title&&<p className="feedback-exam">{assignment.examName}</p>}
     <dl className="feedback-identity"><div><dt>姓名</dt><dd className={localData.identity_name_mismatch&&!localData.identity_name_mismatch_verified?'feedback-mismatch':''}>{Field({label:'报告学生姓名',value:localData.student_name,locked:identityLocked,onChange:e=>handleChange('student_name',e.target.value)})}</dd></div><div><dt>班级</dt><dd>{Field({label:'报告班级',value:localData.class_name,locked:identityLocked,onChange:e=>handleChange('class_name',e.target.value)})}</dd></div><div><dt>序号</dt><dd>{localData.student_no||studentIndex||'—'}{localData.student_no_suffix||''}</dd></div></dl>
    </div>
-   <div className="feedback-total"><span>本次得分</span><div>{Field({label:'作文总分',kind:'number',value:localData.total_score,onChange:handleTotalChange,className:'feedback-total-value'})}<span>/{rubric.total}</span></div></div>
+   <div className="feedback-total"><span>本次得分</span><div>{Field({label:'作文总分',kind:'number',value:localData.total_score,onChange:handleTotalChange,className:'feedback-total-value'})}{rubric?<span>/{rubric.total}</span>:<small>满分未记录</small>}</div></div>
   </header>
   {localData.identity_name_mismatch&&!localData.identity_name_mismatch_verified&&!readOnly&&!identityLocked&&<aside className="feedback-identity-alert no-print"><span>识别姓名：{localData.detected_student_name||localData.identity_name_from_ai||'待核对'}。请对照原稿核对学生归属。</span><label><input type="checkbox" checked={false} onChange={()=>commit('identity_name_mismatch_verified',true)}/>已核对，确认归属正确</label></aside>}
-  <div className="feedback-score-grid" style={{'--feedback-criteria':Math.min(6,(rubric.items?.length||0)+1)}}>
-   {(rubric.items||[]).map(item=><div key={item.id}><span>{item.label}</span><strong>{Field({label:item.label+'得分',kind:'number',value:localData.breakdown?.[item.label]??0,onChange:e=>handleBreakdownChange(item.label,e)})}<small>/{item.score}</small></strong></div>)}
-   <div><span>作文词数</span><strong>{countEnglishWords(localData.original_essay)||localData.word_count||0}</strong><small>要求 {rubric.wordCount||'以题目为准'}</small></div>
+  <div className="feedback-score-grid" style={{'--feedback-criteria':Math.min(6,scoreItems.length+1)}}>
+   {scoreItems.map(item=><div key={item.id||item.label}><span>{item.label}</span><strong>{Field({label:item.label+'得分',kind:'number',value:localData.breakdown?.[item.label]??0,onChange:e=>handleBreakdownChange(item.label,e)})}{item.score!==null&&<small>/{item.score}</small>}</strong></div>)}
+   <div><span>作文词数</span><strong>{countEnglishWords(localData.original_essay)||(localData.word_count??(rubric?0:'未记录'))}</strong><small>{rubric?'要求 '+(rubric.wordCount||'以题目为准'):'字数要求未记录'}</small></div>
   </div>
   {pdfConfig?.showPrompt&&assignment.topic&&<section className="feedback-prompt"><h3>写作任务</h3><div className="feedback-text">{assignment.topic}</div></section>}
   <section className="feedback-section feedback-overall"><Title number={1}/>{Text({label:'总体评价',value:localData.brief_comment,onChange:e=>handleChange('brief_comment',e.target.value)})}</section>

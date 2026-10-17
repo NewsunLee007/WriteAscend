@@ -52,10 +52,11 @@ function adaptResult(raw: JsonObject, assignment: Assignment): LegacyResult {
   } as LegacyResult;
   // Old blob URLs expire; arbitrary remote images must not be fetched during import.
   delete result.original_image_url;
+  delete result.original_image_urls;
   return result;
 }
 
-export async function importLegacy(input: unknown): Promise<ImportBundle> {
+export async function importLegacy(input: unknown,options:{shareReadOnlyContext?:boolean}={}): Promise<ImportBundle> {
   const {value, removed} = sanitizeLegacy(input);
   if (!isObject(value) && !Array.isArray(value)) throw new Error('请选择作文结果、完整备份或已保存结果的 JSON 文件。');
   const reports: ReportRecord[] = [], seen = new Set<string>();
@@ -77,12 +78,12 @@ export async function importLegacy(input: unknown): Promise<ImportBundle> {
       seen.add(fingerprint);
       const warnings: string[] = [];
       if (!ctx.rubric) warnings.push('缺少当时的完整评分标准；可查看原分数，暂不可修改评分。');
-      if (v.original_image_url) warnings.push('原稿图片链接需要重新关联文件，导入时未加载该链接。');
+      if (v.original_image_url || v.original_image_urls) warnings.push('原稿图片链接需要重新关联文件，导入时未加载该链接。');
       if (!v.original_essay && !v.original_text) warnings.push('原稿文字未提供。');
       reports.push({id: 'legacy-' + fingerprint, schema: 'legacy-report-v1', fingerprint, sourcePath: path,
         result: adaptResult(v, ctx.assignment), originalResult: structuredClone(v),
-        assignment: structuredClone(ctx.assignment), rubric: ctx.rubric ? structuredClone(ctx.rubric) : null,
-        pdfConfig: structuredClone(ctx.pdfConfig), identity: {status: 'unlinked', legacyStudentId: text(v.student_id), legacyClassId: text(v.class_id)},
+        assignment: options.shareReadOnlyContext?ctx.assignment:structuredClone(ctx.assignment), rubric: ctx.rubric ? options.shareReadOnlyContext?ctx.rubric:structuredClone(ctx.rubric) : null,
+        pdfConfig: options.shareReadOnlyContext?ctx.pdfConfig:structuredClone(ctx.pdfConfig), identity: {status: 'unlinked', legacyStudentId: text(v.student_id), legacyClassId: text(v.class_id)},
         warnings, modified: false});
       return;
     }

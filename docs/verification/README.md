@@ -51,3 +51,5 @@ Word 附件以 OOXML 提取栏目及计数，不执行文档中的文字指令�
 - [同伴反馈手写二稿](peer-feedback-revisions.md)：独立建议、作者计划、手写新稿、教师收取、原批阅及学生新报告的本地闭环。
 
 - [Cloudflare 测试部署与恢复](cloudflare-staging.md)：实际公网两个独立应用、版本切换、D1/R2探针与Time Travel演练；学校登录和正式切换尚未完成。
+
+- [旧版批改档案与续传](legacy-archive.md)：118份合成报告、断点续传、教师私有档案、完整业务备份、原分数及打印分页验证。

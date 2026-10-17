@@ -11,6 +11,7 @@
 - [Cloudflare 实际测试部署与恢复验证](docs/verification/cloudflare-staging.md)
 - [Daily 实际接入与维护记录](docs/verification/daily-activation.md)
 - [旧版数据与完整工作区备份](docs/workspace-migration.md)
+- [旧版云端批改档案与续传](docs/legacy-archive.md)
 - [GitHub 自动检查](docs/continuous-verification.md)
 - [升级草稿 PR #1](https://github.com/NewsunLee007/WriteAscend/pull/1)
 - [Cloudflare 测试发布与回退](docs/staging-release.md)

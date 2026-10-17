@@ -61,6 +61,10 @@ test('Worker and Daily exchange actual authorization code over HTTP and create o
     assert(!JSON.stringify(cloudSession).includes(logged.cookie.split('=')[1]));
     assert.deepEqual(await (await h.request('/api/classes',logged.cookie)).json(),{classes:[]});
     assert.equal((await h.request('/api/assets',logged.cookie,'POST')).status,403);
+    assert.equal((await h.request('/api/legacy-imports',logged.cookie,'POST')).status,403);
+    assert.equal((await h.request('/api/legacy-imports',logged.cookie)).status,403);
+    assert.equal((await h.request('/api/reports',logged.cookie)).status,403);
+    assert.equal((await h.request('/api/reports/'+crypto.randomUUID(),logged.cookie,'PATCH')).status,403);
     assert.equal((await h.request('/api/snapshots',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks',logged.cookie,'POST')).status,403);
     assert.equal((await h.request('/api/tasks/synthetic',logged.cookie,'PUT')).status,403);
