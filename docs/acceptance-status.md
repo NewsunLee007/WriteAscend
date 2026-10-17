@@ -2,9 +2,9 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程、学校身份和正式部署分别提供下列证据；真实教学质量和实体设备仍须独立验收，不能由测试总数替代。
 
-按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`7dc4aea`、Worker版本`b4be06a2-dc3f-4fde-b21c-5d1e5054dff7`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程244项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`5d4e05e`、Worker版本`a41ae96c-37dc-466b-8e7a-57906cdf5648`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程246项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
 
-测试环境继续独立保留：教师版本`565c1bbd-4934-414a-a8a6-62357aeec2fb`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+测试环境继续独立保留：教师版本`1d45ac71-5078-4dbe-8f61-a46f7d8788be`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
@@ -32,6 +32,8 @@
 ## 首份真实作文与质量问题
 
 用户随后完成任务内上传和AI批阅。正式 D1/R2 只读核对证明1名学生第1稿1页收齐、任务成员及输入清单一致，DeepSeek报告已生成，原稿、标准、学生账号和报告内容摘要均匹配，六区内容齐全，分数合计和分项上限检查通过。逐页查看实际手写图并对照识别文字，未把连接图片当作手写质量验收；报告尚未发布，见[脱敏核对](verification/real-grading-quality-checks.json)。
+
+词数进一步核对：报告82词包含独立标题4词，正文为78词，符合用户指定60–80词；不能将含标题的统计直接当作正文超词。
 
 质量未验收通过：本篇题目60–80词、被冻结的标准80–100词，用户已确认以题目60–80词为准；AI还将历史事迹中合理的过去时判错。新增语境判断约束覆盖原工作台与后台批阅、润色及难度调整；新增任务在前后端均须统一字数再建立，旧任务及报告页显示原始冲突。既有原稿、任务标准快照和报告均未改写或发布。新规则仍需以正确字数标准重新批阅本篇、人工核对，并继续学生本人查看与互评二稿验收；不能仅凭新提示或自动测试声称误判已消除。
 

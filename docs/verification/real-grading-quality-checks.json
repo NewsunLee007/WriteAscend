@@ -48,5 +48,12 @@
     "The model treated contextually valid historical past tense as an error; teacher review is required.",
     "Difficulty remains above the configured heuristic threshold after two bounded rewrites."
   ],
-  "afterFixLiveModelCall": false
+  "afterFixLiveModelCall": false,
+  "wordCounts": {
+    "recordedIncludingTitle": 82,
+    "title": 4,
+    "body": 78,
+    "bodyMeetsConfirmedRange": true,
+    "originalRecordedCountPreserved": true
+  }
 }
