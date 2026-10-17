@@ -1,0 +1,129 @@
+{
+  "sourceCommit": "49f918bbad72c2c54a7968535786be1cf98bfcd3",
+  "productionVersion": "dd121c41-afe5-4d49-99a0-29c0552681e6",
+  "previousProductionVersion": "7b873d83-f40d-4f1a-a791-7c5a44aa00bd",
+  "stagingVersion": "fc65a748-3e22-4f84-8d56-36b4ac576e5c",
+  "previousStagingVersion": "8689f22d-6333-4b0d-956c-61c550f46929",
+  "releasedAt": "2026-10-17T13:37:51.954962+00:00",
+  "rootTests": 254,
+  "peerTests": 9,
+  "githubRun": 39036770722,
+  "githubConclusion": "success",
+  "newDatabaseMigrations": 0,
+  "routeIdsAndRulesUnchanged": true,
+  "backups": {
+    "staging": {
+      "bytes": 25997,
+      "sha256": "78bc3700d56d58e3ae1d2372e34eb0ba18c88771b5e1461f6371b9428f16c963"
+    },
+    "production": {
+      "bytes": 133923,
+      "sha256": "0435eb6f538e8e3f7316b95529066d0da32c308d07c65f6774fda272fb6899d6"
+    }
+  },
+  "online": {
+    "staging": {
+      "passed": true,
+      "target": "staging",
+      "origin": "https://writeascend-staging.317792050.workers.dev",
+      "sourceCommit": "49f918bbad72c2c54a7968535786be1cf98bfcd3",
+      "version": "fc65a748-3e22-4f84-8d56-36b4ac576e5c",
+      "assets": [
+        "/assets/index-CVqjcrMy.js",
+        "/assets/rolldown-runtime-COiEfhsA.js",
+        "/assets/workspace-navigation-Bw7X6ijB.js",
+        "/assets/index-BeNXxaAA.css",
+        "/assets/LegacyArchivePanel-DOh25EYB.js",
+        "/assets/LegacyArchivePanel-DxqjU82D.css"
+      ],
+      "anonymousDenied": [
+        "/api/tasks/11111111-1111-4111-8111-111111111111/sheets",
+        "/api/me",
+        "/api/classes",
+        "/api/student/reports",
+        "/api/model/profiles",
+        "/api/model/local-status",
+        "/api/tasks/11111111-1111-4111-8111-111111111111/sheets POST",
+        "/api/local-relay/poll POST",
+        "/api/local-relay/result POST",
+        "/api/model/personal POST"
+      ],
+      "cspUnchanged": true,
+      "loginCallbackVerified": true,
+      "checkedAt": "2026-10-17T13:32:57.998Z"
+    },
+    "production": {
+      "passed": true,
+      "target": "production",
+      "origin": "https://writeascend.newsunenglish.com",
+      "sourceCommit": "49f918bbad72c2c54a7968535786be1cf98bfcd3",
+      "version": "dd121c41-afe5-4d49-99a0-29c0552681e6",
+      "assets": [
+        "/assets/index-CVqjcrMy.js",
+        "/assets/rolldown-runtime-COiEfhsA.js",
+        "/assets/workspace-navigation-Bw7X6ijB.js",
+        "/assets/index-BeNXxaAA.css",
+        "/assets/LegacyArchivePanel-DOh25EYB.js",
+        "/assets/LegacyArchivePanel-DxqjU82D.css"
+      ],
+      "anonymousDenied": [
+        "/api/tasks/11111111-1111-4111-8111-111111111111/sheets",
+        "/api/me",
+        "/api/classes",
+        "/api/student/reports",
+        "/api/model/profiles",
+        "/api/model/local-status",
+        "/api/tasks/11111111-1111-4111-8111-111111111111/sheets POST",
+        "/api/local-relay/poll POST",
+        "/api/local-relay/result POST",
+        "/api/model/personal POST"
+      ],
+      "cspUnchanged": true,
+      "loginCallbackVerified": true,
+      "checkedAt": "2026-10-17T13:36:51.500Z"
+    }
+  },
+  "browser": {
+    "environment": "local synthetic accounts and stored synthetic reports",
+    "viewports": [
+      375,
+      390,
+      768,
+      1206
+    ],
+    "horizontalOverflow": false,
+    "verified": [
+      "task search and direct publish-stage navigation",
+      "read-only bound report",
+      "initials search",
+      "private report editing and reload",
+      "original and rubric panes",
+      "double click opens without regrading confirmation",
+      "whole-batch preview",
+      "print preview",
+      "cloud search, save, version list and restore confirmation/cancel",
+      "historical zero-score report and full backup download"
+    ],
+    "notVerified": [
+      "physical mobile devices",
+      "native print/PDF dialog",
+      "CSV download confirmation: browser control timed out"
+    ],
+    "screenshots": [
+      "output/archive-ui-proof/desktop-list.jpg",
+      "output/archive-ui-proof/desktop-report.jpg",
+      "output/archive-ui-proof/mobile-list.jpg",
+      "output/archive-ui-proof/mobile-report.jpg"
+    ]
+  },
+  "dailyChanged": false,
+  "peerChanged": false,
+  "gradingPipelineChanged": false,
+  "existingReportsRewrittenByDeployment": false,
+  "remaining": [
+    "real report frozen reference requires separate standard revision",
+    "real report difficulty threshold still exceeded",
+    "real student self-view and classroom peer review",
+    "physical mobile camera and print acceptance"
+  ]
+}

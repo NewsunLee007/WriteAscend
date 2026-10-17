@@ -19,6 +19,6 @@
 
 新增三组数据行为测试：缺失分数与零分、日期排序与时间范围、同名学生身份和拼音首字母检索。根工程 254 项通过，构建与正式 Worker dry-run 通过。浏览器使用本机合成账号与既有合成报告，未调用付费模型，未发布给真实学生。
 
-界面检查覆盖任务检索并直达核对与发布、关联报告只读、快捷报告编辑后回看、原稿/标准切换、重复点击、打印预览、云端版本及取消/确认恢复。移动端使用真实浏览器的 390px 视口检查；实体手机、相机、打印及真实学生登录仍为独立验收事项。最终截图与发布结果记入本轮发布记录。
+界面检查覆盖任务检索并直达核对与发布、关联报告只读、快捷报告编辑后回看、原稿/标准切换、重复点击、整体预览、打印预览、云端保存/搜索/版本及取消/确认恢复、历史零分与完整备份下载。375/390/768/1206px 视口无横向溢出，截图位于`output/archive-ui-proof/`。CSV实际下载确认时浏览器接管超时，未将本次下载记为通过；原CSV实现及兼容测试保留。实体手机、相机、系统打印及真实学生登录仍为独立验收事项。两环境线上资源、登录回调和匿名权限检查均通过，见[本轮发布记录](archive-ui-release.json)。
 
 布局参考官方产品的任务列表、独立报告阅读和导出分工：[Turnitin Assignment Inbox](https://guides.turnitin.com/hc/en-us/articles/21968305800589-Using-the-Assignment-Inbox-in-Feedback-Studio-with-LTI-1-3)、[Gradescope 导出说明](https://guides.gradescope.com/hc/en-us/articles/22239057709453-Exporting-Grades-Evaluations-and-Submissions)。未复制对方界面资产。

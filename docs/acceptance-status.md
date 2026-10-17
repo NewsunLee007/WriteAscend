@@ -2,9 +2,9 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程、学校身份和正式部署分别提供下列证据；真实教学质量和实体设备仍须独立验收，不能由测试总数替代。
 
-按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`0b11747`、Worker版本`7b873d83-f40d-4f1a-a791-7c5a44aa00bd`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程251项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`49f918b`、Worker版本`dd121c41-afe5-4d49-99a0-29c0552681e6`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程254项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/archive-ui-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
 
-测试环境继续独立保留：教师版本`8689f22d-6333-4b0d-956c-61c550f46929`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+测试环境继续独立保留：教师版本`fc65a748-3e22-4f84-8d56-36b4ac576e5c`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
@@ -44,6 +44,20 @@
 本机合成账号通过1页收取→标准第2版→仍收齐待批的实际浏览器流程，251项根工程检查和独立互批9项、构建/正式Worker检查及源提交Linux CI 39032963261通过。两环境各7项关键页面资源、10个匿名读写入口、CSP及Daily回调/S256核验通过；所有路由ID及规则保持不变，无新数据库迁移。正式真实报告内容摘要及修订号均保持原样，本篇当前仍是标准第1版、尚无发布。
 
 正式页面接管再次超时，已向用户交接“按题目修订标准→采用60–80词→保存→一键批阅”，无需重传照片。正确标准下的新报告、真实学生本人查看和课堂互批仍未完成，不以合成流程或部署成功代替质量验收。
+
+## 60–80词重新批阅后的核对
+
+用户已完成标准修订并重新批阅。只读核对确认：任务第2版、60–80词、`context-aware-v2`，新报告ready，私有R2内容摘要与D1记录一致，原报告摘要仍保留。此次逐句批改保留富兰克林事迹的过去时，纠正不可数time及spend time doing搭配，不再将这句话改成现在时。独立标题识别后正文78词；报告统计82仍包括标题4词，不能据此认定正文超词。
+
+本篇质量仍未全部验收：参考范文中历史人物使用现在时，核对发现它与任务保存的旧`modelEssay`完全相同，来自冻结的写作材料，不是此次重批新生成的范文；应单独修订任务材料并保留旧标准。难度检查仍为exceeded（FKGL 6.24、长词比例17.8%），需进一步区分原文引用、教学建议与新生成示范的难度。没有因本次核对重复调用模型或发布报告，见[脱敏核对](verification/real-regrade-checks.json)。上述“尚待重新批阅”的段落为此前交接状态，本节记录当前进展。
+
+## 批改档案新版上线
+
+已上线本批报告、班级任务、云端批次、历史导入四个独立入口，列表检索后打开完整报告，原稿/题目标准可切换。电脑窄索引与宽报告、手机单列阅读；保留原六区报告、编辑、归属、打印/PDF、CSV、JSON、云端版本与历史迁入。重复点击报告不再隐式触发重新AI批阅；本批导出清楚标注全部已完成报告，存档恢复需确认工作区切换。保存状态可在当前档案直接查看。
+
+根工程254项、互批9项与源提交Linux CI 39036770722通过，两环境各6项关键资源、10项匿名读写限制、CSP、Daily回调/S256检查通过。所有路由ID及规则保持原样，无数据库迁移或Daily/互批资源变动。已保存更新前两环境备份与时间旅行书签，见[设计和浏览器验证](verification/archive-redesign.md)及[发布记录](verification/archive-ui-release.json)。
+
+浏览器界面验收使用本机合成账号和报告，覆盖375/390/768/1206px，无横向溢出。编辑回看、原稿/标准、打印预览、云端保存/搜索/版本/恢复取消与确认、历史零分和完整备份下载通过。本轮CSV下载确认时浏览器接管超时；原CSV业务及兼容测试保留，未将这次实际下载记为通过。实体手机和系统打印仍单独待验收。
 
 ## 下一项真实验收
 
