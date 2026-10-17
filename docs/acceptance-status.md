@@ -2,9 +2,9 @@
 
 2026-10-17。整个目标尚未完成。代码、合成流程、学校身份和正式部署分别提供下列证据；真实教学质量和实体设备仍须独立验收，不能由测试总数替代。
 
-按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`ba89047`、Worker版本`52298aad-7db6-4d6f-97f0-59a3a96ad0fb`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程239项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
+按用户2026-10-17明确部署要求，正式域名 `https://writeascend.newsunenglish.com/` 已由新版接管。正式教师源提交`7dc4aea`、Worker版本`b4be06a2-dc3f-4fde-b21c-5d1e5054dff7`；独立正式互批版本`e0c9ff25-219a-4440-92b8-1e9fa9e18704`。根工程244项、互批9项、两个正式配置构建/Worker检查及该源提交Linux CI通过。正式登录的NewsunLee身份、两班47/49人及仅两班的批阅/发布权限已通过现有会话和Daily来源核验，见[正式发布](verification/production-domain.md)及[版本/备份记录](verification/production-domain-release.json)。真实手写、模型质量、手机相机及课堂流程仍未由本次发布替代验收。
 
-测试环境继续独立保留：教师版本`3d4adf1a-a972-4302-8f25-ecfc11154f94`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
+测试环境继续独立保留：教师版本`565c1bbd-4934-414a-a8a6-62357aeec2fb`，互批版本`2a0eae02-3de2-46b4-85e7-cea566d03c60`。Daily三步准备与云端标准库见[验证](verification/rubric-workflow.md)，模型见[验证](verification/model-ui-upgrade.md)，本地模型接入见[正式更新记录](verification/local-models.md)，13家主流供应商及原生Claude适配见[选型](model-provider-expansion.md)与[发布记录](verification/provider-expansion-release.json)，报告保留见[展示验证](verification/report-fidelity-checks.json)。
 
 | 用户要求 | 已有证据 | 尚需取得的证据 |
 | --- | --- | --- |
