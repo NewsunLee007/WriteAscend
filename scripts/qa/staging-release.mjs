@@ -15,8 +15,7 @@ for(const [kind,env,service] of [['teacher',config.teacher,'writeascend'],['peer
  const protectedStatus={};for(const route of paths){const r=await get(origin,route);if(r.response.status!==401)throw Error(kind+' anonymous access unexpectedly returned '+r.response.status+' at '+route);protectedStatus[route]=r.response.status;}
  const machinePath=kind==='teacher'?'/api/integrations/writing-peer/status':'/api/integrations/writeascend/revision-basis';
  const machine=await fetch(origin+machinePath,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',redirect:'manual',signal:AbortSignal.timeout(20000)});await machine.arrayBuffer();if(machine.status!==401)throw Error(kind+' unauthenticated machine exchange '+machine.status);
- // Staging is deliberately not connected to the running school identity server
- // in this deployment stage. This flag is a configuration observation only.
+ // This flag observes configuration; it does not assert a real account login.
  checks.push({kind,origin,release:health.release,loginConfigured:health.loginConfigured,page:html.status,assets:assets.length,anonymousProtectedStatus:protectedStatus,unauthenticatedMachineExchange:machine.status});
 }
 console.log(JSON.stringify({passed:true,checkedAt:new Date().toISOString(),checks,schoolLoginVerified:false,studentDataVerified:false}));

@@ -1,6 +1,6 @@
 # WriteAscend 升级工程
 
-第一阶段审计已完成，基线日期为 2026 年 10 月 16 日。当前已在保留原完整教师系统的基础上接入快速入口、本地验证的 Daily 登录、云端模型任务、报告版本存档、写作任务、授权名册、学校目录管理、个性化写作单、扫码收取、教师版本发布、学生本人反馈、Daily 摘要同步、个人模型密钥托管及学生自主二稿，已部署独立 Cloudflare 测试版，正式域名与学校登录尚未切换。
+第一阶段审计已完成，基线日期为 2026 年 10 月 16 日。当前已在保留原完整教师系统的基础上接入快速入口、Daily 登录、云端模型任务、报告版本存档、写作任务、授权名册、学校目录管理、个性化写作单、扫码收取、教师版本发布、学生本人反馈、Daily 摘要同步、个人模型密钥托管及学生自主二稿。两个独立 Cloudflare 测试版已部署并接入运行中的 Daily；真实账号与目录验收待用户方便时继续，正式域名尚未切换。
 
 升级以原 GitHub 教师作文批阅系统的完整功能为基础：题目和标准设置、作文上传、大模型一键批量批改、教师核对、导出与班级分析。保留后逐项优化，再接入 Daily 身份、Cloudflare 后台与扫码收作业。
 
@@ -9,6 +9,7 @@
 运行 `npm install` 后使用 `npm run dev` 在 `http://127.0.0.1:5186/` 预览。默认快速批改与右上角“完整工作台”共用原评分、模型调用、结果、档案和导出逻辑。`npm test` 验证评分逻辑与历史兼容，`npm run peer:test` 与 `npm run peer:check` 单独检查互批核心，`npm run build` 验证生产构建。浏览器回归脚本和已验证范围见 [教师流程验证](docs/verification/teacher-workflow.md)。
 
 - [Cloudflare 实际测试部署与恢复验证](docs/verification/cloudflare-staging.md)
+- [Daily 实际接入与维护记录](docs/verification/daily-activation.md)
 - [Cloudflare 测试发布与回退](docs/staging-release.md)
 - [第一阶段审计结论](docs/phase-1-audit.md)
 - [具体改造规格](docs/implementation-spec.md)
