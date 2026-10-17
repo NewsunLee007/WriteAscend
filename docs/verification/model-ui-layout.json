@@ -1,0 +1,156 @@
+{
+  "synthetic": true,
+  "checkedAt": "2026-10-17T07:39:39.425Z",
+  "checks": [
+    {
+      "clientWidth": 1434,
+      "page": "工作台",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 1434,
+      "page": "快捷批阅",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 1440,
+      "page": "批改档案",
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "clientWidth": 1434,
+      "page": "学情分析",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 1434,
+      "page": "班级与学生",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 1434,
+      "page": "模型与设置",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 369,
+      "page": "工作台",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "快捷批阅",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 375,
+      "page": "批改档案",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "学情分析",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "班级与学生",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "模型与设置",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 762,
+      "page": "工作台",
+      "scrollWidth": 762,
+      "width": 768
+    },
+    {
+      "clientWidth": 762,
+      "page": "写作任务",
+      "scrollWidth": 762,
+      "width": 768
+    },
+    {
+      "clientWidth": 768,
+      "page": "快捷批阅",
+      "scrollWidth": 768,
+      "width": 768
+    },
+    {
+      "clientWidth": 768,
+      "page": "批改档案",
+      "scrollWidth": 768,
+      "width": 768
+    },
+    {
+      "clientWidth": 762,
+      "page": "学情分析",
+      "scrollWidth": 762,
+      "width": 768
+    },
+    {
+      "clientWidth": 762,
+      "page": "班级与学生",
+      "scrollWidth": 762,
+      "width": 768
+    },
+    {
+      "clientWidth": 762,
+      "page": "模型与设置",
+      "scrollWidth": 762,
+      "width": 768
+    },
+    {
+      "clientWidth": 1434,
+      "page": "写作任务",
+      "scrollWidth": 1434,
+      "width": 1440
+    },
+    {
+      "clientWidth": 369,
+      "page": "任务 · AI批阅",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "任务 · 核对与发布",
+      "scrollWidth": 369,
+      "width": 375
+    },
+    {
+      "clientWidth": 369,
+      "page": "任务 · 完整报告",
+      "scrollWidth": 369,
+      "width": 375
+    }
+  ],
+  "autoDiscovery": {
+    "ocrChoices": 4,
+    "gradingChoices": 2,
+    "irrelevantChoicesFiltered": true,
+    "credentialReuseSaved": true
+  },
+  "recovery": {
+    "moduleWithheld": true,
+    "friendlyPrompt": true,
+    "moduleRestored": true,
+    "reloadRecovered": true
+  }
+}

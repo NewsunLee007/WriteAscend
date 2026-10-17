@@ -1,0 +1,128 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-17T06:44:59.585Z",
+  "gitCommit": "e96b772f0d3648cd82fa3208e9602f6674cb86c8",
+  "checks": [
+    {
+      "kind": "teacher",
+      "version": "6e668848-7cd7-484c-98eb-80f26ee397d1",
+      "page": 200,
+      "csp": true,
+      "assets": [
+        {
+          "path": "/assets/index-Dz4FK2vf.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/rolldown-runtime-COiEfhsA.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/index-B-_L980C.css",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/BoundGradingPanel-_umGb7aG.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/BoundGradingPanel-BliYnSq3.css",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/PeerMaterialsPanel-CYqZ7pFE.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/PeerMaterialsPanel-D4UW3rFQ.css",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/SchoolDirectoryPanel-CBpnjnhR.css",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/SchoolDirectoryPanel-KaNQQy-C.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/WritingCollectionPanel--c8SDP-l.css",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/WritingCollectionPanel-oXJxmhwH.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/WritingSheetsPanel-BqPPWbZ_.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/WritingSheetsPanel-CjrmFQST.css",
+          "sha256Verified": true
+        }
+      ],
+      "anonymous": {
+        "/api/me": 401,
+        "/api/classes": 401,
+        "/api/student/reports": 401,
+        "/api/tasks": 401,
+        "/api/model/profiles": 401,
+        "/api/snapshots": 401,
+        "/api/admin/writing-directory/overview": 401
+      },
+      "machine": 401
+    },
+    {
+      "kind": "peer",
+      "version": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+      "page": 200,
+      "csp": true,
+      "assets": [
+        {
+          "path": "/assets/index-D50hf-eb.js",
+          "sha256Verified": true
+        },
+        {
+          "path": "/assets/index-CD5FMhBD.css",
+          "sha256Verified": true
+        }
+      ],
+      "anonymous": {
+        "/api/me": 401,
+        "/api/rounds": 401
+      },
+      "machine": 401
+    }
+  ],
+  "localTests": {
+    "teacher": 212,
+    "peer": 9,
+    "buildsAndWorkerChecksPassed": true
+  },
+  "browser": {
+    "environment": "synthetic-local-worker",
+    "taskWizardAndRosterConfirmation": true,
+    "pinyinDuplicateSelection": true,
+    "unsavedTaskGuard": true,
+    "unsavedReportGuard": true,
+    "reportRevisionSavedWithoutPublishing": true,
+    "reportExportWorkspaceRetained": true,
+    "settingsPageSeparation": true,
+    "homeWidthsWithoutHorizontalOverflow": [
+      375,
+      390,
+      768,
+      1440
+    ],
+    "newPhotoUploadVerified": false,
+    "stagingPostDeployAuthenticatedBrowserVerified": false
+  },
+  "teacherSessionVerified": true,
+  "realModelQualityVerified": false,
+  "productionDomainChanged": false,
+  "rollbackVersion": "aba81b1e-61cb-40c3-966f-7ef360e30ebb",
+  "databaseBackupRecorded": true,
+  "migrationsApplied": 0,
+  "peerRedeployed": false
+}

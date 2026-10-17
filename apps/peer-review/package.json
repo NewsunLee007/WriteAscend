@@ -1,0 +1,31 @@
+{
+  "name": "@newsun/writing-peer-review",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent student peer-review application; teacher grading remains in WriteAscend.",
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "worker:check": "npm run build && tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env development --dry-run",
+    "worker:dev": "wrangler dev --env development --port 8793 --local",
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "worker:check:staging": "npm run build && tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env staging --dry-run",
+    "worker:check:production": "npm run build && tsc --noEmit -p tsconfig.worker.json && wrangler deploy --env production --dry-run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "@cloudflare/workers-types": "^5.20261016.1",
+    "wrangler": "^4.151.0",
+    "vite": "^8.3.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

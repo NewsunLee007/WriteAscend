@@ -1,0 +1,29 @@
+{
+  "verifiedAt": "2026-10-16T11:57:33.229Z",
+  "authorityReadOnly": true,
+  "directory": "isolated-memory-only",
+  "formalDirectoryWritten": false,
+  "activeSchoolStudents": 2327,
+  "classes": 54,
+  "matchedStudents": 2327,
+  "missing": 0,
+  "duplicates": 0,
+  "pages": 144,
+  "activeTeachers": 3,
+  "sourceUnchangedDuringAudit": true,
+  "byGrade": [
+    {
+      "grade": "七年级",
+      "count": 758
+    },
+    {
+      "grade": "九年级",
+      "count": 733
+    },
+    {
+      "grade": "八年级",
+      "count": 836
+    }
+  ],
+  "identityRowsExported": false
+}

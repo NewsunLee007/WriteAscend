@@ -1,0 +1,1282 @@
+
+> daily-line-local@2.0.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: overlapping source marks preserve whole vocabulary phrases and finite verb phrases
+ok 1 - overlapping source marks preserve whole vocabulary phrases and finite verb phrases
+  ---
+  duration_ms: 1.56075
+  type: 'test'
+  ...
+# Subtest: listening chunks preserve every source word and punctuation across all 144 variants
+ok 2 - listening chunks preserve every source word and punctuation across all 144 variants
+  ---
+  duration_ms: 1.970208
+  type: 'test'
+  ...
+# (node:8974) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: private audio supports complete, seek, suffix, invalid range and HEAD without changing bytes
+ok 3 - private audio supports complete, seek, suffix, invalid range and HEAD without changing bytes
+  ---
+  duration_ms: 53.425875
+  type: 'test'
+  ...
+# {"concurrentLogins":40,"uploads":40,"eventLoopTicks":69,"elapsedMs":494}
+# Subtest: 40 concurrent student logins keep event loop alive; simultaneous duplicate uploads save once
+ok 4 - 40 concurrent student logins keep event loop alive; simultaneous duplicate uploads save once
+  ---
+  duration_ms: 585.556083
+  type: 'test'
+  ...
+# Subtest: audio worklet preserves every sample across chunk boundaries and stop flush
+ok 5 - audio worklet preserves every sample across chunk boundaries and stop flush
+  ---
+  duration_ms: 4.019291
+  type: 'test'
+  ...
+# Subtest: only the captured annotation stylesheet is allowlisted
+ok 6 - only the captured annotation stylesheet is allowlisted
+  ---
+  duration_ms: 0.687209
+  type: 'test'
+  ...
+# Subtest: media overrides, style restrictions and repeated application are preserved
+ok 7 - media overrides, style restrictions and repeated application are preserved
+  ---
+  duration_ms: 0.116709
+  type: 'test'
+  ...
+# Subtest: classroom frame rejects control messages from other frames or origins
+ok 8 - classroom frame rejects control messages from other frames or origins
+  ---
+  duration_ms: 2.010792
+  type: 'test'
+  ...
+# Subtest: leaving a classroom pane pauses audio and closes its open overlays
+ok 9 - leaving a classroom pane pauses audio and closes its open overlays
+  ---
+  duration_ms: 0.707084
+  type: 'test'
+  ...
+# Subtest: low controls scroll reading pages or step sentences, without accepting arbitrary directions
+ok 10 - low controls scroll reading pages or step sentences, without accepting arbitrary directions
+  ---
+  duration_ms: 2.484917
+  type: 'test'
+  ...
+# Media mirror fallback: R2 temporarily unavailable
+# Subtest: only public images, exact lesson IDs and example audio are allowlisted
+ok 11 - only public images, exact lesson IDs and example audio are allowlisted
+  ---
+  duration_ms: 1.150041
+  type: 'test'
+  ...
+# Subtest: public lesson bytes come from R2 after a fresh cookieless origin publication check
+ok 12 - public lesson bytes come from R2 after a fresh cookieless origin publication check
+  ---
+  duration_ms: 19.403292
+  type: 'test'
+  ...
+# Subtest: seek, suffix, invalid Range, If-Range and HEAD preserve HTTP media behavior
+ok 13 - seek, suffix, invalid Range, If-Range and HEAD preserve HTTP media behavior
+  ---
+  duration_ms: 3.729584
+  type: 'test'
+  ...
+# Subtest: unpublished and expired media never escape via an existing edge cache entry
+ok 14 - unpublished and expired media never escape via an existing edge cache entry
+  ---
+  duration_ms: 0.376042
+  type: 'test'
+  ...
+# Subtest: a cache hit still checks publication and cannot become browser-cacheable
+ok 15 - a cache hit still checks publication and cannot become browser-cacheable
+  ---
+  duration_ms: 0.441625
+  type: 'test'
+  ...
+# Subtest: missing mirrors, R2 failures and unsupported routes fall back to existing origin
+ok 16 - missing mirrors, R2 failures and unsupported routes fall back to existing origin
+  ---
+  duration_ms: 7.298541
+  type: 'test'
+  ...
+# Subtest: image mirrors work without the Mac and use the correct MIME type
+ok 17 - image mirrors work without the Mac and use the correct MIME type
+  ---
+  duration_ms: 0.873333
+  type: 'test'
+  ...
+# Subtest: origin outage fails closed for publication-controlled media
+ok 18 - origin outage fails closed for publication-controlled media
+  ---
+  duration_ms: 0.52
+  type: 'test'
+  ...
+# Subtest: conditional requests do not send a body and still respect publication
+ok 19 - conditional requests do not send a body and still respect publication
+  ---
+  duration_ms: 0.809
+  type: 'test'
+  ...
+# Subtest: existing public example audio keeps its browser caching policy
+ok 20 - existing public example audio keeps its browser caching policy
+  ---
+  duration_ms: 0.990959
+  type: 'test'
+  ...
+# Subtest: complete skeletons cover every predicate group in all 144 sources, including nested, shared and implied subjects
+ok 21 - complete skeletons cover every predicate group in all 144 sources, including nested, shared and implied subjects
+  ---
+  duration_ms: 2.872209
+  type: 'test'
+  ...
+# Subtest: A valid selected scope survives bare navigation and retains each books unit independently
+ok 22 - A valid selected scope survives bare navigation and retains each books unit independently
+  ---
+  duration_ms: 1.499875
+  type: 'test'
+  ...
+# Subtest: Caption timing handles identifiers, gaps, seeking and malformed blocks
+ok 23 - Caption timing handles identifiers, gaps, seeking and malformed blocks
+  ---
+  duration_ms: 0.511292
+  type: 'test'
+  ...
+# (node:8981) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Discovery selects complete published Days, caches summaries, and invalidates after edits
+ok 24 - Discovery selects complete published Days, caches summaries, and invalidates after edits
+  ---
+  duration_ms: 11.603042
+  type: 'test'
+  ...
+# Subtest: Text compression respects quality negotiation and HEAD without changing decoded bytes
+ok 25 - Text compression respects quality negotiation and HEAD without changing decoded bytes
+  ---
+  duration_ms: 0.848166
+  type: 'test'
+  ...
+# Subtest: Figure descriptions stay concise while provenance drops conversion boilerplate
+ok 26 - Figure descriptions stay concise while provenance drops conversion boilerplate
+  ---
+  duration_ms: 0.19175
+  type: 'test'
+  ...
+# Subtest: Figure language selection separates descriptions from attribution and preserves both languages
+ok 27 - Figure language selection separates descriptions from attribution and preserves both languages
+  ---
+  duration_ms: 0.340709
+  type: 'test'
+  ...
+# Subtest: A stalled public GET times out, retries once and completes without refresh
+ok 28 - A stalled public GET times out, retries once and completes without refresh
+  ---
+  duration_ms: 413.108958
+  type: 'test'
+  ...
+# Subtest: Persistent stalls terminate with a retry message; writes and client errors are never retried
+ok 29 - Persistent stalls terminate with a retry message; writes and client errors are never retried
+  ---
+  duration_ms: 433.60925
+  type: 'test'
+  ...
+# (node:8983) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Full research figure legends survive saving, while excessive captions fail without modifying the lesson
+ok 30 - Full research figure legends survive saving, while excessive captions fail without modifying the lesson
+  ---
+  duration_ms: 10.658875
+  type: 'test'
+  ...
+# Subtest: Original GIF animations keep their format and cannot escape the public source directory
+ok 31 - Original GIF animations keep their format and cannot escape the public source directory
+  ---
+  duration_ms: 1.22925
+  type: 'test'
+  ...
+# Subtest: Scanned originals retain every page and reject oversized or unsafe image lists
+ok 32 - Scanned originals retain every page and reject oversized or unsafe image lists
+  ---
+  duration_ms: 1.718042
+  type: 'test'
+  ...
+# Subtest: Daily publication respects drafts, future dates, expiry, grade and revision; summaries exclude large bodies
+ok 33 - Daily publication respects drafts, future dates, expiry, grade and revision; summaries exclude large bodies
+  ---
+  duration_ms: 2.919375
+  type: 'test'
+  ...
+# Subtest: Daily news and media publishing enforce source metadata and ready resources
+ok 34 - Daily news and media publishing enforce source metadata and ready resources
+  ---
+  duration_ms: 2.579834
+  type: 'test'
+  ...
+# Subtest: Media parsing recognizes approved platforms, HLS, direct and signed links without fetching arbitrary sites
+ok 35 - Media parsing recognizes approved platforms, HLS, direct and signed links without fetching arbitrary sites
+  ---
+  duration_ms: 0.362042
+  type: 'test'
+  ...
+# Subtest: Exact publication date differs from the previous cumulative date filter
+ok 36 - Exact publication date differs from the previous cumulative date filter
+  ---
+  duration_ms: 0.876709
+  type: 'test'
+  ...
+# Subtest: Textbook units filter within one grade and reject ambiguous assignments
+ok 37 - Textbook units filter within one grade and reject ambiguous assignments
+  ---
+  duration_ms: 1.507875
+  type: 'test'
+  ...
+# Subtest: Sentence study fields survive teacher edits and stay out of compact public lists
+ok 38 - Sentence study fields survive teacher edits and stay out of compact public lists
+  ---
+  duration_ms: 1.561791
+  type: 'test'
+  ...
+# Subtest: Reading versions preserve their own exercises, original text and credited image without bloating lists
+ok 39 - Reading versions preserve their own exercises, original text and credited image without bloating lists
+  ---
+  duration_ms: 5.752375
+  type: 'test'
+  ...
+# Subtest: Optional HD video is served only for a published lesson and stays protected from deletion
+ok 40 - Optional HD video is served only for a published lesson and stays protected from deletion
+  ---
+  duration_ms: 1.480667
+  type: 'test'
+  ...
+# Subtest: Pre-A1 can be edited alongside all other reading levels and appears in public level summaries
+ok 41 - Pre-A1 can be edited alongside all other reading levels and appears in public level summaries
+  ---
+  duration_ms: 1.133333
+  type: 'test'
+  ...
+# Subtest: visual learning cards support every content kind and protect uploaded image assets
+ok 42 - visual learning cards support every content kind and protect uploaded image assets
+  ---
+  duration_ms: 1.223292
+  type: 'test'
+  ...
+# (node:8984) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: multi-grade import preserves existing 8A IDs and valid audio, separates identical unit numbers
+ok 43 - multi-grade import preserves existing 8A IDs and valid audio, separates identical unit numbers
+  ---
+  duration_ms: 31.320334
+  type: 'test'
+  ...
+# Subtest: changed text invalidates only the matching grade's audio and removes obsolete sentences
+ok 44 - changed text invalidates only the matching grade's audio and removes obsolete sentences
+  ---
+  duration_ms: 14.869708
+  type: 'test'
+  ...
+# Subtest: invalid imports do not partially change the database
+ok 45 - invalid imports do not partially change the database
+  ---
+  duration_ms: 5.035708
+  type: 'test'
+  ...
+# Subtest: spoken text and explicit verb annotations remain intact
+ok 46 - spoken text and explicit verb annotations remain intact
+  ---
+  duration_ms: 5.472209
+  type: 'test'
+  ...
+# (node:8985) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: primary account binding is idempotent, class scoped, immutable and keeps recording owner IDs
+ok 47 - primary account binding is idempotent, class scoped, immutable and keeps recording owner IDs
+  ---
+  duration_ms: 79.249167
+  type: 'test'
+  ...
+# Subtest: learning self assessments and drafts are private by subject, grade and unit and do not alter scores
+ok 48 - learning self assessments and drafts are private by subject, grade and unit and do not alter scores
+  ---
+  duration_ms: 89.096416
+  type: 'test'
+  ...
+# Subtest: all 19 official unit mappings retain grammar and final outputs, including exact U3 objectives
+ok 49 - all 19 official unit mappings retain grammar and final outputs, including exact U3 objectives
+  ---
+  duration_ms: 48.545084
+  type: 'test'
+  ...
+# Subtest: only API-verified signed subject enters the account bridge; Daily credentials never go upstream
+ok 50 - only API-verified signed subject enters the account bridge; Daily credentials never go upstream
+  ---
+  duration_ms: 82.826375
+  type: 'test'
+  ...
+# Subtest: Discovery includes six matching slots from one book/unit/Day, never fragments or mixed books
+ok 51 - Discovery includes six matching slots from one book/unit/Day, never fragments or mixed books
+  ---
+  duration_ms: 1.848833
+  type: 'test'
+  ...
+# Subtest: Complete Days spanning list pages are included; unassigned daily items cannot fill missing slots
+ok 52 - Complete Days spanning list pages are included; unassigned daily items cannot fill missing slots
+  ---
+  duration_ms: 0.43275
+  type: 'test'
+  ...
+# Subtest: Selected units constrain every Day and every card, including an empty Starter unit
+ok 53 - Selected units constrain every Day and every card, including an empty Starter unit
+  ---
+  duration_ms: 0.735834
+  type: 'test'
+  ...
+# (node:8987) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ten distinct learning activities and authentic graded material snapshots
+ok 54 - ten distinct learning activities and authentic graded material snapshots
+  ---
+  duration_ms: 3.016209
+  type: 'test'
+  ...
+# Subtest: draft history, record deduplication, ownership and final assessment basis are preserved
+ok 55 - draft history, record deduplication, ownership and final assessment basis are preserved
+  ---
+  duration_ms: 18.501083
+  type: 'test'
+  ...
+# Subtest: viewing an empty companion session does not invalidate an independent baseline
+ok 56 - viewing an empty companion session does not invalidate an independent baseline
+  ---
+  duration_ms: 2.314708
+  type: 'test'
+  ...
+# Subtest: mixed response conditions are explicitly marked, never treated as comparable ability gains
+ok 57 - mixed response conditions are explicitly marked, never treated as comparable ability gains
+  ---
+  duration_ms: 5.235417
+  type: 'test'
+  ...
+# Subtest: teacher preview runs assessments and records in an isolated subject without enabling classes
+ok 58 - teacher preview runs assessments and records in an isolated subject without enabling classes
+  ---
+  duration_ms: 106.344417
+  type: 'test'
+  ...
+# Subtest: twenty synthetic samples keep level, quotation, history and support conditions in Socratic requests
+ok 59 - twenty synthetic samples keep level, quotation, history and support conditions in Socratic requests
+  ---
+  duration_ms: 0.552458
+  type: 'test'
+  ...
+# Subtest: final oral learning judgements require a recorded teacher listening review
+ok 60 - final oral learning judgements require a recorded teacher listening review
+  ---
+  duration_ms: 9.083
+  type: 'test'
+  ...
+# (node:8988) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: parallel checks preserve answer meaning with different fixed option orders
+ok 61 - parallel checks preserve answer meaning with different fixed option orders
+  ---
+  duration_ms: 2.326042
+  type: 'test'
+  ...
+# Subtest: pilot starts off, requires approval, and pins immutable material snapshots
+ok 62 - pilot starts off, requires approval, and pins immutable material snapshots
+  ---
+  duration_ms: 5.229167
+  type: 'test'
+  ...
+# Subtest: drafts, graduated hints, idempotent versions, teacher review and ownership
+ok 63 - drafts, graduated hints, idempotent versions, teacher review and ownership
+  ---
+  duration_ms: 7.525709
+  type: 'test'
+  ...
+# Subtest: independent forms hide answers and disable hints until submission; first results and redo remain separate
+ok 64 - independent forms hide answers and disable hints until submission; first results and redo remain separate
+  ---
+  duration_ms: 16.316792
+  type: 'test'
+  ...
+# Subtest: durable jobs recover expired leases, wait without zero scores, and commit results once
+ok 65 - durable jobs recover expired leases, wait without zero scores, and commit results once
+  ---
+  duration_ms: 4.812583
+  type: 'test'
+  ...
+# Subtest: model enabling requires a real probe and is invalidated by credential changes; keys never leave settings
+ok 66 - model enabling requires a real probe and is invalidated by credential changes; keys never leave settings
+  ---
+  duration_ms: 22.854416
+  type: 'test'
+  ...
+# Subtest: qwen-tutor/companion: contract validates 20 learner samples with correct vendor parameters
+ok 67 - qwen-tutor/companion: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 9.371791
+  type: 'test'
+  ...
+# Subtest: qwen-evaluator/evaluation: contract validates 20 learner samples with correct vendor parameters
+ok 68 - qwen-evaluator/evaluation: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 5.782208
+  type: 'test'
+  ...
+# Subtest: deepseek-tutor/companion: contract validates 20 learner samples with correct vendor parameters
+ok 69 - deepseek-tutor/companion: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 7.655
+  type: 'test'
+  ...
+# Subtest: deepseek-evaluator/evaluation: contract validates 20 learner samples with correct vendor parameters
+ok 70 - deepseek-evaluator/evaluation: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 20.604375
+  type: 'test'
+  ...
+# Subtest: openai-text/companion: contract validates 20 learner samples with correct vendor parameters
+ok 71 - openai-text/companion: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 10.140875
+  type: 'test'
+  ...
+# Subtest: openai-text/evaluation: contract validates 20 learner samples with correct vendor parameters
+ok 72 - openai-text/evaluation: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 13.085458
+  type: 'test'
+  ...
+# Subtest: custom-text/companion: contract validates 20 learner samples with correct vendor parameters
+ok 73 - custom-text/companion: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 4.673459
+  type: 'test'
+  ...
+# Subtest: custom-text/evaluation: contract validates 20 learner samples with correct vendor parameters
+ok 74 - custom-text/evaluation: contract validates 20 learner samples with correct vendor parameters
+  ---
+  duration_ms: 17.185167
+  type: 'test'
+  ...
+# Subtest: fallback handles network without bypassing refusal or invalid output
+ok 75 - fallback handles network without bypassing refusal or invalid output
+  ---
+  duration_ms: 12.332375
+  type: 'test'
+  ...
+# Subtest: fallback handles 429 without bypassing refusal or invalid output
+ok 76 - fallback handles 429 without bypassing refusal or invalid output
+  ---
+  duration_ms: 5.914958
+  type: 'test'
+  ...
+# Subtest: fallback handles 503 without bypassing refusal or invalid output
+ok 77 - fallback handles 503 without bypassing refusal or invalid output
+  ---
+  duration_ms: 25.764542
+  type: 'test'
+  ...
+# Subtest: fallback handles 401 without bypassing refusal or invalid output
+ok 78 - fallback handles 401 without bypassing refusal or invalid output
+  ---
+  duration_ms: 1.808208
+  type: 'test'
+  ...
+# Subtest: fallback handles 403 without bypassing refusal or invalid output
+ok 79 - fallback handles 403 without bypassing refusal or invalid output
+  ---
+  duration_ms: 1.461
+  type: 'test'
+  ...
+# Subtest: fallback handles 400 without bypassing refusal or invalid output
+ok 80 - fallback handles 400 without bypassing refusal or invalid output
+  ---
+  duration_ms: 6.568875
+  type: 'test'
+  ...
+# Subtest: fallback handles invalid without bypassing refusal or invalid output
+ok 81 - fallback handles invalid without bypassing refusal or invalid output
+  ---
+  duration_ms: 2.016625
+  type: 'test'
+  ...
+# Subtest: fallback handles refusal without bypassing refusal or invalid output
+ok 82 - fallback handles refusal without bypassing refusal or invalid output
+  ---
+  duration_ms: 1.366333
+  type: 'test'
+  ...
+# Subtest: fallback handles unsupported without bypassing refusal or invalid output
+ok 83 - fallback handles unsupported without bypassing refusal or invalid output
+  ---
+  duration_ms: 1.396417
+  type: 'test'
+  ...
+# Subtest: domestic-only ASR and evaluation complete without calling OpenAI
+ok 84 - domestic-only ASR and evaluation complete without calling OpenAI
+  ---
+  duration_ms: 21.040834
+  type: 'test'
+  ...
+# Subtest: OpenAI transcription uses a file upload and custom compatible provider is isolated
+ok 85 - OpenAI transcription uses a file upload and custom compatible provider is isolated
+  ---
+  duration_ms: 6.357209
+  type: 'test'
+  ...
+# Subtest: daily quotas use Beijing dates, are student scoped, and deduplicate the same request
+ok 86 - daily quotas use Beijing dates, are student scoped, and deduplicate the same request
+  ---
+  duration_ms: 26.97075
+  type: 'test'
+  ...
+# Subtest: unsupported quotations, extra questions and invalid rubric scores are rejected
+ok 87 - unsupported quotations, extra questions and invalid rubric scores are rejected
+  ---
+  duration_ms: 0.256583
+  type: 'test'
+  ...
+# Subtest: complete ten-task journey keeps both outcomes, feedback, revisions and delayed independent evidence
+ok 88 - complete ten-task journey keeps both outcomes, feedback, revisions and delayed independent evidence
+  ---
+  duration_ms: 18.239458
+  type: 'test'
+  ...
+# Subtest: companion requests are owned and idempotent; examples record only delivered support, and independent checks pause pending help
+ok 89 - companion requests are owned and idempotent; examples record only delivered support, and independent checks pause pending help
+  ---
+  duration_ms: 7.78975
+  type: 'test'
+  ...
+# Subtest: SQLite reopening preserves drafts, independent locks and pending queue payloads
+ok 90 - SQLite reopening preserves drafts, independent locks and pending queue payloads
+  ---
+  duration_ms: 13.807125
+  type: 'test'
+  ...
+# Subtest: route configuration rejects incompatible roles and duplicates, and evaluation thinking is independent
+ok 91 - route configuration rejects incompatible roles and duplicates, and evaluation thinking is independent
+  ---
+  duration_ms: 2.420417
+  type: 'test'
+  ...
+# Subtest: queue bounds concurrent work, prioritizes companion turns and still serves background evaluation
+ok 92 - queue bounds concurrent work, prioritizes companion turns and still serves background evaluation
+  ---
+  duration_ms: 39.764958
+  type: 'test'
+  ...
+# Subtest: HTTP enforces sessions, admin role, origin, private audio, and cross-student isolation
+ok 93 - HTTP enforces sessions, admin role, origin, private audio, and cross-student isolation
+  ---
+  duration_ms: 61.430625
+  type: 'test'
+  ...
+# (node:8989) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: teacher learning APIs require admin identity and same origin, persist reviews and visibility with audit
+ok 94 - teacher learning APIs require admin identity and same origin, persist reviews and visibility with audit
+  ---
+  duration_ms: 218.76275
+  type: 'test'
+  ...
+# (node:8990) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Publishing rejects reading/video reuse in either order, including different Days
+ok 95 - Publishing rejects reading/video reuse in either order, including different Days
+  ---
+  duration_ms: 9.562292
+  type: 'test'
+  ...
+# Subtest: New reading subjects on the same theme are allowed; drafts can be revised
+ok 96 - New reading subjects on the same theme are allowed; drafts can be revised
+  ---
+  duration_ms: 0.939041
+  type: 'test'
+  ...
+# Subtest: Original URL and video URL variants catch reuse, while distinct source sections remain distinct
+ok 97 - Original URL and video URL variants catch reuse, while distinct source sections remain distinct
+  ---
+  duration_ms: 0.714708
+  type: 'test'
+  ...
+# Subtest: Course videos and archived content do not block reading publication
+ok 98 - Course videos and archived content do not block reading publication
+  ---
+  duration_ms: 1.45275
+  type: 'test'
+  ...
+# (node:8991) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Day migration preserves IDs, content and learning records, is idempotent and independent of dates
+ok 99 - Day migration preserves IDs, content and learning records, is idempotent and independent of dates
+  ---
+  duration_ms: 14.261792
+  type: 'test'
+  ...
+# Subtest: learning reports use original points and valid recitation evidence, retain nonparticipating class members, and isolate classes
+ok 100 - learning reports use original points and valid recitation evidence, retain nonparticipating class members, and isolate classes
+  ---
+  duration_ms: 86.602042
+  type: 'test'
+  ...
+# Subtest: rank ties share place and exclusions affect display without rewriting points
+ok 101 - rank ties share place and exclusions affect display without rewriting points
+  ---
+  duration_ms: 9.792834
+  type: 'test'
+  ...
+# Subtest: every student textbook link resolves the same lesson and preserves a separate classroom link
+ok 102 - every student textbook link resolves the same lesson and preserves a separate classroom link
+  ---
+  duration_ms: 2694.174125
+  type: 'test'
+  ...
+# Subtest: leaderboard permits masked public grade rows, preserves verified class and protects private history
+ok 103 - leaderboard permits masked public grade rows, preserves verified class and protects private history
+  ---
+  duration_ms: 90.97375
+  type: 'test'
+  ...
+# Subtest: public name masking hides exactly one middle character and handles short names
+ok 104 - public name masking hides exactly one middle character and handles short names
+  ---
+  duration_ms: 0.073708
+  type: 'test'
+  ...
+# (node:8992) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: pending rewards retry after service recovery without issuing a second reward
+ok 105 - pending rewards retry after service recovery without issuing a second reward
+  ---
+  duration_ms: 50.467667
+  type: 'test'
+  ...
+# Subtest: learning reward outbox survives missing service/key and stores each task once
+ok 106 - learning reward outbox survives missing service/key and stores each task once
+  ---
+  duration_ms: 0.527042
+  type: 'test'
+  ...
+# Subtest: public gateway cannot forward internal reward writes even with a same-origin request
+ok 107 - public gateway cannot forward internal reward writes even with a same-origin request
+  ---
+  duration_ms: 0.234416
+  type: 'test'
+  ...
+# Subtest: return from a filtered second-page video preserves the exact browsing context
+ok 108 - return from a filtered second-page video preserves the exact browsing context
+  ---
+  duration_ms: 1.942708
+  type: 'test'
+  ...
+# Subtest: a Day lesson returns to its own unit and Day instead of the generic library
+ok 109 - a Day lesson returns to its own unit and Day instead of the generic library
+  ---
+  duration_ms: 0.284042
+  type: 'test'
+  ...
+# Subtest: home and direct links have a local contextual return destination
+ok 110 - home and direct links have a local contextual return destination
+  ---
+  duration_ms: 0.298459
+  type: 'test'
+  ...
+# Subtest: school account is the default; public login and registration remain explicit options
+ok 111 - school account is the default; public login and registration remain explicit options
+  ---
+  duration_ms: 0.455958
+  type: 'test'
+  ...
+# Subtest: weekly recitation switch opens a school login form and keeps the return destination
+ok 112 - weekly recitation switch opens a school login form and keeps the return destination
+  ---
+  duration_ms: 0.225375
+  type: 'test'
+  ...
+# Subtest: return destinations retain study state and reject other origins, unknown paths and backslashes
+ok 113 - return destinations retain study state and reject other origins, unknown paths and backslashes
+  ---
+  duration_ms: 0.503083
+  type: 'test'
+  ...
+# (node:8995) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: server rounds cover everyone once; idempotent retry and stale-device rejection
+ok 114 - server rounds cover everyone once; idempotent retry and stale-device rejection
+  ---
+  duration_ms: 9.800541
+  type: 'test'
+  ...
+# Subtest: fair mode prioritizes never-called students after early restarts, manual selections count
+ok 115 - fair mode prioritizes never-called students after early restarts, manual selections count
+  ---
+  duration_ms: 2.368292
+  type: 'test'
+  ...
+# Subtest: absence, group edit, stable IDs and import deduplication preserve individual round history
+ok 116 - absence, group edit, stable IDs and import deduplication preserve individual round history
+  ---
+  duration_ms: 3.182792
+  type: 'test'
+  ...
+# Subtest: uniform mode reports true candidate sizes independently of accumulated counts
+ok 117 - uniform mode reports true candidate sizes independently of accumulated counts
+  ---
+  duration_ms: 0.296542
+  type: 'test'
+  ...
+# Subtest: failed imports are atomic; every operation validates revision and operation identity
+ok 118 - failed imports are atomic; every operation validates revision and operation identity
+  ---
+  duration_ms: 1.504667
+  type: 'test'
+  ...
+# Subtest: backup restores complete rounds and history as new classes without overwriting; invalid restore is atomic
+ok 119 - backup restores complete rounds and history as new classes without overwriting; invalid restore is atomic
+  ---
+  duration_ms: 2.243333
+  type: 'test'
+  ...
+# Subtest: teacher workspaces isolate rosters, draw mutations, retries and backups; legacy administrator data remains accessible
+ok 120 - teacher workspaces isolate rosters, draw mutations, retries and backups; legacy administrator data remains accessible
+  ---
+  duration_ms: 1.508667
+  type: 'test'
+  ...
+# Subtest: hundreds of rounds have no repeated students and no adjacent boundary repeat
+ok 121 - hundreds of rounds have no repeated students and no adjacent boundary repeat
+  ---
+  duration_ms: 18.22775
+  type: 'test'
+  ...
+# Subtest: manual picks, restored data and new imports retain coverage
+ok 122 - manual picks, restored data and new imports retain coverage
+  ---
+  duration_ms: 1.339667
+  type: 'test'
+  ...
+# Subtest: group rounds and classes are independent
+ok 123 - group rounds and classes are independent
+  ---
+  duration_ms: 0.270916
+  type: 'test'
+  ...
+# Subtest: imports deduplicate names, recognize headers and preserve students with different numbers
+ok 124 - imports deduplicate names, recognize headers and preserve students with different numbers
+  ---
+  duration_ms: 0.320459
+  type: 'test'
+  ...
+# Subtest: single student and bounded random indexes
+ok 125 - single student and bounded random indexes
+  ---
+  duration_ms: 1.114125
+  type: 'test'
+  ...
+# Subtest: Embedded caption decision applies only to the inspected video asset
+ok 126 - Embedded caption decision applies only to the inspected video asset
+  ---
+  duration_ms: 0.329208
+  type: 'test'
+  ...
+# (node:8998) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: 14-day window includes its first day and leaves older media on Mac
+ok 127 - 14-day window includes its first day and leaves older media on Mac
+  ---
+  duration_ms: 9.346167
+  type: 'test'
+  ...
+# Subtest: budget reserves small permanent resources and favours newest lessons
+ok 128 - budget reserves small permanent resources and favours newest lessons
+  ---
+  duration_ms: 0.180416
+  type: 'test'
+  ...
+# Subtest: video categories filter before pagination and survive teacher edits
+ok 129 - video categories filter before pagination and survive teacher edits
+  ---
+  duration_ms: 3.220708
+  type: 'test'
+  ...
+# Subtest: lock-screen controls follow playback, clamp seeking, and release on exit
+ok 130 - lock-screen controls follow playback, clamp seeking, and release on exit
+  ---
+  duration_ms: 1.440917
+  type: 'test'
+  ...
+# Subtest: unsupported media session does not affect playback
+ok 131 - unsupported media session does not affect playback
+  ---
+  duration_ms: 0.322375
+  type: 'test'
+  ...
+# (node:9000) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Publishing rejects absent, link-only and processing-note originals; drafts remain editable
+ok 132 - Publishing rejects absent, link-only and processing-note originals; drafts remain editable
+  ---
+  duration_ms: 7.818167
+  type: 'test'
+  ...
+# Subtest: Long originals retain the complete ending; excessive input is rejected before truncation
+ok 133 - Long originals retain the complete ending; excessive input is rejected before truncation
+  ---
+  duration_ms: 2.39025
+  type: 'test'
+  ...
+# Subtest: Source sentences longer than 100 characters remain complete and excessive titles reject atomically
+ok 134 - Source sentences longer than 100 characters remain complete and excessive titles reject atomically
+  ---
+  duration_ms: 0.400875
+  type: 'test'
+  ...
+# Subtest: All seven native equations retain primary-source mathematical markup and complete original text
+ok 135 - All seven native equations retain primary-source mathematical markup and complete original text
+  ---
+  duration_ms: 10.66325
+  type: 'test'
+  ...
+# Subtest: Equation typesetting never applies to altered prose or an unrelated article
+ok 136 - Equation typesetting never applies to altered prose or an unrelated article
+  ---
+  duration_ms: 0.340542
+  type: 'test'
+  ...
+# Subtest: Fog paper retains all ten primary equations and separately restarted methods numbering
+ok 137 - Fog paper retains all ten primary equations and separately restarted methods numbering
+  ---
+  duration_ms: 14.006542
+  type: 'test'
+  ...
+# Subtest: Braille hysteresis formula retains the primary fraction, subscripts, sign and equation number
+ok 138 - Braille hysteresis formula retains the primary fraction, subscripts, sign and equation number
+  ---
+  duration_ms: 14.267334
+  type: 'test'
+  ...
+# Subtest: Fiber afterglow keeps all three decay terms and remains unnumbered like the source
+ok 139 - Fiber afterglow keeps all three decay terms and remains unnumbered like the source
+  ---
+  duration_ms: 13.054625
+  type: 'test'
+  ...
+# Subtest: Complete Route 20 original retains all section levels and title text
+ok 140 - Complete Route 20 original retains all section levels and title text
+  ---
+  duration_ms: 3.712333
+  type: 'test'
+  ...
+# Subtest: Nested headings retain their depth within the HTML heading range
+ok 141 - Nested headings retain their depth within the HTML heading range
+  ---
+  duration_ms: 0.114458
+  type: 'test'
+  ...
+# Subtest: Ordinary paragraphs and multiline blocks are not converted into headings
+ok 142 - Ordinary paragraphs and multiline blocks are not converted into headings
+  ---
+  duration_ms: 1.069333
+  type: 'test'
+  ...
+# Subtest: Inline image positions follow embedded source captions and avoid reference paragraphs
+ok 143 - Inline image positions follow embedded source captions and avoid reference paragraphs
+  ---
+  duration_ms: 2.264792
+  type: 'test'
+  ...
+# Subtest: Graded readings distribute figures without treating original captions as translated paragraphs
+ok 144 - Graded readings distribute figures without treating original captions as translated paragraphs
+  ---
+  duration_ms: 0.357209
+  type: 'test'
+  ...
+# Subtest: Research diagrams stay at their named figure and retain the full original legend
+ok 145 - Research diagrams stay at their named figure and retain the full original legend
+  ---
+  duration_ms: 0.2785
+  type: 'test'
+  ...
+# Subtest: Locust research figures follow their actual scientific subjects in all grades
+ok 146 - Locust research figures follow their actual scientific subjects in all grades
+  ---
+  duration_ms: 5.635625
+  type: 'test'
+  ...
+# Subtest: Fog figures stay beside design, vortices, drainage and outdoor testing in all four grades
+ok 147 - Fog figures stay beside design, vortices, drainage and outdoor testing in all four grades
+  ---
+  duration_ms: 3.125583
+  type: 'test'
+  ...
+# Subtest: Braille figures accompany fabrication, morphology, performance, touch sensing and audio demonstrations in each grade
+ok 148 - Braille figures accompany fabrication, morphology, performance, touch sensing and audio demonstrations in each grade
+  ---
+  duration_ms: 2.48025
+  type: 'test'
+  ...
+# Subtest: Fiber figures accompany the pigment, material structure, optical comparison and charged-afterglow subjects in each grade
+ok 149 - Fiber figures accompany the pigment, material structure, optical comparison and charged-afterglow subjects in each grade
+  ---
+  duration_ms: 2.322
+  type: 'test'
+  ...
+# Subtest: All eighteen pictograph previews follow their own category, with the sample at the end
+ok 150 - All eighteen pictograph previews follow their own category, with the sample at the end
+  ---
+  duration_ms: 12.283042
+  type: 'test'
+  ...
+# Subtest: Separated bilingual steps keep their source numbers rather than restarting at one
+ok 151 - Separated bilingual steps keep their source numbers rather than restarting at one
+  ---
+  duration_ms: 0.717666
+  type: 'test'
+  ...
+# Subtest: Numbered runs retain deliberate gaps and textual punctuation
+ok 152 - Numbered runs retain deliberate gaps and textual punctuation
+  ---
+  duration_ms: 0.13
+  type: 'test'
+  ...
+# Subtest: Decimal dimensions, dates, empty steps and prose are preserved as prose
+ok 153 - Decimal dimensions, dates, empty steps and prose are preserved as prose
+  ---
+  duration_ms: 0.065125
+  type: 'test'
+  ...
+# (node:9006) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Reviewed translations preserve option positions, answers and explanations and are idempotent
+ok 154 - Reviewed translations preserve option positions, answers and explanations and are idempotent
+  ---
+  duration_ms: 4.318458
+  type: 'test'
+  ...
+# Subtest: Published reading rejects untranslated prompts or options at every level; drafts and Chinese explanations remain supported
+ok 155 - Published reading rejects untranslated prompts or options at every level; drafts and Chinese explanations remain supported
+  ---
+  duration_ms: 4.494917
+  type: 'test'
+  ...
+# Subtest: Source display equations in layout tables must appear completely in the original
+ok 156 - Source display equations in layout tables must appear completely in the original
+  ---
+  duration_ms: 1.077916
+  type: 'test'
+  ...
+# Subtest: Ordinary prose and inline math do not require display-equation records
+ok 157 - Ordinary prose and inline math do not require display-equation records
+  ---
+  duration_ms: 0.056625
+  type: 'test'
+  ...
+# Subtest: Publication requires a complete human voice review tied to every adapted text and Chinese version
+ok 158 - Publication requires a complete human voice review tied to every adapted text and Chinese version
+  ---
+  duration_ms: 7.661167
+  type: 'test'
+  ...
+# Subtest: Complete source score tables retain every cell, including blank notes and medal ranks
+ok 159 - Complete source score tables retain every cell, including blank notes and medal ranks
+  ---
+  duration_ms: 3.43525
+  type: 'test'
+  ...
+# Subtest: Malformed tables and ordinary prose are kept as text instead of losing cells
+ok 160 - Malformed tables and ordinary prose are kept as text instead of losing cells
+  ---
+  duration_ms: 0.338667
+  type: 'test'
+  ...
+# Subtest: Blank-separated source material rows form one complete table without changing original blocks
+ok 161 - Blank-separated source material rows form one complete table without changing original blocks
+  ---
+  duration_ms: 2.152167
+  type: 'test'
+  ...
+# Subtest: Pipe prose without a table heading and mismatched table rows stay unchanged
+ok 162 - Pipe prose without a table heading and mismatched table rows stay unchanged
+  ---
+  duration_ms: 0.297625
+  type: 'test'
+  ...
+# Subtest: Fiber source tables preserve grouped temperatures, all 33 numeric/sample cells and complete raw records
+ok 163 - Fiber source tables preserve grouped temperatures, all 33 numeric/sample cells and complete raw records
+  ---
+  duration_ms: 2.508125
+  type: 'test'
+  ...
+# Subtest: Named sample records remain prose without a table heading or with inconsistent columns
+ok 164 - Named sample records remain prose without a table heading or with inconsistent columns
+  ---
+  duration_ms: 0.19175
+  type: 'test'
+  ...
+# Subtest: recitation preparation links preserve the assigned sentence and each level without exposing references
+ok 165 - recitation preparation links preserve the assigned sentence and each level without exposing references
+  ---
+  duration_ms: 1.518
+  type: 'test'
+  ...
+# Subtest: missing or invalid legacy course coordinates do not invent a corresponding lesson
+ok 166 - missing or invalid legacy course coordinates do not invent a corresponding lesson
+  ---
+  duration_ms: 0.77
+  type: 'test'
+  ...
+# (node:9010) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: admin password authentication, independent sessions, logout and password rotation
+ok 167 - admin password authentication, independent sessions, logout and password rotation
+  ---
+  duration_ms: 291.351666
+  type: 'test'
+  ...
+# Subtest: multiple sentences, level isolation, selected reference snapshots and all-item completion
+ok 168 - multiple sentences, level isolation, selected reference snapshots and all-item completion
+  ---
+  duration_ms: 67.865292
+  type: 'test'
+  ...
+# Subtest: class roster matching, private attempts, reference gate and idempotent local storage
+ok 169 - class roster matching, private attempts, reference gate and idempotent local storage
+  ---
+  duration_ms: 139.108458
+  type: 'test'
+  ...
+# Subtest: recording format validation rejects silence, wrong formats, excessive length and preserves sample rate
+ok 170 - recording format validation rejects silence, wrong formats, excessive length and preserves sample rate
+  ---
+  duration_ms: 200.306708
+  type: 'test'
+  ...
+# Subtest: Xfyun percentage scores, repeated word alignment, phrase feedback and rejected recordings
+ok 171 - Xfyun percentage scores, repeated word alignment, phrase feedback and rejected recordings
+  ---
+  duration_ms: 1.160875
+  type: 'test'
+  ...
+# Subtest: provider rejection exposes corrective feedback without accepting invalid scores
+ok 172 - provider rejection exposes corrective feedback without accepting invalid scores
+  ---
+  duration_ms: 69.786709
+  type: 'test'
+  ...
+# Subtest: service errors give safe, actionable retry messages
+ok 173 - service errors give safe, actionable retry messages
+  ---
+  duration_ms: 0.245416
+  type: 'test'
+  ...
+# Subtest: speech request follows BOM/text separator and first/middle/final audio protocol
+ok 174 - speech request follows BOM/text separator and first/middle/final audio protocol
+  ---
+  duration_ms: 1038.031167
+  type: 'test'
+  ...
+# Subtest: unscored inserted words do not discard valid scores or replace repeated reference words
+ok 175 - unscored inserted words do not discard valid scores or replace repeated reference words
+  ---
+  duration_ms: 0.41725
+  type: 'test'
+  ...
+# Subtest: correcting a mistaken level preserves audio, reference snapshots, privacy and idempotency
+ok 176 - correcting a mistaken level preserves audio, reference snapshots, privacy and idempotency
+  ---
+  duration_ms: 87.729709
+  type: 'test'
+  ...
+# Subtest: teacher roster covers all students and full task history beyond 500 recordings, isolated by task and class
+ok 177 - teacher roster covers all students and full task history beyond 500 recordings, isolated by task and class
+  ---
+  duration_ms: 84.158958
+  type: 'test'
+  ...
+# Subtest: native recorder waits for the final chunk before constructing a complete recording
+ok 178 - native recorder waits for the final chunk before constructing a complete recording
+  ---
+  duration_ms: 0.655917
+  type: 'test'
+  ...
+# Subtest: native recorder surfaces device errors instead of accepting incomplete audio
+ok 179 - native recorder surfaces device errors instead of accepting incomplete audio
+  ---
+  duration_ms: 2.180958
+  type: 'test'
+  ...
+# (node:9012) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: administrator can manage only registered students and teachers, without exposing password hashes or deleting learning history
+ok 180 - administrator can manage only registered students and teachers, without exposing password hashes or deleting learning history
+  ---
+  duration_ms: 14.209708
+  type: 'test'
+  ...
+# Subtest: single play ends normally; looping waits for the configured gap and replays the same audio
+ok 181 - single play ends normally; looping waits for the configured gap and replays the same audio
+  ---
+  duration_ms: 0.572625
+  type: 'test'
+  ...
+# Subtest: pause during the gap cancels replay; changing gap replaces the existing timer
+ok 182 - pause during the gap cancels replay; changing gap replaces the existing timer
+  ---
+  duration_ms: 0.186625
+  type: 'test'
+  ...
+# Subtest: disabling loop and stopping for a sentence or module switch cancel waiting and stale callbacks
+ok 183 - disabling loop and stopping for a sentence or module switch cancel waiting and stale callbacks
+  ---
+  duration_ms: 0.599125
+  type: 'test'
+  ...
+# Subtest: a rejected pending play after stop cannot show an error or resume playback
+ok 184 - a rejected pending play after stop cannot show an error or resume playback
+  ---
+  duration_ms: 0.074583
+  type: 'test'
+  ...
+# Subtest: Cold preserved photographs and animated GIFs have no synthetic download deadline
+ok 185 - Cold preserved photographs and animated GIFs have no synthetic download deadline
+  ---
+  duration_ms: 15.2525
+  type: 'test'
+  ...
+# Subtest: Complete cached source images are displayed without another full original download
+ok 186 - Complete cached source images are displayed without another full original download
+  ---
+  duration_ms: 0.673333
+  type: 'test'
+  ...
+# Subtest: Private accounts and student tasks remain outside the offline cache
+ok 187 - Private accounts and student tasks remain outside the offline cache
+  ---
+  duration_ms: 0.803833
+  type: 'test'
+  ...
+# Subtest: Shell assets keep a bounded fallback while cold navigation stays alive
+ok 188 - Shell assets keep a bounded fallback while cold navigation stays alive
+  ---
+  duration_ms: 0.828417
+  type: 'test'
+  ...
+# Subtest: all 18 units have 144 source-matched variants, valid structural spans and 432 exercises
+ok 189 - all 18 units have 144 source-matched variants, valid structural spans and 432 exercises
+  ---
+  duration_ms: 5.736875
+  type: 'test'
+  ...
+# Subtest: deep links resolve every variant, retain unit on level change and cross unit boundaries
+ok 190 - deep links resolve every variant, retain unit on level change and cross unit boundaries
+  ---
+  duration_ms: 7.851584
+  type: 'test'
+  ...
+# Subtest: core marking distinguishes identically worded subordinate and main subjects
+ok 191 - core marking distinguishes identically worded subordinate and main subjects
+  ---
+  duration_ms: 0.202292
+  type: 'test'
+  ...
+# Subtest: first attempts and hint use survive retries and serialization, revisions separate records
+ok 192 - first attempts and hint use survive retries and serialization, revisions separate records
+  ---
+  duration_ms: 0.354833
+  type: 'test'
+  ...
+# Subtest: context-bound corrections fix pronouns and nominal clauses without changing words or other sentences
+ok 193 - context-bound corrections fix pronouns and nominal clauses without changing words or other sentences
+  ---
+  duration_ms: 0.633875
+  type: 'test'
+  ...
+# Subtest: all 144 lessons expose nonoverlapping, source-matched subject and verb anchors
+ok 194 - all 144 lessons expose nonoverlapping, source-matched subject and verb anchors
+  ---
+  duration_ms: 4.988875
+  type: 'test'
+  ...
+# (node:9017) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: all 144 verb maps are source-exact, bounded and nonoverlapping; embedded verbs and nonfinite distinctions
+ok 195 - all 144 verb maps are source-exact, bounded and nonoverlapping; embedded verbs and nonfinite distinctions
+  ---
+  duration_ms: 2.260334
+  type: 'test'
+  ...
+# Subtest: multi-class publication is atomic, deduplicates classes, and archive/reopen preserves attempts
+ok 196 - multi-class publication is atomic, deduplicates classes, and archive/reopen preserves attempts
+  ---
+  duration_ms: 93.45625
+  type: 'test'
+  ...
+# Subtest: WordUp routing leaves Daily private APIs and media untouched
+ok 197 - WordUp routing leaves Daily private APIs and media untouched
+  ---
+  duration_ms: 0.453916
+  type: 'test'
+  ...
+# Subtest: Unavailable upstream keeps page navigation and retry context, while APIs return JSON
+ok 198 - Unavailable upstream keeps page navigation and retry context, while APIs return JSON
+  ---
+  duration_ms: 24.470208
+  type: 'test'
+  ...
+# Subtest: Gateway preserves cookies, multipart payloads, status and ranges; rejects foreign writes
+ok 199 - Gateway preserves cookies, multipart payloads, status and ranges; rejects foreign writes
+  ---
+  duration_ms: 12.567042
+  type: 'test'
+  ...
+# Subtest: Theme injection changes only HTML pages, preserving RSC and API payloads and HEAD semantics
+ok 200 - Theme injection changes only HTML pages, preserving RSC and API payloads and HEAD semantics
+  ---
+  duration_ms: 12.033083
+  type: 'test'
+  ...
+# Subtest: WordUp health checks both services, shares concurrent probes, and detects recovery
+ok 201 - WordUp health checks both services, shares concurrent probes, and detects recovery
+  ---
+  duration_ms: 25.797542
+  type: 'test'
+  ...
+# Subtest: An unavailable WordUp service produces a bounded failure
+ok 202 - An unavailable WordUp service produces a bounded failure
+  ---
+  duration_ms: 7.194584
+  type: 'test'
+  ...
+# Subtest: writing bridge keeps the same-origin login return and all PKCE state, without allowing external redirects
+ok 203 - writing bridge keeps the same-origin login return and all PKCE state, without allowing external redirects
+  ---
+  duration_ms: 1.658708
+  type: 'test'
+  ...
+# Subtest: writing feedback returns to the same-origin student history without opening external redirects
+ok 204 - writing feedback returns to the same-origin student history without opening external redirects
+  ---
+  duration_ms: 0.336875
+  type: 'test'
+  ...
+# Subtest: independent peer login preserves its same-origin return without external callback redirects
+ok 205 - independent peer login preserves its same-origin return without external callback redirects
+  ---
+  duration_ms: 0.368292
+  type: 'test'
+  ...
+1..205
+# tests 205
+# suites 0
+# pass 205
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3141.364292

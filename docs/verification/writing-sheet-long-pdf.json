@@ -1,0 +1,11 @@
+{
+  "syntheticOnly": true,
+  "pages": 5,
+  "instructionPages": 4,
+  "writingPages": 1,
+  "requirementsPreserved": 45,
+  "writingPageIdentityPreserved": true,
+  "footerWithinPageBrowserCheck": true,
+  "instructionPageMarginsVerified": true,
+  "pdfSha256": "78a336a439f164c6e1afdb8c77bc98caddf83af8df3364d60938208e5c6c9912"
+}

@@ -1,0 +1,897 @@
+{
+  "checkedAt": "2026-10-17T00:41:53.635915+00:00",
+  "deployedGitCommit": "89280a7487569479142e55a3012c7d76eeffd77b",
+  "releaseManifest": {
+    "schema": "newsun-writing-staging-release-v1",
+    "createdAt": "2026-10-17T00:19:36.821Z",
+    "gitCommit": "89280a7487569479142e55a3012c7d76eeffd77b",
+    "accountId": "41c0024342aae8d7b6a8b67c7def1d3e",
+    "applications": [
+      {
+        "kind": "teacher",
+        "name": "writeascend-staging",
+        "origin": "https://writeascend-staging.317792050.workers.dev",
+        "database": {
+          "binding": "DB",
+          "database_name": "writeascend-staging",
+          "database_id": "c1bb77de-0b5f-4d35-8dbf-e52739c3ba75",
+          "migrations_dir": "migrations"
+        },
+        "assets": [
+          {
+            "path": "_headers",
+            "bytes": 472,
+            "sha256": "e25c28713afc443a10cb119b620654177e1765a9864136d5b44deb5fd4be48d3"
+          },
+          {
+            "path": "assets/BoundGradingPanel--O0KUeYt.js",
+            "bytes": 37547,
+            "sha256": "4f6298c2a57145018b7e7e68d923a55b9d8e1a9bb0eddf3cd04a488255dd5aaa"
+          },
+          {
+            "path": "assets/BoundGradingPanel--O0KUeYt.js.map",
+            "bytes": 94270,
+            "sha256": "ffd662bf4e1a0a0759e9766f2ec740b6ea36f793d9b432de79aba8ace90e4a53"
+          },
+          {
+            "path": "assets/BoundGradingPanel-BliYnSq3.css",
+            "bytes": 11676,
+            "sha256": "7d88798fa1874719ccacb487f1c247ef41217457816bc388dfa7f45f01c58d1f"
+          },
+          {
+            "path": "assets/index-Clrj5sJw.js",
+            "bytes": 533915,
+            "sha256": "bd61d64fc0f63c4806cac94318c9718d2b6671e2fa1a7cf48cd73a4c6c6ef827"
+          },
+          {
+            "path": "assets/index-Clrj5sJw.js.map",
+            "bytes": 1975161,
+            "sha256": "198e4480812b58d5926410a0fe7180fe765a6341b27db3efb2830be205df33ba"
+          },
+          {
+            "path": "assets/index-Nc6ZY7Oi.css",
+            "bytes": 89605,
+            "sha256": "c99d3ccd8f4fdaee817654e09ce725cfaa673b1fdf86b11a73ae11debbea0a98"
+          },
+          {
+            "path": "assets/mammoth.browser-dkmlS4hQ.js",
+            "bytes": 298592,
+            "sha256": "6d123a0a28e7d9061197430444b2cc5325fe24b6be172a6649aad265533d6705"
+          },
+          {
+            "path": "assets/mammoth.browser-dkmlS4hQ.js.map",
+            "bytes": 1040571,
+            "sha256": "b5940c2e9a625b04b466babb17047dac12502e64c0fb8105b4b43056d37bcd6f"
+          },
+          {
+            "path": "assets/pdf-BuVai-Vj.js",
+            "bytes": 430282,
+            "sha256": "c1dca0596e7a8495f721c5dc912f3e1e3036684b22228e2fd3cfa3d0d2bdaed8"
+          },
+          {
+            "path": "assets/pdf-BuVai-Vj.js.map",
+            "bytes": 1464645,
+            "sha256": "8e38f93693911b30f08195d211878795d95e82f35f85512a06a86f12a4fe84ad"
+          },
+          {
+            "path": "assets/pdf.worker.min-CjEcRF4W.mjs",
+            "bytes": 1264342,
+            "sha256": "9536359f1b8367850d485731ca1d5e45c159a7b7a0912325e539937aa21ceb18"
+          },
+          {
+            "path": "assets/PeerMaterialsPanel-CXX3yxWj.js",
+            "bytes": 11470,
+            "sha256": "bb2ab356ac9860042e161e57ce685111c97ba9e27602ebc8b4d61ee6f5f6669f"
+          },
+          {
+            "path": "assets/PeerMaterialsPanel-CXX3yxWj.js.map",
+            "bytes": 31151,
+            "sha256": "921d8d7fb3d31abc3e281bdee71d47fe7eb9d273018c78a21e90929e82b66770"
+          },
+          {
+            "path": "assets/PeerMaterialsPanel-D4UW3rFQ.css",
+            "bytes": 4540,
+            "sha256": "de4015ac978e1d8f0f362c778a9323a963753503ef2f3a3c68d1950603c8938c"
+          },
+          {
+            "path": "assets/PeerRevisionEvidence-BxxosMsR.css",
+            "bytes": 4228,
+            "sha256": "3b9eb2e2ebc40652adfd382f5bdabe441f8e14d1c56e79ee843a22b27af00333"
+          },
+          {
+            "path": "assets/PeerRevisionEvidence-CpYxci97.js",
+            "bytes": 4030,
+            "sha256": "b923cbbafd56c9731089254bfa49d2b9c907cf0006d81223a18c12c61c5e6942"
+          },
+          {
+            "path": "assets/PeerRevisionEvidence-CpYxci97.js.map",
+            "bytes": 10676,
+            "sha256": "8bad82b7291d53d72eb225b36127e8b8cadf4625801a608d88a7259aea2efcc4"
+          },
+          {
+            "path": "assets/revision-cache-LW6ZhA4s.js",
+            "bytes": 1960,
+            "sha256": "dd0fd52573e8cd061955d8bc2cbc39358d104108b3375ef333ce92b0c2242400"
+          },
+          {
+            "path": "assets/revision-cache-LW6ZhA4s.js.map",
+            "bytes": 5174,
+            "sha256": "15402c44eb435eb2915d2663b237f93b3756493f30169ae3e0731de9524cadd7"
+          },
+          {
+            "path": "assets/rolldown-runtime-COiEfhsA.js",
+            "bytes": 1116,
+            "sha256": "174e7e98105b02138bee9b4c62dfc8a01980db395f9e6c916db999c091115562"
+          },
+          {
+            "path": "assets/scan-outbox-PYl0l1pw.js",
+            "bytes": 2164,
+            "sha256": "2b84dd76cbffdcce1cf02ff3c9ba020a9980fc66378ae71f4c4c951aed9873a7"
+          },
+          {
+            "path": "assets/scan-outbox-PYl0l1pw.js.map",
+            "bytes": 6492,
+            "sha256": "7dd8152a994fc8c59b710436098c7da8337afb40cfed8c7b32a1ad03ed4eb612"
+          },
+          {
+            "path": "assets/SchoolDirectoryPanel-C46gUJW5.js",
+            "bytes": 11392,
+            "sha256": "897a2e532dc5e8bc13971e1418bad7a7bec477b0969a7f31347578a1dd24b07b"
+          },
+          {
+            "path": "assets/SchoolDirectoryPanel-C46gUJW5.js.map",
+            "bytes": 30501,
+            "sha256": "3fb46f0124bff61f02051854269309a202a721e81af2540ef70807cce27a4856"
+          },
+          {
+            "path": "assets/SchoolDirectoryPanel-CBpnjnhR.css",
+            "bytes": 4215,
+            "sha256": "1f686f49c8573c0133ceba60d30701fbaa816ee73dd899f61bcf5ff7a4afd083"
+          },
+          {
+            "path": "assets/student-search-BD0S4UxB.js",
+            "bytes": 290964,
+            "sha256": "8451b4904c70fcee40f0b526894f770fc57a8eff4fa0bbcb1486129e5c650e79"
+          },
+          {
+            "path": "assets/student-search-BD0S4UxB.js.map",
+            "bytes": 810469,
+            "sha256": "46bd859995c8847918883b46fcbd8ff56eef26db8785fddeb6a530a082dcd169"
+          },
+          {
+            "path": "assets/StudentReports-BixhUmLw.css",
+            "bytes": 6048,
+            "sha256": "0cc0e3ba5a4f8ac353e5e8fbeaf5f5b719e8b85c17ffb13bca1dca77fcf68ba7"
+          },
+          {
+            "path": "assets/StudentReports-CDKgDq8L.js",
+            "bytes": 30475,
+            "sha256": "d77351b5ca9059032d88de9a5f706b74f65a967ae0a9b6616c577548c6385d2a"
+          },
+          {
+            "path": "assets/StudentReports-CDKgDq8L.js.map",
+            "bytes": 68666,
+            "sha256": "c4d5c6a9735c90ee336c130a517ab4d8bfa32658b6a5dc3c0fa438f040b2976e"
+          },
+          {
+            "path": "assets/WritingCollectionPanel--c8SDP-l.css",
+            "bytes": 5501,
+            "sha256": "e58f945b6f439a582e643374602ed2d2abcbb402286dd79c7042eb79a903123d"
+          },
+          {
+            "path": "assets/WritingCollectionPanel-D-p3gXTU.js",
+            "bytes": 164795,
+            "sha256": "d8969cd3f469da6170bfbaaa30c10b1aad035db093fa72f3b6d4acf13817dac5"
+          },
+          {
+            "path": "assets/WritingCollectionPanel-D-p3gXTU.js.map",
+            "bytes": 483787,
+            "sha256": "92ad6240c025bba427d01324f46bd1aa0851e104a3d4703708e1bcd22ff88dea"
+          },
+          {
+            "path": "assets/WritingSheetsPanel-CjrmFQST.css",
+            "bytes": 2582,
+            "sha256": "ebe3d2942e2dc4d3149e2572ad4fc57ce7868dd5648967a0b620ee0193426890"
+          },
+          {
+            "path": "assets/WritingSheetsPanel-CuDjbouG.js",
+            "bytes": 37197,
+            "sha256": "7b21372ab83e4df6613defbf840a28ea7757605fdf3b2b13e1912f8f919d2b8c"
+          },
+          {
+            "path": "assets/WritingSheetsPanel-CuDjbouG.js.map",
+            "bytes": 149856,
+            "sha256": "8088ba7c00a156607e9508034ff2f5f4f59084d5b05bf2de3530ef7e6136d309"
+          },
+          {
+            "path": "brand-logo.png",
+            "bytes": 296848,
+            "sha256": "4bc9103b5ea95c44f3751ce39ecb9e4a683bb9dbfa1abe32e8f8bb6159882479"
+          },
+          {
+            "path": "favicon.svg",
+            "bytes": 277,
+            "sha256": "d3e486c4b2425bb322bcb144cbbbe6b21adfdef02fecde009f01fb30fd2b4d88"
+          },
+          {
+            "path": "index.html",
+            "bytes": 629,
+            "sha256": "008b7814385060270b4fb3ebd1e4c04e8a03b204387e82245e605a8a46809332"
+          }
+        ],
+        "migrations": [
+          {
+            "name": "0001_report_workspace.sql",
+            "sha256": "e96226e1cecbfc3bd194f0c4fa60aa21206e0c4b3fdf543446976458c53137ce"
+          },
+          {
+            "name": "0002_model_jobs.sql",
+            "sha256": "e94c8738d7de02f7b92143edd01d8c1645daf62d99f20c081fc109e7e5d9ff9f"
+          },
+          {
+            "name": "0003_cloud_snapshots.sql",
+            "sha256": "51ae2ac37a6adbff9991807ad935f62bd6eaf2e88f8b8be6f30501ddc03a1fe7"
+          },
+          {
+            "name": "0004_writing_tasks.sql",
+            "sha256": "1f45bcae15d54b0f3cbdd299b6b37a8c9b00b6d4f3ff556811749bbcf869ec9e"
+          },
+          {
+            "name": "0005_writing_sheets.sql",
+            "sha256": "e85fe41a1ba70c5c34210777544b6b71824279105a224a338e9045fec6505fff"
+          },
+          {
+            "name": "0006_writing_collection.sql",
+            "sha256": "6bee7715417ed5d699df5783f46fd9233853ff03b9ccadc9f7ceceb3a5dd9922"
+          },
+          {
+            "name": "0007_bound_grading.sql",
+            "sha256": "1126d450104ab6a7670bd8c56ba5e51a13683dfcfd17896ab631c760b69308bd"
+          },
+          {
+            "name": "0008_report_publications.sql",
+            "sha256": "8f535692a56da62cb4535deb2039bd19abd435190c66395e8cccf3e87ad6cb6d"
+          },
+          {
+            "name": "0009_integration_delivery.sql",
+            "sha256": "b1d76265c1f44d877fb6b45b3fcfa6faf719a748bc8c5989a7f93d34af47c813"
+          },
+          {
+            "name": "0010_grading_history.sql",
+            "sha256": "1d09d7bdc5d645e9b13553adfa166237e5c6e758e8899d1826cf7fb7a0bd990f"
+          },
+          {
+            "name": "0011_background_work.sql",
+            "sha256": "81c5b94c80a9b3267df90ad22b3bdac35da5c4c01a519050c70820a97cc93e73"
+          },
+          {
+            "name": "0012_personal_models.sql",
+            "sha256": "239418a2fc86fa443cc4613ac969cbdd97bea7c6d4f073f1536c2773a0ab0dd0"
+          },
+          {
+            "name": "0013_student_revisions.sql",
+            "sha256": "b19a65e74ad78c9e2284aa6f58bc66c6dc87a2025c6e48b03dae4eb0929ad9cb"
+          },
+          {
+            "name": "0014_peer_exports.sql",
+            "sha256": "2ad20b909633c426299760f4c74a1a0ce8d45a051683090529710d5d05fb027d"
+          },
+          {
+            "name": "0015_peer_revision_basis.sql",
+            "sha256": "e7fe428820da9e7485dad95bf2f0a88b6ff690dd23e149454e81c0e072f51562"
+          }
+        ]
+      },
+      {
+        "kind": "peer",
+        "name": "newsun-writing-peer-staging",
+        "origin": "https://newsun-writing-peer-staging.317792050.workers.dev",
+        "database": {
+          "binding": "DB",
+          "database_name": "writing-peer-staging",
+          "database_id": "262e2da0-f181-44ce-afc7-a584f708ecbd",
+          "migrations_dir": "migrations"
+        },
+        "assets": [
+          {
+            "path": "account-error.css",
+            "bytes": 566,
+            "sha256": "23a4eb4991478905988548ac34b7cb309d589092b2941f5f46c28058e9fd0721"
+          },
+          {
+            "path": "assets/index-CD5FMhBD.css",
+            "bytes": 7869,
+            "sha256": "ff58a93fa92c8d4576ee1b7840e01012a5e78d8d3739bf60d59d2258ba6660e5"
+          },
+          {
+            "path": "assets/index-D50hf-eb.js",
+            "bytes": 264928,
+            "sha256": "e7f99dba2210eaa3de3371e8fa8b45413e68c99a56900c8dba920393d0100829"
+          },
+          {
+            "path": "assets/index-D50hf-eb.js.map",
+            "bytes": 1156072,
+            "sha256": "64e991d119890a9edcbc2fa5e598a484f6bde3f67b8e9753005bb517c0afb570"
+          },
+          {
+            "path": "favicon.svg",
+            "bytes": 279,
+            "sha256": "8f5f156bfc8f7d883d199b88a7ce3d09386fc084fb2a26aba62d26759c34ef42"
+          },
+          {
+            "path": "index.html",
+            "bytes": 436,
+            "sha256": "12297df2668459136e5be515aadae28f9060764bd1189f08e8637cde40c9cfee"
+          }
+        ],
+        "migrations": [
+          {
+            "name": "0001_peer_auth.sql",
+            "sha256": "bdcaae6f27e45c3c1928e9cbab3d9f0abdbef018ba6fce59c7cd4c794895a801"
+          },
+          {
+            "name": "0002_source_imports.sql",
+            "sha256": "7d127e173e03bfb1a3c7a6ee1c39a4c2f5bc8f6fea5904889bc3ff028694dcea"
+          },
+          {
+            "name": "0003_peer_rounds.sql",
+            "sha256": "458273467b087d14878daf583c5dcfb4515927775b90736c968aa5e9b227354c"
+          }
+        ]
+      }
+    ],
+    "sourceSha256": {
+      "apps/peer-review/index.html": "37b74bd853a9654dc66accfc77f4462edf6fc7a4c3f06b39868e8ad39b1cff38",
+      "apps/peer-review/migrations/0001_peer_auth.sql": "bdcaae6f27e45c3c1928e9cbab3d9f0abdbef018ba6fce59c7cd4c794895a801",
+      "apps/peer-review/migrations/0002_source_imports.sql": "7d127e173e03bfb1a3c7a6ee1c39a4c2f5bc8f6fea5904889bc3ff028694dcea",
+      "apps/peer-review/migrations/0003_peer_rounds.sql": "458273467b087d14878daf583c5dcfb4515927775b90736c968aa5e9b227354c",
+      "apps/peer-review/package-lock.json": "1cb9f6b52b2a5c3f7470f9dcce7ba50eb556fc6685e42fdeb0b2b6652d836af5",
+      "apps/peer-review/package.json": "e8ac8f6c548d8dcd0245d145cdd98b6e3927bbfd2963eaf79f0e8e5da2065717",
+      "apps/peer-review/public/account-error.css": "23a4eb4991478905988548ac34b7cb309d589092b2941f5f46c28058e9fd0721",
+      "apps/peer-review/public/favicon.svg": "8f5f156bfc8f7d883d199b88a7ce3d09386fc084fb2a26aba62d26759c34ef42",
+      "apps/peer-review/src/ImportMaterials.tsx": "2f72f7a1d2d5a7a3a9d34f343ba692b5bfbd8ed43671db08b6ce405bd021ac53",
+      "apps/peer-review/src/RoundSetup.tsx": "c0eef9fdc5e254914bc1a0cd8327e03813f0a9b90d2ba489c36e087d0b8e36f5",
+      "apps/peer-review/src/RoundWorkspace.tsx": "eda5d108f0741c5c7ec1fdc8b2405b3821865eef0b587be0ec16314847e1a550",
+      "apps/peer-review/src/core/allocation.ts": "9aa1775ec44c49ae68a0ca65fcfd0e01c9b67568c8c7cf46c25c0a3ae54a8eba",
+      "apps/peer-review/src/core/feedback.ts": "3cab2201d8cf134184ce6620c9dacc5aceeb5c579c6b66d6deac371eabfcc44b",
+      "apps/peer-review/src/core/rubric.ts": "1d8721c08afd780203900ad063c87cd92821381911d5a5cc76b1cca9d2c06529",
+      "apps/peer-review/src/core/validation.ts": "6f0bb4328b6f54c67c721e14093cf3325b46535b35cad2c2a9b8c55c2a8d1a58",
+      "apps/peer-review/src/main.tsx": "76563b179d4d9f00177928bdfaf402d98d61e900dbe6681555939619a626b997",
+      "apps/peer-review/src/peer-api.ts": "353ae207c83bbfc36dd0a2852a47c30333c471286d2fd2cb04c3bc3fdc1f2993",
+      "apps/peer-review/src/style.css": "093a001f581a02613100efac7276dd791c0e7f899c12ea7994855c4ab6c3c4ae",
+      "apps/peer-review/vite.config.ts": "89413a869b2ad0a8ee128ca5041e0e5b30d763b3668d0e7317111b4f71358659",
+      "apps/peer-review/worker/auth.ts": "86158cbd405b63a4d0148016f224fb37e8842329801be64a0a41cb6c291631c8",
+      "apps/peer-review/worker/imports.ts": "1fad395ddf5139a68162e01d1af76cde57fd63e72689a1750afbb2903b061295",
+      "apps/peer-review/worker/index.ts": "4ca9192c3ae7c9809edac8c2f74eeb454f5e16de17d57af0e6c89c52ae1e7a22",
+      "apps/peer-review/worker/revision-basis.ts": "747fcd9133779a9db900454450106d9deb8c9dc571d248b56ca79e120a9efbec",
+      "apps/peer-review/worker/rounds.ts": "9403b9cc26caf64cd30ff83adb4babf7fafa3ed8906d8c317fa90148ea36f06e",
+      "apps/peer-review/wrangler.jsonc": "f6370b158ca5d79312f18d9a754ebb7f82f7fb7e88dba1b6686253ca08ac8246",
+      "index.html": "81e9f3046f85c6dcea6302028893e78fc024d5ffb85545a690c41489d49996fa",
+      "legacy/index.html": "9ef317732830a2a3d1c76046ba6d0293b156867040aad9dea93e6fcf6d14331f",
+      "migrations/0001_report_workspace.sql": "e96226e1cecbfc3bd194f0c4fa60aa21206e0c4b3fdf543446976458c53137ce",
+      "migrations/0002_model_jobs.sql": "e94c8738d7de02f7b92143edd01d8c1645daf62d99f20c081fc109e7e5d9ff9f",
+      "migrations/0003_cloud_snapshots.sql": "51ae2ac37a6adbff9991807ad935f62bd6eaf2e88f8b8be6f30501ddc03a1fe7",
+      "migrations/0004_writing_tasks.sql": "1f45bcae15d54b0f3cbdd299b6b37a8c9b00b6d4f3ff556811749bbcf869ec9e",
+      "migrations/0005_writing_sheets.sql": "e85fe41a1ba70c5c34210777544b6b71824279105a224a338e9045fec6505fff",
+      "migrations/0006_writing_collection.sql": "6bee7715417ed5d699df5783f46fd9233853ff03b9ccadc9f7ceceb3a5dd9922",
+      "migrations/0007_bound_grading.sql": "1126d450104ab6a7670bd8c56ba5e51a13683dfcfd17896ab631c760b69308bd",
+      "migrations/0008_report_publications.sql": "8f535692a56da62cb4535deb2039bd19abd435190c66395e8cccf3e87ad6cb6d",
+      "migrations/0009_integration_delivery.sql": "b1d76265c1f44d877fb6b45b3fcfa6faf719a748bc8c5989a7f93d34af47c813",
+      "migrations/0010_grading_history.sql": "1d09d7bdc5d645e9b13553adfa166237e5c6e758e8899d1826cf7fb7a0bd990f",
+      "migrations/0011_background_work.sql": "81c5b94c80a9b3267df90ad22b3bdac35da5c4c01a519050c70820a97cc93e73",
+      "migrations/0012_personal_models.sql": "239418a2fc86fa443cc4613ac969cbdd97bea7c6d4f073f1536c2773a0ab0dd0",
+      "migrations/0013_student_revisions.sql": "b19a65e74ad78c9e2284aa6f58bc66c6dc87a2025c6e48b03dae4eb0929ad9cb",
+      "migrations/0014_peer_exports.sql": "2ad20b909633c426299760f4c74a1a0ce8d45a051683090529710d5d05fb027d",
+      "migrations/0015_peer_revision_basis.sql": "e7fe428820da9e7485dad95bf2f0a88b6ff690dd23e149454e81c0e072f51562",
+      "package-lock.json": "fae10efc468505d2951b3b4ac40994f8463c6c7a965ec43f437f8e74d52272be",
+      "package.json": "a46d20cd14d1bc6f68427f892fa543f17e14c3a1ff743e15fcdaa4621a9623ff",
+      "public/_headers": "e25c28713afc443a10cb119b620654177e1765a9864136d5b44deb5fd4be48d3",
+      "public/brand-logo.png": "4bc9103b5ea95c44f3751ce39ecb9e4a683bb9dbfa1abe32e8f8bb6159882479",
+      "public/favicon.svg": "d3e486c4b2425bb322bcb144cbbbe6b21adfdef02fecde009f01fb30fd2b4d88",
+      "src/TeacherApp.jsx": "ce731281f1141dd0e1e387f3e3c628954f58046451696a9872068452fe339359",
+      "src/internal/ReportCompatibilityLab.tsx": "8809df460ab996363591389bee734391d4c4d7f782bcc648ed823d0764048fb8",
+      "src/internal/report-lab.css": "72aac6bcfe6812840f4aa136a8d244849905ab382521d74350621778fa327dff",
+      "src/main.tsx": "a2274dc07919bb3acb753a36aeb0927aa83d0cbf5a312d7dd8dcd925680526a2",
+      "src/report/LegacyClassAnalysis.jsx": "f89242fbff044d25cb314d0512e5d74d7380f1bfb50f8548a5bb06301624e6e7",
+      "src/report/LegacyPaper.jsx": "e5f4acfe5da2d709ee3d0beb8bef0541b09c5dcae1ca54e2b8bdc159c12d964a",
+      "src/report/contracts.ts": "96bb3e4ef41a307daa772c9b532ebd0adf42e34a4d2ff532508487190c9ae0fe",
+      "src/report/fixtures.ts": "aebeb72bfb60a9c8cbd82320098b907c26bfa83e85409d370b16c63e6100164d",
+      "src/report/grading-pipeline.ts": "9ee5544585d7b547299aa3c9baedbdec33fcca62e14135a7e9fb5ec51202b9ea",
+      "src/report/legacy-core.js": "3863874b1d528d005a44d9c58610549b202952e9a4c8d95d4f6c9aff05a03b83",
+      "src/report/legacy-import.ts": "7f5aea0ff83b5a873ba6e0067ead79e941a50e383088a376d2d2d822b6fcaef4",
+      "src/report/legacy-model-parser.js": "00869935173186a1c29f09daaecda05e22a2f5c1e0e209172651e5b5a116dd27",
+      "src/report/legacy-paper.css": "caa2c48cb355e35ada7c8ad853a38cd60a1ff9283b0722c10021998cf18c3674",
+      "src/report/writing-feedback.css": "75b4ca0f8f2a8b15162f4768ac47cc14e65de96f81c95cc5f87d6a6b25ddee7f",
+      "src/student/PeerRevisionEvidence.tsx": "4bcebecac426bb2c33aeb7ccbc3c68a79e418a6dfdbde6b6fd9bb95b2ce0e695",
+      "src/student/PeerRevisionStart.tsx": "aeac138b992b57686012099f4e921547b6d1eb7ac4b6bd4e749a17bdd5bf75bd",
+      "src/student/StudentReports.tsx": "faa7e1c78408bec4e537791bcacd4e420983df5177f39d688dc1f682d460197b",
+      "src/student/StudentRevision.tsx": "4487e62bc80d704b16d08a33b82af78d34e202b8c20d3b28d658f154efda3c04",
+      "src/student/StudentRevisionsHome.tsx": "a7e8d054cf3a72a073a22d46efcd0d498562d2608c34072f531b19f8b95c678c",
+      "src/student/revision-cache.ts": "c8f81c9189c34daa345b2220e57e7af5e7b6058626b5ddd7357b2341445f2335",
+      "src/student/student-reports.css": "4e82299874e2781ce543b62d3fae088e42b7cc1b7d0cf37418271710f1ce8d02",
+      "src/student/student-revisions.css": "8563fb8f3986fad7d71ed7f0a8839490aa802806c0e63d2b8791823c34b6d998",
+      "src/teacher-styles.css": "033ab32b68f5bc3dc31a0e3bb51e709a78f3883f4971b2dbcb23d49819af1738",
+      "src/teacher/BoundGradingPanel.tsx": "eb06f6abb845445600910762d670c6a3024330f38a26c813a588c5d764d9daf0",
+      "src/teacher/CloudSnapshotsPanel.tsx": "a0d0969818bf0864b96c8730f4f5a49b2b22115b98bb23c7fe05e66a1e277374",
+      "src/teacher/PeerMaterialsPanel.tsx": "f7be6ab5db3f710febd5b94666f818c4add9616e3c63896809c9a4ba4115a595",
+      "src/teacher/PersonalModels.tsx": "8da75ca3ee984351556f9253e1bd3a135a774508440653588b432269733101d2",
+      "src/teacher/PublicationControls.tsx": "0b48581775e2cfbae609500491ee2bb0d372a41e43319de7d4154411303051a2",
+      "src/teacher/QuickGrading.jsx": "6e46e34f6e96a8a39abccdb1c5d15bf4366bcbde8580d52fb67baf2511a29ef4",
+      "src/teacher/ReportHistory.tsx": "314dfeb63fbc02b0a4b068d976d74e819ad77ca261eea7c168fff204a8ba0893",
+      "src/teacher/SchoolDirectoryPanel.tsx": "fe7e36c999232c6a29c6712d3b932af4dc4222f2f2858c029ec704cc22597bcd",
+      "src/teacher/StudentRevisionReview.tsx": "e1346f8cafd126dcfc8302221bb1e9c00d68c19db9db55ed6427caa19f6fa51d",
+      "src/teacher/TeacherCloud.tsx": "3fcd4b513216190b625665e0a80915310b184ede506750c641511a7b60c9a808",
+      "src/teacher/TeacherTasksPanel.tsx": "60370bae94cfb66db402b3c4d9f9fabf9f344a8d6c71a45b3cab0049a43fd58b",
+      "src/teacher/WritingCollectionPanel.tsx": "c7f32b3b7dc057ae6c0afe45e35331a539e81ce92dc7208e4598fc2962a358ac",
+      "src/teacher/WritingSheetsPanel.tsx": "1d6b1ca6fdd88de696d324f46c7e711ebb1908511f8f0fb1c91719cf959e061c",
+      "src/teacher/bound-grading.css": "46c7529b28ab21d9f131ceae7f42e9f05d9edc098157f63f5498cb5fd53bb679",
+      "src/teacher/bound-grading.ts": "107a4f6f04ba1acef7b3691b07a0f1e2b5c56fa065376e732ff3ba84f54c69c7",
+      "src/teacher/capture-identity.ts": "a1fcf770e794c85933b40ee75e08290ed1b5b9f2bca26643f6eaa37d789fc85f",
+      "src/teacher/cloud-assets.ts": "17e96574ab1f882e5961c93e71e0e3c79babc5e0cb530bef119ebfe9537f300f",
+      "src/teacher/cloud-model.ts": "c6ef76b04103ea559419edd6f78db6bb1fb42cb35daf4f4e6eaafbe51079ee84",
+      "src/teacher/cloud-snapshots.css": "dfc6a7d02a22e0cf65755cb03604dea0498bf3b3b81998a412f35b1b9b06e20f",
+      "src/teacher/identity-ocr.ts": "bcc8fbbc30d4340ad89c554c10a8670340664e6f71009a926e880e41b9a71819",
+      "src/teacher/model-check.ts": "e4bc0de14218e60efdb497eaae34c58eebe8609b3999fdd1d342bff64cb3ab06",
+      "src/teacher/model-providers.ts": "6d00c60acd801fbff0d4ac42d642f1e2665e62b949f9f3163e28e6b57d6358a7",
+      "src/teacher/model-selection.ts": "02e7ea4b98e8d32947fa75c8b8cf7730b454d683ef68b066d4782c48421deb0b",
+      "src/teacher/peer-materials.css": "f17032e495abf4db31e26fb7945baf73d2020216db976e829b59bf94427617dc",
+      "src/teacher/personal-models.css": "8e6183235b76a7075de578efea262511292db6b75bc76f5c77e9964c89fc10fd",
+      "src/teacher/professional-workspace.css": "f97050972e0d3f4d9e4879ef7e4e1cb3006cef26d589b173e4cc27a2c7c4a1b1",
+      "src/teacher/publication-controls.css": "9810a0362a7f729c24188b57e4fe08d0ab6a711ed92a3edc9be0d52bd3290842",
+      "src/teacher/quick-grading.css": "1a393987b29ac014702ea40b12dad153a5dbba8a3644a0fd796344ac46e770ea",
+      "src/teacher/report-history.css": "ad5b346c66156e48aa2e867e1b53cb35bd13a5bfe7e4790c25f1bbe4e857b74b",
+      "src/teacher/scan-outbox.ts": "d980c7a70c5b7803e410d2f8504193799d4e88c2979c9bcd08276f3fa0b68623",
+      "src/teacher/scan-photo.ts": "7e2c96a8a93b50fb662cf07442370eaef69994b04281fae8b6384cdb2aea8fbf",
+      "src/teacher/school-directory.css": "e4f8c11ccf8f3cef0d5308b5aefe02b4c16ffb912387a36cf011b31d9a44e0a3",
+      "src/teacher/student-search.ts": "55d299824e119fb763e37620e1af4dc9663e92b56368eef187409042c66b6e6e",
+      "src/teacher/task-contracts.ts": "0d404ff9b0ef39f49e41173d67e7b9e374d121f43e010634b4578cdda6bd8428",
+      "src/teacher/task-roster.ts": "58e7e8d5cf6600c9754b5c5376150348ee3d6181599c3caadcbbd309eed343ce",
+      "src/teacher/teacher-cloud.css": "6bde68b1d124215630aaa1caaa9caf2d953d89a55ecb95dfafcad5c28cb3025a",
+      "src/teacher/teacher-tasks.css": "b046e5ac30714890f96c7b4ce911e9280b5ed0a558bf25f9245c988666cae1ed",
+      "src/teacher/teacher-ui.css": "f527d886fc67ceed4600d2ba332e6d3e7a403d942f58ef6bdf77e287eefcb37a",
+      "src/teacher/useCloudSnapshots.ts": "9c480b04478ea260b449f791b500d61e7168de557e06edc6643f30e3d9e7565a",
+      "src/teacher/useWorkspaceDraft.ts": "01ff98a3d6c28623323ad9ef9dd6ec39e2a1177e2911a82ca2bf5a4838819b88",
+      "src/teacher/workspace-storage.ts": "19c589c707d2e6cfbc275795401c58de9cf2cf9b636bee42727b48fcd0e06ce7",
+      "src/teacher/writing-collection.css": "9860c7ec327c314ecb293f3ebaf7f7ad91c746d8a6b99425963f632d0f90063d",
+      "src/teacher/writing-sheet-print.ts": "7da487c43edaad23eb21f1c37b6686a8d35d1654531ec262ebf39acbcaf7d8a1",
+      "src/teacher/writing-sheets.css": "dd5ae79f7ad116ed2494a523a277df2f17da8923a705e12e9aca81a62470f5f4",
+      "vite.config.ts": "a39624ff3eba7abdd2f970994e83c9b75822e7532f25c7cfae4d308c4dfde2d2",
+      "worker/assets.ts": "4a88dde3648c6bae8af5446202368f1ab713a5c526e829de42e11ce24a342724",
+      "worker/collection.ts": "42e839b0e22558a505d8a7f154e5c32eba2fabc2633233151a6eb962158e2e81",
+      "worker/daily-feedback.ts": "823c2fd8bcfe4f115e19a5fd62fa211beec3b862ceb8156ba44586e8b358ce33",
+      "worker/errors.ts": "4f533feff252d508dd5fbf2cda87ca2dc82b7b2a7e5f49ba2727a3016ef5eb60",
+      "worker/grading-types.ts": "3b90010918cf2aed43997543432819dab3dcf62a1c68f5f20eea1e434f07cc85",
+      "worker/grading.ts": "710fed76adee2103e5fffeff5b94cf809cd9df58fdb8e51e52117aee7c84b764",
+      "worker/index.ts": "06197762d056c89785ccaab0cf2a6ba0aa61d6048d8d825d536a50ef6f1b75a0",
+      "worker/model-jobs.ts": "25ebcacc429e7fc391b92882d7e2e8f51070d62d8c8f827966b51143cbd5308f",
+      "worker/peer-exports.ts": "fdd26f1b505527578df4c0789e5e2c33676b87a5391e1a5c35165d2a4352674e",
+      "worker/peer-revision-basis.ts": "4d2b3c4742e47f624a28998c393de37c9ad634073c9bb2f1b9a6e7a26f4b6e3a",
+      "worker/personal-models.ts": "974971e8f712cbb9dbb3adf4da6b40764fb5a81ef23d1152bc30a9ff00bc21a9",
+      "worker/publication-invalidation.ts": "12e5d5a2522de5d5da0af7b5aac532de280b5e792c1dfd239e3682371c3a1528",
+      "worker/publication-projection.ts": "e3aa58f8b08c6a06d61c721b5bd14cd1808a3169630d81f98f02fc336fa9c17a",
+      "worker/publications.ts": "c6061348ba2cc411316efecc75039abdb50af8b3923346b383f516e0d445037b",
+      "worker/sheets.ts": "2ba8553f74341a19e86db914e4b44d01ca1188076100fceceb75a086083b8b91",
+      "worker/snapshots.ts": "5fb6d29aa62be8b8e03bf58dedc59c56cd2d7145d70cdbe97d16199754111e07",
+      "worker/student-revisions.ts": "50f3cd3d188649e20637a46f1d8ad4a8d311c84ca13ff20cff0950dc75233e78",
+      "worker/tasks.ts": "b0b769f7f3d15874be03da466dd798edfea7e67cfda00d12d00801eb076cf72d",
+      "worker/work-permits.ts": "7eabd20acfb14d96edba488efbcc571eb99289351d0e91b4faac75fe05e7e2aa",
+      "wrangler.jsonc": "7ff3bd8c7ed682a07ed57e0e9b9064192ba971ca2ca1364159495b079fe025e9"
+    }
+  },
+  "applications": {
+    "teacher": {
+      "url": "https://writeascend-staging.317792050.workers.dev",
+      "bootstrapVersion": "14a2cc27-b960-46b1-b6f0-280fb799341f",
+      "currentVersion": "48b349f2-02e1-4154-847b-581b2199fe41",
+      "currentDeployment": {
+        "id": "d3fb492f-1f69-4f80-a604-6e05161d9ebb",
+        "createdOn": "2026-10-17T00:33:07.751895Z",
+        "versions": [
+          {
+            "version_id": "48b349f2-02e1-4154-847b-581b2199fe41",
+            "percentage": 100
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "name": "ASSETS",
+          "type": "assets"
+        },
+        {
+          "name": "DAILY_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "FEEDBACK_EVENTS",
+          "type": "queue"
+        },
+        {
+          "name": "FILES",
+          "type": "r2_bucket"
+        },
+        {
+          "name": "MODEL_JOBS",
+          "type": "queue"
+        },
+        {
+          "name": "MODEL_VAULT_KEY",
+          "type": "secret_text"
+        },
+        {
+          "name": "MODEL_VAULT_KEY_ID",
+          "type": "plain_text"
+        },
+        {
+          "name": "PEER_EXCHANGE_TOKEN",
+          "type": "secret_text"
+        },
+        {
+          "name": "PEER_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "PEER_SERVICE",
+          "type": "service",
+          "service": "newsun-writing-peer-staging"
+        },
+        {
+          "name": "PUBLIC_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "VERSION",
+          "type": "version_metadata"
+        }
+      ],
+      "migrations": [
+        "0001_report_workspace.sql",
+        "0002_model_jobs.sql",
+        "0003_cloud_snapshots.sql",
+        "0004_writing_tasks.sql",
+        "0005_writing_sheets.sql",
+        "0006_writing_collection.sql",
+        "0007_bound_grading.sql",
+        "0008_report_publications.sql",
+        "0009_integration_delivery.sql",
+        "0010_grading_history.sql",
+        "0011_background_work.sql",
+        "0012_personal_models.sql",
+        "0013_student_revisions.sql",
+        "0014_peer_exports.sql",
+        "0015_peer_revision_basis.sql"
+      ],
+      "businessCounts": [
+        {
+          "object": "tasks",
+          "count": 0
+        },
+        {
+          "object": "members",
+          "count": 0
+        },
+        {
+          "object": "reports",
+          "count": 0
+        },
+        {
+          "object": "revisions",
+          "count": 0
+        },
+        {
+          "object": "sessions",
+          "count": 0
+        }
+      ],
+      "technicalProbePreserved": true,
+      "technicalProbeDeleted": true
+    },
+    "peer": {
+      "url": "https://newsun-writing-peer-staging.317792050.workers.dev",
+      "bootstrapVersion": "55f77e6a-0365-4d9a-8e76-459ab02eab41",
+      "currentVersion": "55bab676-f8f6-4770-93d2-6e3d16b3a80a",
+      "currentDeployment": {
+        "id": "f0b808cc-6e42-4687-8492-dd14ef0eb780",
+        "createdOn": "2026-10-17T00:36:08.447336Z",
+        "versions": [
+          {
+            "version_id": "55bab676-f8f6-4770-93d2-6e3d16b3a80a",
+            "percentage": 100
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "name": "ASSETS",
+          "type": "assets"
+        },
+        {
+          "name": "DAILY_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "PUBLIC_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "SOURCE_EXCHANGE_TOKEN",
+          "type": "secret_text"
+        },
+        {
+          "name": "SOURCE_ORIGIN",
+          "type": "plain_text"
+        },
+        {
+          "name": "SOURCE_SERVICE",
+          "type": "service",
+          "service": "writeascend-staging"
+        },
+        {
+          "name": "VERSION",
+          "type": "version_metadata"
+        }
+      ],
+      "migrations": [
+        "0001_peer_auth.sql",
+        "0002_source_imports.sql",
+        "0003_peer_rounds.sql"
+      ],
+      "businessCounts": [
+        {
+          "object": "rounds",
+          "count": 0
+        },
+        {
+          "object": "assignments",
+          "count": 0
+        },
+        {
+          "object": "imports",
+          "count": 0
+        },
+        {
+          "object": "sessions",
+          "count": 0
+        }
+      ],
+      "technicalProbePreserved": true,
+      "technicalProbeDeleted": true
+    }
+  },
+  "tests": {
+    "root": {
+      "tests": 188,
+      "pass": 188,
+      "fail": 0,
+      "logSha256": "a4589bd1f7409b9977eceb9e7923d5fea699c910693292e77ce6e5e4d9e4cb6e"
+    },
+    "peerCore": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "logSha256": "0e32cc35b79481bf8a759fb3d1e5be1834231281ea4ab5d2f53079b3e469785f"
+    },
+    "actualDaily": {
+      "tests": 205,
+      "pass": 205,
+      "fail": 0,
+      "logSha256": "7cdae94a33798ce8fb8e58e4a6b7def442d8056116da6a7f64ae79e72491364e"
+    }
+  },
+  "cloudSmoke": {
+    "passed": true,
+    "checkedAt": "2026-10-17T00:37:16.820Z",
+    "checks": [
+      {
+        "kind": "teacher",
+        "origin": "https://writeascend-staging.317792050.workers.dev",
+        "release": {
+          "id": "48b349f2-02e1-4154-847b-581b2199fe41",
+          "tag": "staging-89280a74-linked",
+          "timestamp": "2026-10-17T00:26:14.453594Z"
+        },
+        "loginConfigured": false,
+        "page": 200,
+        "assets": 3,
+        "anonymousProtectedStatus": {
+          "/api/me": 401,
+          "/api/classes": 401,
+          "/api/student/reports": 401,
+          "/api/tasks": 401
+        },
+        "unauthenticatedMachineExchange": 401
+      },
+      {
+        "kind": "peer",
+        "origin": "https://newsun-writing-peer-staging.317792050.workers.dev",
+        "release": {
+          "id": "55bab676-f8f6-4770-93d2-6e3d16b3a80a",
+          "tag": "staging-89280a74-linked",
+          "timestamp": "2026-10-17T00:27:24.317955Z"
+        },
+        "loginConfigured": false,
+        "page": 200,
+        "assets": 2,
+        "anonymousProtectedStatus": {
+          "/api/me": 401,
+          "/api/rounds": 401
+        },
+        "unauthenticatedMachineExchange": 401
+      }
+    ],
+    "schoolLoginVerified": false,
+    "studentDataVerified": false
+  },
+  "cloudBrowser": {
+    "passed": true,
+    "scriptSha256": "d130a62d628ad6168b0df01a5ceaead33f4a711a18ac3e1455c330f2f547efd9",
+    "checkedAt": "2026-10-17T00:28:34.171868+00:00",
+    "result": {
+      "passed": true,
+      "cloudPages": [
+        {
+          "kind": "teacher",
+          "origin": "https://writeascend-staging.317792050.workers.dev",
+          "release": {
+            "id": "48b349f2-02e1-4154-847b-581b2199fe41",
+            "tag": "staging-89280a74-linked",
+            "timestamp": "2026-10-17T00:26:14.453594Z"
+          },
+          "anonymousMe": 401,
+          "responsiveWidths": [
+            375,
+            390,
+            768,
+            1440
+          ],
+          "csp": true
+        },
+        {
+          "kind": "peer",
+          "origin": "https://newsun-writing-peer-staging.317792050.workers.dev",
+          "release": {
+            "id": "55bab676-f8f6-4770-93d2-6e3d16b3a80a",
+            "tag": "staging-89280a74-linked",
+            "timestamp": "2026-10-17T00:27:24.317955Z"
+          },
+          "anonymousMe": 401,
+          "responsiveWidths": [
+            375,
+            390,
+            768,
+            1440
+          ],
+          "csp": true
+        }
+      ],
+      "schoolLoginVerified": false,
+      "studentRecordsVerified": false
+    }
+  },
+  "localBrowserRegression": {
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-17T00:18:45.993028+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "peer-rounds": {
+      "passed": true,
+      "scriptSha256": "9c2bff2be0f52f691c2e5b1816969dce989790e476b140ae5c9684caa17ea828",
+      "checkedAt": "2026-10-17T00:18:57.202518+00:00",
+      "result": {
+        "passed": true,
+        "teacherOriginalRubricAndCustomPrompt": true,
+        "handwritingTeacherOnly": true,
+        "balancedNoSelfReview": true,
+        "sameNameAccountsIsolated": true,
+        "exampleTraining": true,
+        "mobileSentenceEvidence": true,
+        "automaticDraftAndReload": true,
+        "transientAccountFailureHidesContentAndKeepsEdits": true,
+        "studentCannotSeeUnpublishedFeedback": true,
+        "explicitTeacherPublication": true,
+        "authorAdoptionAndPlan": true,
+        "hideStopsAuthorAccess": true,
+        "teacherReturnAndResubmission": true,
+        "changedFeedbackRequiresNewResponse": true,
+        "sourceMemberRemovalStopsAccess": true,
+        "noModelCalls": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    }
+  },
+  "timeTravelDrill": {
+    "databaseId": "9610cb02-c37a-4178-8a3f-c848a7aece56",
+    "before": {
+      "value": "before",
+      "revision": 1
+    },
+    "changed": {
+      "value": "after",
+      "revision": 2
+    },
+    "restored": [
+      {
+        "id": "staging-restore-probe",
+        "value": "before",
+        "revision": 1
+      }
+    ],
+    "restoredVerified": true,
+    "teachingDatabaseRestored": false
+  },
+  "privateR2": {
+    "publicDevelopmentUrlEnabled": false,
+    "customDomains": [],
+    "probeSha256": "c3386830d2068075ddaa7be74abbf3683be4ac11912ec4320d804b20875beab0",
+    "bytesPreserved": true,
+    "probeRemoved": true
+  },
+  "logSha256": {
+    "release-teacher-migrations.txt": "915c6bf702fe89911c848c4a8b7f22f7f869b72f5e7fe93323528bd476cd3886",
+    "release-peer-migrations.txt": "322ecdaeac38beb09c6e1861b137eee72c41c3fedbe4961cef6a452ebde53a96",
+    "release-teacher-bootstrap-deploy.txt": "ef3928e04daf2fc434f19657e63ba109e45b74c5c4d3ebb31a287d7f5f827703",
+    "release-peer-bootstrap-deploy.txt": "f4617fd29a7641bfce0fb8f92a153a9094dabfef33ef561e34c5ae11685c6989",
+    "release-teacher-linked-deploy.txt": "a8d564314f5dd8db86fe447fb56e0fb8abff2515c0c4dbb4c75c3f1f27b76331",
+    "release-peer-linked-deploy.txt": "4334a5d1dcf3ae9cf0da89cd2466e2d9b0b6f01d92e0524f2e9fc1e1358a32c3",
+    "release-teacher-rollback.txt": "c9fc3e4479615d2fb28b6d6a93983cce05bc4baa528ae2dada08fb72abbae080",
+    "release-teacher-restored.txt": "1d5b4ddecb97d5e35a5fc04b0a713cf87d4d60b9e62b345017ffe451a1fcbc0a",
+    "release-peer-rollback.txt": "a28256027fb7224ae174c55b90b0865d7875fce5d204f0400f81664ed8bfac55",
+    "release-peer-restored.txt": "b6faf6ae19fd3fbea44fe7e985a575726a5c771aac42204a0e0c65833dbc256d",
+    "release-drill-seed.json": "c39e8c7e5b2eed4ec31065cea4aeeaed96a3f8d226f5c9a86418ee4e8122e8c1",
+    "release-drill-mutated.json": "aca8c24ce8002fcf456097376a73802a7a0803499fda3bad11f9498f9073598d",
+    "release-drill-restore.json": "20ff44fdd1efcb952c93e8b577924f5f993f66999c867156f8c15e926ac973ec",
+    "release-drill-restored.json": "ce6da485cba4e3faa103c729b838f08a4fb412029483f1a0b18ba31857b95db8",
+    "release-r2-probe-put.txt": "678efeae2f7a7132c3c7d5448181fd7dce1313e3fbd1749b87cadf92a8dee9db",
+    "release-r2-probe-get.txt": "a307636bfd3532da731c9fa075af2a40b0f8ca618249bde9d783ae5cc4df8963",
+    "release-r2-probe-cleanup.txt": "ac9820e1d421928bd9e0a2603b07d1d75d61b3a89cd52f7947080ad323284fb9",
+    "release-model-queue-after.txt": "1223f20650995677bd884ecfdf235392cb3412f3f2d7e3319e6126bab0ddd9ab",
+    "release-feedback-queue-after.txt": "5592c307daf0c33b65d81d45c4eac61e07a4fb0dccc04a23d3aec453308ffd31",
+    "release-worker-check.txt": "0a2a796b1d5c705f5ef1f333eba438a6edff35823e120e1ae47269254bf631f4",
+    "release-peer-worker-check.txt": "0949775a0e69f1831176c33540368cc86822f4c1444c0842cef865de388d8423"
+  },
+  "screenshotsSha256": {
+    "output/cloud-staging-teacher-mobile.png": "5e17299b5be006bd9d66b509c9e25fbfd1a57f183526916cdbd882750e48b74b",
+    "output/cloud-staging-peer-mobile.png": "bb5324b7558036d419d81ad753b5430591caf6dca85985073d9aa195589c24c8",
+    "output/cloud-staging-peer-desktop.png": "156c1a64744fdc30094c1345073b59cdc70459c23e14712bf41da317ea4209fb",
+    "output/cloud-staging-teacher-desktop.png": "e9e90c994179bce2cb70731a15066fe2f07421bfc513291bbebde030636df652"
+  },
+  "schoolLoginEnabled": false,
+  "formalDomainChanged": false,
+  "formalSchoolDirectoryWritten": false,
+  "formalDailyRestarted": false,
+  "maintenanceTimeReplyPending": true,
+  "pending": [
+    "Daily live bridge maintenance and real account verification",
+    "school administrator directory and teacher grants",
+    "real model and handwriting validation",
+    "real phone and print pilot",
+    "legacy browser data migration and production rollback"
+  ],
+  "verificationScriptSha256": {
+    "scripts/qa/staging-release.mjs": "903b5b4c77279cd72d1e0c11bfdeec91f79462d7bbafba200f7b26027a6da70f",
+    "scripts/qa/cloud-staging.cjs": "d130a62d628ad6168b0df01a5ceaead33f4a711a18ac3e1455c330f2f547efd9",
+    "scripts/release-manifest.mjs": "2c7adb6797fb665b1404fcd32d04fbebd18f453eebbb95ecdcf745ea2b66f6fa",
+    "test/release.test.ts": "6415c9c85ef766bd0b911dcc349d7ac664405581ee18fcf35494aeb26f0f531d"
+  }
+}

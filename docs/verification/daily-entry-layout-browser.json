@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "actualInstalledHtmlAndStyles": true,
+  "layoutOnlyDataScriptsSuppressed": true,
+  "noAuthenticationOrStudentData": true,
+  "noMutations": true,
+  "studentAndTeacherEntry": true,
+  "disabledEntryHidden": true,
+  "responsiveWidths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "recordedAt": "2026-10-16T17:09:16.375295+00:00",
+  "scriptSha256": "ebb6000f9e3b598164ec32c42d8cf36ed817bbdfe9e2f3df834de0b34b687f86"
+}

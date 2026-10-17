@@ -1,0 +1,150 @@
+
+> writeascend@2.0.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# (node:39599) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: bridge code is bound to callback and PKCE, consumed once, and never returns the source cookie
+ok 1 - bridge code is bound to callback and PKCE, consumed once, and never returns the source cookie
+  ---
+  duration_ms: 30.207958
+  type: 'test'
+  ...
+# Subtest: foreign origins, wrong clients/callbacks/challenges, guests and public accounts cannot authorize
+ok 2 - foreign origins, wrong clients/callbacks/challenges, guests and public accounts cannot authorize
+  ---
+  duration_ms: 10.235666
+  type: 'test'
+  ...
+# Subtest: code/grant expiration, source disablement, role changes and explicit revocation take effect
+ok 3 - code/grant expiration, source disablement, role changes and explicit revocation take effect
+  ---
+  duration_ms: 11.154875
+  type: 'test'
+  ...
+# Subtest: successful Daily logout revokes all grants for that source; foreign logout does not
+ok 4 - successful Daily logout revokes all grants for that source; foreign logout does not
+  ---
+  duration_ms: 6.98675
+  type: 'test'
+  ...
+# Subtest: teacher class grants are explicit and revocation is checked live for roster requests
+ok 5 - teacher class grants are explicit and revocation is checked live for roster requests
+  ---
+  duration_ms: 7.292167
+  type: 'test'
+  ...
+# Subtest: Daily identity adapter verifies the source before decoding, separates legacy admin and caps original expiry
+ok 6 - Daily identity adapter verifies the source before decoding, separates legacy admin and caps original expiry
+  ---
+  duration_ms: 0.597709
+  type: 'test'
+  ...
+# Subtest: disabled bridge makes no schema changes and does not interfere with existing routes
+ok 7 - disabled bridge makes no schema changes and does not interfere with existing routes
+  ---
+  duration_ms: 2.834916
+  type: 'test'
+  ...
+# Subtest: legacy backup preserves teacher scores, every report section and unknown business fields
+ok 8 - legacy backup preserves teacher scores, every report section and unknown business fields
+  ---
+  duration_ms: 4.325625
+  type: 'test'
+  ...
+# Subtest: each saved snapshot retains its own rubric; changed labels do not recalculate old scores
+ok 9 - each saved snapshot retains its own rubric; changed labels do not recalculate old scores
+  ---
+  duration_ms: 1.91425
+  type: 'test'
+  ...
+# Subtest: serialized browser storage credentials are stripped before hashing, storage or transmission
+ok 10 - serialized browser storage credentials are stripped before hashing, storage or transmission
+  ---
+  duration_ms: 1.325625
+  type: 'test'
+  ...
+# Subtest: missing historical rubric and images remain missing rather than taking the current default
+ok 11 - missing historical rubric and images remain missing rather than taking the current default
+  ---
+  duration_ms: 0.712542
+  type: 'test'
+  ...
+# Subtest: aliases, student history and schema extensions remain usable
+ok 12 - aliases, student history and schema extensions remain usable
+  ---
+  duration_ms: 1.288292
+  type: 'test'
+  ...
+# Subtest: JSON round trip keeps rubric, sections, teacher changes and scores without duplicate reports
+ok 13 - JSON round trip keeps rubric, sections, teacher changes and scores without duplicate reports
+  ---
+  duration_ms: 1.248416
+  type: 'test'
+  ...
+# Subtest: CSV retains the original seven headers, quotes multiline content and prevents formula execution
+ok 14 - CSV retains the original seven headers, quotes multiline content and prevents formula execution
+  ---
+  duration_ms: 1.090542
+  type: 'test'
+  ...
+# Subtest: credential filtering does not pollute object prototypes and preserves unknown report metadata
+ok 15 - credential filtering does not pollute object prototypes and preserves unknown report metadata
+  ---
+  duration_ms: 0.141
+  type: 'test'
+  ...
+# Subtest: original scoring helpers keep half marks and exclude crossed-out words
+ok 16 - original scoring helpers keep half marks and exclude crossed-out words
+  ---
+  duration_ms: 1.43425
+  type: 'test'
+  ...
+# Subtest: original scoring and model prompt block is retained exactly
+ok 17 - original scoring and model prompt block is retained exactly
+  ---
+  duration_ms: 1.028375
+  type: 'test'
+  ...
+# Subtest: all original teacher operations remain present after extraction
+ok 18 - all original teacher operations remain present after extraction
+  ---
+  duration_ms: 20.782459
+  type: 'test'
+  ...
+# Subtest: main entry is the complete teacher app and does not use the report-import experiment
+ok 19 - main entry is the complete teacher app and does not use the report-import experiment
+  ---
+  duration_ms: 0.4925
+  type: 'test'
+  ...
+# (node:39602) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Worker and Daily exchange actual authorization code over HTTP and create only a separate cloud session
+ok 20 - Worker and Daily exchange actual authorization code over HTTP and create only a separate cloud session
+  ---
+  duration_ms: 28.797334
+  type: 'test'
+  ...
+# Subtest: Worker rejects missing or wrong state and external return paths; failed transactions cannot be replayed
+ok 21 - Worker rejects missing or wrong state and external return paths; failed transactions cannot be replayed
+  ---
+  duration_ms: 13.118541
+  type: 'test'
+  ...
+# Subtest: Worker roster follows current Daily class permissions and logout still succeeds after source account disablement
+ok 22 - Worker roster follows current Daily class permissions and logout still succeeds after source account disablement
+  ---
+  duration_ms: 10.303625
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 287.717916

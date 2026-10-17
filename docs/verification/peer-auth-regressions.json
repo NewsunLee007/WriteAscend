@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "peer-auth",
+      "passed": true,
+      "scriptSha256": "a05de3dbe7bd50b53e30c6b23db319832160941413a2285b222417b9ae90de62",
+      "checkedAt": "2026-10-16T21:00:12.125773+00:00",
+      "result": {
+        "passed": true,
+        "independentWorkerAndCookie": true,
+        "realDailyConsentCodeFlow": true,
+        "teacherClassScope": true,
+        "studentOwnClassScope": true,
+        "sameNameAccountsIsolated": true,
+        "noBrowserReadableSecrets": true,
+        "refreshKeepsSession": true,
+        "peerLogoutPreservesTeacherAndOtherDevice": true,
+        "currentClassRevocation": true,
+        "sourceOutageHidesStaleAccount": true,
+        "peerOutagePreservesTeacher": true,
+        "sourceLogoutRevokesBothApps": true,
+        "schoolGuestDenied": true,
+        "interactiveExpiry": true,
+        "callbackFailureHasRecovery": true,
+        "noTeacherModelOrDirectoryEndpoints": true,
+        "noModelCalls": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    {
+      "name": "background-work",
+      "passed": true,
+      "scriptSha256": "fca5dbbc2de0109c0cf39798560cde6f3d3ed546d9cf547f820d08522e1218ed",
+      "checkedAt": "2026-10-16T21:00:48.918275+00:00",
+      "result": {
+        "passed": true,
+        "boundWorkAfterPrimaryExpiry": true,
+        "boundWorkAfterClosingPage": true,
+        "multiplePipelineStages": true,
+        "freshLoginKeepsOriginalRun": true,
+        "classRevocationBlocksDispatch": true,
+        "explicitResumeRenewsOnlyExistingRun": true,
+        "standaloneModelJobWorkAfterExpiry": true,
+        "localLogoutStopsWorkWhenRemoteRevokeFails": true,
+        "noDuplicateModelCalls": true,
+        "totalSyntheticModelCalls": 4
+      }
+    },
+    {
+      "name": "student-revisions",
+      "passed": true,
+      "scriptSha256": "1bab10f1d15a14a1a9dd185851e09da368f34803332a1265382db9852fa336c0",
+      "checkedAt": "2026-10-16T21:01:15.969171+00:00",
+      "result": {
+        "passed": true,
+        "studentOwnRevision": true,
+        "sameTeacherRubric": true,
+        "offlinePhotoCached": true,
+        "refreshRestoresLocalPhotoAndEvidence": true,
+        "crossDeviceConflictExplicit": true,
+        "photoOrdering": true,
+        "teacherReturnAndResubmit": true,
+        "teacherAcceptanceCreatesNextDraft": true,
+        "originalOneClickGrading": true,
+        "firstFeedbackPreserved": true,
+        "studentAuthorshipVisible": true,
+        "noAutoModelOrPublication": true,
+        "studentAndTeacherIsolation": true,
+        "logoutClearsCache": true,
+        "logoutFencesDelayedWrites": true,
+        "syntheticModelCalls": 2,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    {
+      "name": "grading-history",
+      "passed": true,
+      "scriptSha256": "3a7d674ef1847af6cfda012ab21a31dfd84c1946aea331a83c09d70475fe1433",
+      "checkedAt": "2026-10-16T21:01:47.889985+00:00",
+      "result": {
+        "passed": true,
+        "reportRevisionHistory": true,
+        "readOnlyHistory": true,
+        "historyComparison": true,
+        "restoreCreatesNewRevision": true,
+        "historyDoesNotInvokeAI": true,
+        "regradeExplicitlyInvokesOneModel": true,
+        "regradePreservesPublishedVersion": true,
+        "oldReportAccessibleDuringRegrade": true,
+        "dailyPublishedSummary": true,
+        "dailyOwnAccountLink": true,
+        "dailyDatabaseRestoreRepaired": true,
+        "lostAcknowledgmentReconciled": true,
+        "syncAndHistoryHaveNoAdditionalModelCalls": true,
+        "withdrawalClearsDaily": true,
+        "disabledEntryLeavesExistingPage": true,
+        "teacherDailyEntry": true,
+        "studentLogin": true,
+        "unpublishedHidden": true,
+        "teacherConfirmation": true,
+        "readOnlyFeedback": true,
+        "stableOwnReportLink": true,
+        "studentPdfRendered": true,
+        "studentOwnOriginal": true,
+        "sameNameIsolated": true,
+        "teacherEditsAwaitRepublish": true,
+        "versionedRepublish": true,
+        "withdrawalBlocksReportAndImage": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    {
+      "name": "teacher-workflow",
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-16T21:01:52.698446+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    }
+  ]
+}

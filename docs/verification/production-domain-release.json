@@ -1,0 +1,266 @@
+{
+  "environment": "production",
+  "sourceCommit": "99cc6e2caf36bd85b4efc3a6bd4dbd8c7aee8f20",
+  "origin": "https://writeascend.newsunenglish.com",
+  "teacherWorker": "writeascend-production",
+  "teacherVersion": "74b3df81-649f-4bc6-99cd-c20c8ef3b111",
+  "peerWorker": "newsun-writing-peer-production",
+  "peerOrigin": "https://newsun-writing-peer-production.317792050.workers.dev",
+  "peerVersion": "e0c9ff25-219a-4440-92b8-1e9fa9e18704",
+  "activatedAt": "2026-10-17T08:48:36.246171+00:00",
+  "route": {
+    "id": "ab8080cdc1ad41b7a4548cc306131fe0",
+    "pattern": "writeascend.newsunenglish.com/*",
+    "script": "writeascend-production",
+    "request_limit_fail_open": false
+  },
+  "otherRoutesUnchanged": true,
+  "dnsChanged": false,
+  "oldSite": {
+    "provider": "GitHub Pages",
+    "htmlBytes": 515072,
+    "htmlSha256": "9ef317732830a2a3d1c76046ba6d0293b156867040aad9dea93e6fcf6d14331f",
+    "currentlyPresented": false,
+    "browserLocalDataCleared": false
+  },
+  "manifestSha256": "c87656ed46723e36aadb8ce255bfda64aafe2205f9bda359155462e1e5fc3a2c",
+  "resources": {
+    "teacherDatabase": "writeascend-production",
+    "teacherDatabaseId": "42be3f98-85b6-45cd-a9ff-261b6e167e91",
+    "peerDatabase": "writing-peer-production",
+    "peerDatabaseId": "3dc945f1-9f2c-4718-802a-a85f58745617",
+    "teacherMigrations": 17,
+    "peerMigrations": 3,
+    "bucket": "writeascend-production-private",
+    "bucketPublic": false,
+    "queues": [
+      "writeascend-production-model-jobs",
+      "writeascend-production-feedback-events"
+    ],
+    "isolatedFromStaging": true,
+    "sourceStagingBusinessCounts": {
+      "tasks": 0,
+      "models": 0,
+      "rubrics": 0,
+      "assets": 0
+    }
+  },
+  "backups": {
+    "cloudDatabases": [
+      {
+        "kind": "teacher",
+        "databaseName": "writeascend-production",
+        "sqlBytes": 23521,
+        "sqlSha256": "da991ba144a779bc2753eca578c06a60a1819ffcef3844eb1865be7930411a77",
+        "bookmarkRecorded": true
+      },
+      {
+        "kind": "peer",
+        "databaseName": "writing-peer-production",
+        "sqlBytes": 5118,
+        "sqlSha256": "3256e8ac929f46db05686a9a79fe94e8818e1dda7bbd1e9074721a890e03e8b2",
+        "bookmarkRecorded": true
+      }
+    ],
+    "dailyDatabases": [
+      {
+        "name": "daily-line.sqlite",
+        "sha256": "adcdae19b20f7d5c95416cc5ba7058059f85a3ea4b53b254b11159b85d0d0536",
+        "bytes": 274432,
+        "verified": true
+      },
+      {
+        "name": "recitations.sqlite",
+        "sha256": "598af4475644100292b1dcccde4cea68d065c5d64baf99de3f4e8b544187df98",
+        "bytes": 15880192,
+        "verified": true
+      }
+    ],
+    "dailyEnvironmentBeforeSha256": "11bc7e336813600e23f8f20654aca3c5685042fe51b9016eef16dd4d43e353f3",
+    "dailyEnvironmentAfterSha256": "8e8e28d7656859803329caa03f81ee20be87d9d9a1bf74a3afbfe3a26c279672",
+    "privateStorageOnly": true
+  },
+  "dailyMaintenance": {
+    "restartedOnly": "com.newsun.daily-line.web",
+    "schoolDirectoryCountsUnchanged": {
+      "writing_schools": 1,
+      "writing_classes": 54,
+      "writing_memberships": 2327,
+      "writing_teacher_class_grants": 2,
+      "writing_membership_periods": 2327
+    },
+    "wordupHealthy": true,
+    "audioReady": 144,
+    "callbacksProductionFirstAndStagingRetained": true
+  },
+  "tests": {
+    "teacher": 233,
+    "peer": 9,
+    "productionBuildAndWorkerDryRuns": true,
+    "linuxCi": {
+      "runId": 39018358803,
+      "conclusion": "success",
+      "sourceCommit": "99cc6e2caf36bd85b4efc3a6bd4dbd8c7aee8f20"
+    }
+  },
+  "online": {
+    "passed": true,
+    "checkedAt": "2026-10-17T08:52:49.204Z",
+    "gitCommit": "99cc6e2caf36bd85b4efc3a6bd4dbd8c7aee8f20",
+    "checks": [
+      {
+        "kind": "teacher",
+        "origin": "https://writeascend.newsunenglish.com",
+        "version": "74b3df81-649f-4bc6-99cd-c20c8ef3b111",
+        "page": 200,
+        "oldHtmlAbsent": true,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-BpHkLL79.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/rolldown-runtime-COiEfhsA.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-Dwq3S_Ly.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-BliYnSq3.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-C0Bk9Oi3.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-D4UW3rFQ.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-Dfez8hQU.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-CBpnjnhR.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-Cx_u_A6V.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel--c8SDP-l.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel-BLkPR0Vy.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-CjrmFQST.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-CV7v0oVv.js",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/classes": 401,
+          "/api/student/reports": 401,
+          "/api/tasks": 401,
+          "/api/model/profiles": 401,
+          "/api/snapshots": 401,
+          "/api/admin/writing-directory/overview": 401,
+          "/api/rubric-templates": 401,
+          "/api/model/discover POST": 401,
+          "/api/model/personal POST": 401,
+          "/api/rubric-templates POST": 401
+        },
+        "machine": 401,
+        "studentRoute": 200,
+        "loginStart": 302,
+        "callbackOriginVerified": true
+      },
+      {
+        "kind": "peer",
+        "origin": "https://newsun-writing-peer-production.317792050.workers.dev",
+        "version": "e0c9ff25-219a-4440-92b8-1e9fa9e18704",
+        "page": 200,
+        "oldHtmlAbsent": true,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-D50hf-eb.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-CD5FMhBD.css",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/rounds": 401
+        },
+        "machine": 401,
+        "studentRoute": 200,
+        "loginStart": 302,
+        "callbackOriginVerified": true
+      }
+    ]
+  },
+  "formalTeacher": {
+    "passed": true,
+    "checkedAt": "2026-10-17T08:58:39.982Z",
+    "formalSessionPresent": true,
+    "displayName": "NewsunLee",
+    "role": "teacher",
+    "classes": [
+      {
+        "name": "八（13）班",
+        "grade": "八年级",
+        "academicYear": "2026-1",
+        "students": 47,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      },
+      {
+        "name": "八（14）班",
+        "grade": "八年级",
+        "academicYear": "2026-1",
+        "students": 49,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      }
+    ],
+    "taskCreated": false,
+    "realStudentContentUploaded": false,
+    "modelInvoked": false
+  },
+  "browser": {
+    "domReadPassed": true,
+    "observed": "Formal origin workbench showed NewsunLee, connected school account and exactly two authorized classes",
+    "screenshotSaved": false,
+    "screenshotLimitation": "Browser CDP timed out; native fallback returned ScreenCaptureKit error -3812. No screenshot was substituted."
+  },
+  "rollback": {
+    "preciseRouteId": "ab8080cdc1ad41b7a4548cc306131fe0",
+    "preciseRoutePattern": "writeascend.newsunenglish.com/*",
+    "firstReleaseRecovery": "Remove only this release route to restore existing GitHub origin; retain production D1/R2. Daily configuration rollback is checksum-guarded and never restores old databases."
+  },
+  "realClassroomModelAndCameraValidated": false
+}

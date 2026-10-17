@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-17T11:21:44.074983+00:00",
+  "readOnly": true,
+  "task": {
+    "memberCount": 49,
+    "version": 1,
+    "targetCount": 1,
+    "total": 20,
+    "dimensionScoreSum": 20,
+    "dimensionCount": 5,
+    "grade": "八年级",
+    "wordCount": "80–100 words",
+    "hasTopic": true,
+    "hasPrivatePromptImage": false
+  },
+  "imageConnectionChecks": {
+    "deepseek-flash": {
+      "correctVisibleText": true,
+      "attempts": 1
+    },
+    "qwen3.5-ocr": {
+      "correctVisibleText": true,
+      "attempts": 1
+    }
+  },
+  "observedModelJobs": 4,
+  "realHandwritingQualityVerified": false,
+  "browserUiVerified": false,
+  "teacherSessionCurrent": false,
+  "productionReadyAssets": 1,
+  "readyAssetsAreOnlyConnectionCheckImage": true,
+  "staging": {
+    "tasks": 0,
+    "drafts": 0,
+    "activeModels": 0,
+    "modelJobs": 0
+  },
+  "collection": {
+    "studentDrafts": 0,
+    "studentPhotosReceivedVerified": false,
+    "userReportedEntry": "task collection",
+    "currentPhotoStatusAwaitingUser": true
+  },
+  "limitations": [
+    "Connection checks prove printed test image recognition only, not real handwriting quality.",
+    "Two further DeepSeek jobs returned task-analysis and rubric preparation, not an essay report.",
+    "Browser page reads and screenshots timed out; native capture failed. No UI action or model call was performed by this audit.",
+    "Teacher sessions were expired at read-only database check."
+  ],
+  "verifiedEssayGradingJobs": 0
+}

@@ -1,0 +1,27 @@
+import React, {useRef,useState} from 'react';
+import {rubricProblem} from './rubric-library';
+
+export default function QuickGrading({assignment,setAssignment,rubric,setRubric,classes,currentClassId,activeClassIds,setCurrentClassId,setActiveClassIds,onGradeChange,files,isBatchProcessing,configReady,onPromptUpload,onRecognizePrompt,onUpload,onStart,onManageStudents,onModelSettings,onAdvanced,onImportRubric,onRemoveFile,onRetry,renderPreparation}) {
+  const upload=useRef(null),camera=useRef(null),topic=useRef(null);
+  const [setupStep,setSetupStep]=useState(files.length?2:0);
+  const hasTopic=!!String(assignment.topic||'').trim();
+  const currentClass=classes.find(c=>String(c.id)===String(currentClassId));
+  const selectedClasses=activeClassIds.length?activeClassIds:(currentClassId?[currentClassId]:[]);
+  const grade=activeClassIds.length>1?rubric.gradeLevel:(currentClass?.gradeLevel||rubric.gradeLevel);
+  const grades=[...new Set(['六年级','七年级','八年级','九年级','高一','高二','高三',grade].filter(Boolean))];
+  const pending=files.filter(f=>f.status==='idle').length;
+  const completed=files.filter(f=>f.status==='success').length;
+  const failures=files.filter(f=>f.status==='error').length;
+  return <div className="quick-grading">
+    <header className="quick-heading"><h1>私人作文批阅</h1><span>确认题目、评分标准，再上传作文。使用本机私人名单。</span></header>
+    <nav className="wa-preparation-steps" aria-label="私人批阅准备">{['学生与题目','批阅标准','上传并批阅'].map((label,i)=><button key={label} aria-current={i===setupStep?'step':undefined} disabled={isBatchProcessing||i>setupStep||completed>0&&i!==setupStep} onClick={()=>setSetupStep(i)}><span>{i+1}</span>{label}</button>)}</nav>
+    {setupStep===0&&<><section className="wa-panel"><h2>本机班级与学生</h2><div className="wa-form-grid"><label>年级<select aria-label="私人批阅年级" value={grade} onChange={e=>onGradeChange(e.target.value)}>{grades.map(x=><option key={x}>{x}</option>)}</select></label><label>班级<select aria-label="私人批阅班级" value={currentClassId} onChange={e=>{setCurrentClassId(e.target.value);setActiveClassIds([e.target.value]);}}>{classes.map(c=><option key={c.id} value={c.id}>{c.name}（{c.students?.length||0}人）</option>)}</select></label></div><button className="wa-text-button" onClick={onManageStudents}>管理私人名单</button>{classes.length>1&&<details><summary>同时选择多个私人班级</summary>{classes.map(c=><label className="wa-inline-check" key={c.id}><input type="checkbox" checked={selectedClasses.includes(c.id)} disabled={selectedClasses.length===1&&selectedClasses.includes(c.id)} onChange={e=>setActiveClassIds(e.target.checked?[...new Set([...selectedClasses,c.id])]:selectedClasses.filter(id=>id!==c.id))}/>{c.name}</label>)}</details>}</section>{renderPreparation('prompt')}<div className="wa-preparation-footer"><span>1 / 3 · 明确本篇要求</span><button className="wa-primary" disabled={!hasTopic} onClick={()=>{setSetupStep(1);window.scrollTo({top:0});}}>下一步：批阅标准</button></div></>}
+    {setupStep===1&&<>{renderPreparation('rubric')}<div className="wa-preparation-footer"><button className="wa-secondary" onClick={()=>setSetupStep(0)}>上一步</button><button className="wa-primary" disabled={!hasTopic||!!rubricProblem(rubric)} onClick={()=>{setSetupStep(2);window.scrollTo({top:0});}}>确认本次标准，上传作文</button></div>{rubricProblem(rubric)&&<p className="wa-error" role="alert">{rubricProblem(rubric)}</p>}</>}
+    {setupStep===2&&<><section className="wa-panel"><div className="wa-row"><h2>已确认本次题目与标准</h2><button className="wa-text-button" disabled={isBatchProcessing||completed>0} onClick={()=>setSetupStep(1)}>返回调整标准</button></div><p>{assignment.title||assignment.topic}</p><div className="wa-tags"><span className="wa-tag">{grade}</span><span className="wa-tag">{rubric.total}分 · {rubric.items.length}个维度</span><span className="wa-tag">{rubric.wordCount}</span></div></section>
+    <section className="quick-card" aria-labelledby="quick-upload-title"><div className="quick-card-title"><h2 id="quick-upload-title"><b>3</b> 上传学生作文</h2><span>{files.length?`${files.length} 份作文`:''}</span></div><div className="quick-upload-actions"><button onClick={()=>camera.current?.click()}><span>拍一份</span><small>调用手机相机</small></button><button onClick={()=>upload.current?.click()}><span>批量上传</span><small>从相册或电脑选择多张</small></button></div><input ref={upload} type="file" accept="image/*" multiple hidden onChange={onUpload}/><input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={onUpload}/>
+      {files.length>0&&<><div className="quick-file-summary"><span>待批改 {pending} · 已完成 {completed}{failures?` · 需重试 ${failures}`:''}</span>{failures>0&&<button onClick={onRetry}>重试失败作文</button>}</div><ul className="quick-files">{files.map((f,i)=><li key={f.id}><img src={f.url} alt={`作文 ${i+1}`}/><div><strong>{f.result?.student_name||f.inferredStudentName||f.name||`作文 ${i+1}`}</strong><small>{{idle:'已就绪',loading:'批改中',success:'已完成',error:'需重试'}[f.status]||'待核对'}</small></div>{!isBatchProcessing&&f.status!=='success'&&<button onClick={()=>onRemoveFile(f.id)} aria-label={`移除作文 ${i+1}`}>×</button>}</li>)}</ul></>}
+      {!files.length&&<p className="quick-help">支持多张 JPG、PNG 等图片。姓名、班级和序号会结合名单核对，不需要逐份填写。</p>}
+    </section>
+    <div className="quick-start-bar"><div><strong>{files.length?`已准备 ${files.length} 份作文`:'上传作文后开始批改'}</strong><small>{configReady?'使用已配置的大模型与当前评分标准':'首次使用请先完成模型设置'}</small></div><button onClick={onStart} disabled={isBatchProcessing||files.length===0}>{isBatchProcessing?'正在批改…':pending?`一键批改（${pending}份）`:files.length?'查看批改结果':'一键批改'}</button></div>
+  </>}</div>;
+}

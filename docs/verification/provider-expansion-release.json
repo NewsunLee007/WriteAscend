@@ -1,0 +1,209 @@
+{
+  "sourceCommit": "7dc4aea0829ae51b66454f481050ac68d3cc6d5d",
+  "releasedAt": "2026-10-17T09:51:53.219Z",
+  "origin": "https://writeascend.newsunenglish.com",
+  "productionVersion": "b4be06a2-dc3f-4fde-b21c-5d1e5054dff7",
+  "previousProductionVersion": "52298aad-7db6-4d6f-97f0-59a3a96ad0fb",
+  "stagingVersion": "565c1bbd-4934-414a-a8a6-62357aeec2fb",
+  "previousStagingVersion": "3d4adf1a-a972-4302-8f25-ecfc11154f94",
+  "providers": [
+    {
+      "id": "deepseek",
+      "label": "DeepSeek · 深度求索",
+      "models": [
+        "deepseek-flash"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "doubao",
+      "label": "火山方舟 · 豆包",
+      "models": [
+        "doubao-seed-2-1-lite-260915",
+        "doubao-seed-2-1-pro-260915",
+        "doubao-seed-2-1-turbo-260628"
+      ],
+      "accountDirectory": false
+    },
+    {
+      "id": "moonshot",
+      "label": "月之暗面 · Kimi",
+      "models": [
+        "kimi-k3",
+        "kimi-k2.6"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "minimax",
+      "label": "MiniMax · 稀宇科技",
+      "models": [
+        "MiniMax-M3"
+      ],
+      "accountDirectory": false
+    },
+    {
+      "id": "baidu",
+      "label": "百度智能云 · 千帆文心",
+      "models": [
+        "ernie-5.0"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "hunyuan",
+      "label": "腾讯云 · 混元 TokenHub",
+      "models": [
+        "hy-vision-2.0-instruct"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "anthropic",
+      "label": "Anthropic · Claude",
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5",
+        "claude-opus-5-5"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "qwen",
+      "label": "阿里云百炼 · 千问",
+      "models": [
+        "qwen3.8-flash",
+        "qwen3.8-max",
+        "qwen3.5-ocr",
+        "qwen-vl-ocr-latest"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "glm",
+      "label": "智谱开放平台 · GLM",
+      "models": [
+        "glm-4.6v",
+        "glm-4.6v-flash"
+      ],
+      "accountDirectory": false
+    },
+    {
+      "id": "siliconflow",
+      "label": "硅基流动 · SiliconFlow",
+      "models": [
+        "Qwen/Qwen3-VL-30B-A3B-Instruct"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "gemini",
+      "label": "Google Gemini",
+      "models": [
+        "gemini-3.8-flash",
+        "gemini-3.5-flash-lite"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "openai",
+      "label": "OpenAI",
+      "models": [
+        "gpt-6.1-sol",
+        "gpt-6-luna",
+        "gpt-6-astra"
+      ],
+      "accountDirectory": true
+    },
+    {
+      "id": "mistral",
+      "label": "Mistral · 专业 OCR",
+      "models": [
+        "mistral-ocr-4-1",
+        "mistral-ocr-latest"
+      ],
+      "accountDirectory": true
+    }
+  ],
+  "mainstreamProviders": 13,
+  "curatedModels": 26,
+  "addedProviders": [
+    "deepseek",
+    "doubao",
+    "moonshot",
+    "minimax",
+    "baidu",
+    "hunyuan",
+    "anthropic"
+  ],
+  "route": {
+    "id": "2cb3915d8a9347c3beb01b6fd373bb4b",
+    "pattern": "writeascend.newsunenglish.com/*",
+    "script": "writeascend-production",
+    "request_limit_fail_open": false
+  },
+  "routeIdsAndRulesUnchanged": true,
+  "dnsChanged": false,
+  "dailyChanged": false,
+  "peerChanged": false,
+  "newDatabaseMigrations": 0,
+  "existingTeacherMigrations": 18,
+  "backups": {
+    "staging": {
+      "bytes": 25997,
+      "sha256": "b0689320396bd59f34ff88f2bf3b106cdeca33e7c8914792672393f5fa1cce2f"
+    },
+    "production": {
+      "bytes": 24945,
+      "sha256": "e6c9675ff651bd728a4839c9d1a8c92297cbb74f453e17080371136ef432606e"
+    }
+  },
+  "automatedTests": {
+    "teacher": 244,
+    "peer": 9,
+    "githubRun": 39022443400,
+    "conclusion": "success",
+    "newProviderCases": 7,
+    "realProviderModelCalls": 0
+  },
+  "browserQa": {
+    "environment": "isolated local synthetic",
+    "providerModelKeyEndpointBindings": 7,
+    "professionalOcrPurposeIsolation": true,
+    "mobileViewportWidth": 390,
+    "horizontalOverflow": false,
+    "screenshot": "output/provider-expansion-deepseek.jpg",
+    "realCredentialsUsed": false,
+    "productionScreenshotCaptured": false
+  },
+  "online": {
+    "passed": true,
+    "target": "production",
+    "origin": "https://writeascend.newsunenglish.com",
+    "sourceCommit": "7dc4aea0829ae51b66454f481050ac68d3cc6d5d",
+    "version": "b4be06a2-dc3f-4fde-b21c-5d1e5054dff7",
+    "assets": [
+      "/assets/index-CIOC8Isq.js",
+      "/assets/rolldown-runtime-COiEfhsA.js",
+      "/assets/index-DVDmP0Zg.css",
+      "/assets/BoundGradingPanel-BliYnSq3.css",
+      "/assets/BoundGradingPanel-CA3Ed1uE.js"
+    ],
+    "anonymousDenied": [
+      "/api/me",
+      "/api/classes",
+      "/api/student/reports",
+      "/api/model/profiles",
+      "/api/model/local-status",
+      "/api/local-relay/poll POST",
+      "/api/local-relay/result POST",
+      "/api/model/personal POST"
+    ],
+    "cspUnchanged": true,
+    "loginCallbackVerified": true,
+    "checkedAt": "2026-10-17T09:51:53.219Z"
+  },
+  "remaining": [
+    "Real account API keys, availability, handwritten recognition and feedback quality verification"
+  ]
+}

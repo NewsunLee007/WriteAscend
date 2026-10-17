@@ -1,0 +1,63 @@
+name: Verify writing applications
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  WRANGLER_SEND_METRICS: 'false'
+
+jobs:
+  teacher:
+    name: Teacher grading and shared integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked teacher dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify original grading and integration rules
+        run: npm test
+      - name: Build teacher application
+        run: npm run build
+      - name: Check teacher Worker without deploying
+        run: npm run worker:check
+
+  peer:
+    name: Independent peer review
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/peer-review
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: apps/peer-review/package-lock.json
+      - name: Install locked peer dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify peer rubric and assignment rules
+        run: npm test
+      - name: Build and check independent Worker without deploying
+        run: npm run worker:check:staging

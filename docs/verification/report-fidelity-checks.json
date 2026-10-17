@@ -1,0 +1,414 @@
+{
+  "checkedAt": "2026-10-17T02:40:27.330925+00:00",
+  "rootTests": 208,
+  "realAccountLoginVerified": false,
+  "realModelCalled": false,
+  "flows": {
+    "legacy-archive": {
+      "passed": true,
+      "scriptSha256": "3f506bf84a875f573b5f60d04ad73855028cc19fb51d93271c0b85a1bd11f2dc",
+      "checkedAt": "2026-10-17T02:39:02.439392+00:00",
+      "result": {
+        "passed": true,
+        "sourceReports": 118,
+        "previewBeforeUpload": true,
+        "initialUploadPause": 10,
+        "chunkPause": 20,
+        "closeAndResume": true,
+        "duplicateImportDeduplicated": true,
+        "fullBusinessBackup": true,
+        "credentialsExcluded": true,
+        "missingRubricReadable": true,
+        "zeroScorePreserved": true,
+        "recordedWordCountPreserved": true,
+        "historicalTaskTitlePreserved": true,
+        "missingFactsNotInvented": true,
+        "unmatchedCriteriaPreserved": true,
+        "reportSections": 6,
+        "printPdf": true,
+        "originalWorkbenchCopy": true,
+        "withdrawRestore": true,
+        "noAiCalls": true,
+        "noForeignImageLoads": true,
+        "mobileWidths": [
+          375,
+          390,
+          768,
+          1440
+        ],
+        "realSchoolData": false
+      }
+    },
+    "teacher-workflow": {
+      "passed": true,
+      "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37",
+      "checkedAt": "2026-10-17T02:39:06.486259+00:00",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    "student-publication": {
+      "passed": true,
+      "scriptSha256": "39e3217f379669264ac2d669c2863e9b88fdb89532b06544468c5fda11baefbb",
+      "checkedAt": "2026-10-17T02:36:27.961497+00:00",
+      "result": {
+        "passed": true,
+        "studentLogin": true,
+        "unpublishedHidden": true,
+        "teacherConfirmation": true,
+        "readOnlyFeedback": true,
+        "stableOwnReportLink": true,
+        "studentPdfRendered": true,
+        "studentOwnOriginal": true,
+        "sameNameIsolated": true,
+        "teacherEditsAwaitRepublish": true,
+        "versionedRepublish": true,
+        "withdrawalBlocksReportAndImage": true,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    }
+  },
+  "print": {
+    "passed": true,
+    "reports": [
+      {
+        "file": "legacy-archive-zero-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      },
+      {
+        "file": "legacy-archive-report.pdf",
+        "pages": 2,
+        "sections": 6,
+        "a4": true,
+        "noFooterOnlyPage": true,
+        "noFooterOverlap": true
+      }
+    ],
+    "syntheticOnly": true,
+    "physicalPrinterTested": false
+  },
+  "files": {
+    "src/report/LegacyPaper.jsx": "f3efe8e27393746dc6015b3b4cfcdb5ab8d6ca60e9b4300b7fa2d2ba45b82c40",
+    "src/report/writing-feedback.css": "e39bcfca26ab3e35122b070b745d4f67b673306bf018bd387ae42ee7ae159d2a",
+    "src/report/legacy-import.ts": "55034e60201bc5251ba957a38e6f209221cb1bb519fb567c9a7325755bb26a9f",
+    "test/report-compatibility.test.ts": "da0e19e7bc0f648b4f65566c8e48712be591abe2e50f6587053bc644d0b123c2",
+    "scripts/qa/legacy-archive.cjs": "3f506bf84a875f573b5f60d04ad73855028cc19fb51d93271c0b85a1bd11f2dc",
+    "scripts/qa/student-publication.cjs": "39e3217f379669264ac2d669c2863e9b88fdb89532b06544468c5fda11baefbb"
+  },
+  "formalDirectory": {
+    "checkedAt": "2026-10-17T02:37:23.906Z",
+    "readOnly": true,
+    "database": "Daily recitations authority bridge",
+    "formalDirectoryCounts": {
+      "writing_schools": 0,
+      "writing_classes": 0,
+      "writing_memberships": 0,
+      "writing_teacher_class_grants": 0,
+      "writing_membership_periods": null
+    },
+    "nullMeansTableNotInitialized": true,
+    "realAccountLoginVerified": false,
+    "identityRowsExported": false
+  },
+  "latestPriorDocsCI": {
+    "commit": "dbb1c2e88363569ec286e63c77b77c01f63870e6",
+    "runId": 38995181955,
+    "conclusion": "success"
+  },
+  "deployment": {
+    "passed": true,
+    "checkedAt": "2026-10-17T02:43:14.159012+00:00",
+    "sourceCommit": "0fc95234fab47a81d1427e90594787d11a38c6b7",
+    "teacherRelease": {
+      "id": "3424251a-e994-4d93-ad68-2245a237613c",
+      "tag": null,
+      "timestamp": "2026-10-17T02:42:25.423494Z"
+    },
+    "teacherPreviousVersion": "1795bc62-30b2-4fa0-bac5-9c8d754192e5",
+    "peerRelease": {
+      "id": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+      "tag": null,
+      "timestamp": "2026-10-17T00:47:36.937352Z"
+    },
+    "peerRedeployed": false,
+    "assets": [
+      {
+        "path": "assets/LegacyArchivePanel-B-Zi9sLQ.css",
+        "bytes": 5201,
+        "sha256": "19cb7863301133475e7acff4466e7effad5ffe6df4776ba240e8732b1bd5482e",
+        "matches": true
+      },
+      {
+        "path": "assets/LegacyArchivePanel-BTyORulu.js",
+        "bytes": 33264,
+        "sha256": "5d2b577520b02dda02531e71edef8289c9ed179d4c60abd967e1d2042084a88f",
+        "matches": true
+      },
+      {
+        "path": "assets/index-BG2Z-ffy.css",
+        "bytes": 89937,
+        "sha256": "767f33a6752368ed466a60bd9888f78d231ddf531368065a919296de43dc9d09",
+        "matches": true
+      },
+      {
+        "path": "assets/index-CaPvuTlv.js",
+        "bytes": 548429,
+        "sha256": "80cb834fdedf430e2eb4f8a0c982c674bbaec5aaf16566de213643aaf272dda3",
+        "matches": true
+      },
+      {
+        "path": "assets/rolldown-runtime-COiEfhsA.js",
+        "bytes": 1116,
+        "sha256": "174e7e98105b02138bee9b4c62dfc8a01980db395f9e6c916db999c091115562",
+        "matches": true
+      },
+      {
+        "path": "index.html",
+        "bytes": 629,
+        "sha256": "e14c73ba1380be06be3fdf1404075690c82bb67a1d6105e568337bd1c4eb3574",
+        "matches": true
+      }
+    ],
+    "anonymousProtection": [
+      {
+        "path": "/api/legacy-imports",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/api/reports",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/api/legacy-imports",
+        "method": "POST",
+        "status": 401
+      },
+      {
+        "path": "/api/legacy-imports/00000000-0000-0000-0000-000000000000/source",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/api/legacy-imports/00000000-0000-0000-0000-000000000000/continue",
+        "method": "POST",
+        "status": 401
+      }
+    ],
+    "realAccountLoginVerified": false,
+    "schemaChanged": false,
+    "databaseCountsBefore": {
+      "migrations": 16,
+      "archive_batches": 0,
+      "legacy_reports": 0,
+      "tasks": 0,
+      "model_jobs": 0
+    },
+    "backup": {
+      "passed": true,
+      "databaseId": "c1bb77de-0b5f-4d35-8dbf-e52739c3ba75",
+      "sqlBytes": 22517,
+      "sqlSha256": "dc6e5210eb6c83f44a1559bdf624a85955002c47ddac23afe7075f13e7834cc6",
+      "bookmarkRecorded": true,
+      "checkedAt": "2026-10-17T02:41:21.442723+00:00"
+    },
+    "publicPages": {
+      "passed": true,
+      "scriptSha256": "bdc86d582a33ac6738d8e947a2fd81910e7f857a754e963e6a50ace730985f19",
+      "checkedAt": "2026-10-17T02:43:07.070573+00:00",
+      "result": {
+        "passed": true,
+        "cloudPages": [
+          {
+            "kind": "teacher",
+            "origin": "https://writeascend-staging.317792050.workers.dev",
+            "release": {
+              "id": "3424251a-e994-4d93-ad68-2245a237613c",
+              "tag": null,
+              "timestamp": "2026-10-17T02:42:25.423494Z"
+            },
+            "loginConfigured": true,
+            "anonymousMe": 401,
+            "responsiveWidths": [
+              375,
+              390,
+              768,
+              1440
+            ],
+            "csp": true,
+            "anonymousProtection": [
+              {
+                "path": "/api/me",
+                "status": 401
+              },
+              {
+                "path": "/api/classes",
+                "status": 401
+              },
+              {
+                "path": "/api/student/reports",
+                "status": 401
+              },
+              {
+                "path": "/api/tasks",
+                "status": 401
+              },
+              {
+                "path": "/api/integrations/writing-peer/status",
+                "status": 401
+              }
+            ]
+          },
+          {
+            "kind": "peer",
+            "origin": "https://newsun-writing-peer-staging.317792050.workers.dev",
+            "release": {
+              "id": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+              "tag": null,
+              "timestamp": "2026-10-17T00:47:36.937352Z"
+            },
+            "loginConfigured": true,
+            "anonymousMe": 401,
+            "responsiveWidths": [
+              375,
+              390,
+              768,
+              1440
+            ],
+            "csp": true,
+            "anonymousProtection": [
+              {
+                "path": "/api/me",
+                "status": 401
+              },
+              {
+                "path": "/api/rounds",
+                "status": 401
+              },
+              {
+                "path": "/api/integrations/writeascend/revision-basis",
+                "status": 401
+              }
+            ]
+          }
+        ],
+        "schoolLoginVerified": false,
+        "studentRecordsVerified": false
+      }
+    }
+  },
+  "ci": {
+    "passed": true,
+    "id": 38995903743,
+    "url": "https://github.com/NewsunLee007/WriteAscend/actions/runs/38995903743",
+    "headSha": "0fc95234fab47a81d1427e90594787d11a38c6b7",
+    "event": "pull_request",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117288292009,
+        "name": "Independent peer review",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked peer dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify peer rubric and assignment rules",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and check independent Worker without deploying",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 117288292189,
+        "name": "Teacher grading and shared integration",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked teacher dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify original grading and integration rules",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build teacher application",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check teacher Worker without deploying",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "sourceCommit": "ba89047fbce9c458f183cbe960ebdcadb39d7476",
+  "releasedAt": "2026-10-17T09:26:05.164Z",
+  "origin": "https://writeascend.newsunenglish.com",
+  "productionVersion": "52298aad-7db6-4d6f-97f0-59a3a96ad0fb",
+  "previousProductionVersion": "74b3df81-649f-4bc6-99cd-c20c8ef3b111",
+  "stagingVersion": "3d4adf1a-a972-4302-8f25-ecfc11154f94",
+  "previousStagingVersion": "c3518d4d-696f-4445-a117-5e13f16d7c8b",
+  "peerChanged": false,
+  "dailyChanged": false,
+  "route": {
+    "id": "2cb3915d8a9347c3beb01b6fd373bb4b",
+    "pattern": "writeascend.newsunenglish.com/*",
+    "script": "writeascend-production",
+    "request_limit_fail_open": false
+  },
+  "routeIdRecreatedByWrangler": true,
+  "otherRoutesUnchanged": true,
+  "dnsChanged": false,
+  "backups": {
+    "staging": {
+      "bytes": 25329,
+      "sha256": "da1e8ab5bc8dcc8e94e0ddf6927bb01b8d8e683f9b1c0e2ca37442fe674bf793"
+    },
+    "production": {
+      "bytes": 24917,
+      "sha256": "5ff66110c3f118f5a44e129c46bac5618ff01709fd87f18df7c73fd691ca3d51"
+    }
+  },
+  "migrationEvidence": {
+    "staging": {
+      "migration": "0018_local_model_relays.sql",
+      "applied": true,
+      "transcriptSha256": "badfb4742b064259c726f4599bdfe83d2b24a26e98079f7100e95533769c65ae"
+    },
+    "production": {
+      "migration": "0018_local_model_relays.sql",
+      "applied": true,
+      "transcriptSha256": "2bf2c27d9bca31d68bd0f7d9c473c624c8e3f5696e2b12f228e946c04112a973"
+    }
+  },
+  "automatedTests": {
+    "teacher": 239,
+    "peer": 9,
+    "githubRun": 39020774733,
+    "conclusion": "success"
+  },
+  "online": {
+    "passed": true,
+    "target": "production",
+    "origin": "https://writeascend.newsunenglish.com",
+    "sourceCommit": "ba89047fbce9c458f183cbe960ebdcadb39d7476",
+    "version": "52298aad-7db6-4d6f-97f0-59a3a96ad0fb",
+    "assets": [
+      "/assets/index-BsgnURGV.js",
+      "/assets/rolldown-runtime-COiEfhsA.js",
+      "/assets/index-DVDmP0Zg.css",
+      "/assets/BoundGradingPanel-BliYnSq3.css",
+      "/assets/BoundGradingPanel-Dt-asdNI.js"
+    ],
+    "anonymousDenied": [
+      "/api/me",
+      "/api/classes",
+      "/api/student/reports",
+      "/api/model/profiles",
+      "/api/model/local-status",
+      "/api/local-relay/poll POST",
+      "/api/local-relay/result POST",
+      "/api/model/personal POST"
+    ],
+    "cspUnchanged": true,
+    "loginCallbackVerified": true,
+    "checkedAt": "2026-10-17T09:26:05.164Z"
+  },
+  "browserQa": {
+    "environment": "local isolated synthetic",
+    "desktop": true,
+    "mobileWidth": 390,
+    "horizontalOverflow": false,
+    "downloadedConnectorRan": true,
+    "modelDirectoryFiltered": true,
+    "imageRequestRoundTripPassed": true,
+    "connectorRevocationPassed": true,
+    "syntheticConnectionRemoved": true,
+    "realHardwareInferenceVerified": false,
+    "productionScreenshotCaptured": false
+  },
+  "remaining": [
+    "Teacher local runtime/model installation and real handwritten OCR/feedback quality verification",
+    "Existing physical paper, real mobile camera, student account classroom acceptance"
+  ]
+}

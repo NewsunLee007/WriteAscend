@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-10-16T20:25:38.450776+00:00",
+  "sources": [
+    {
+      "name": "a2",
+      "url": "https://www.cambridgeenglish.org/Images/600973-teacher-guide-for-writing-a2-key-for-schools.pdf",
+      "bytes": 5745357,
+      "sha256": "ebb0b0853b3854c2ac384294ec55d1a30a17e6d273677999e6dee4e7f3182209",
+      "inspectedPdfPages": [
+        3,
+        4,
+        7,
+        12,
+        13
+      ],
+      "method": "PDF text extraction; scale PDF page 12 visually rendered (printed pages 22–23)"
+    },
+    {
+      "name": "b1",
+      "url": "https://www.cambridgeenglish.org/images/231794-cambridge-english-assessing-writing-performance-at-level-b1.pdf",
+      "bytes": 8695217,
+      "sha256": "22d7faa304baf1d838be35d40b7627ae35b98e55c995b280091edbba9a7fc597",
+      "inspectedPdfPages": [
+        3,
+        4,
+        6,
+        13,
+        14
+      ],
+      "method": "PDF text extraction; scale PDF page 13 visually rendered (printed pages 24–25)"
+    },
+    {
+      "name": "moe-english-2022",
+      "url": "https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582349487953.pdf",
+      "bytes": 31502213,
+      "sha256": "59ec3971e0dbd6ca487c4e4972cbc80effaf2fd62418d07e5f62c6698fa222fb",
+      "inspectedPdfPages": [
+        1,
+        6,
+        7,
+        8,
+        17,
+        18,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64
+      ],
+      "method": "Scanned PDF; selected pages visually inspected; no text extraction claims"
+    }
+  ],
+  "limitations": [
+    "Only listed pages inspected; not a claim of full curriculum review.",
+    "CEFR PDF web text available, appendix grid visual review pending.",
+    "Project classroom adaptations are not psychometrically validated scales."
+  ]
+}

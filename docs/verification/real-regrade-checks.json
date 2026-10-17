@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-17T13:31:16.178Z",
+  "readOnly": true,
+  "newReportReady": true,
+  "taskVersion": 2,
+  "pipeline": "context-aware-v2",
+  "canonicalHashMatches": true,
+  "oldReportHashPreserved": true,
+  "rubricWordCount": "60\u201380 words",
+  "reportedWordCount": 82,
+  "independentTitleRecognized": true,
+  "bodyWords": 78,
+  "historicalPastRetainedInCorrection": true,
+  "referenceHistoricalPresentStillNeedsReview": true,
+  "difficultyStatus": "exceeded",
+  "difficultyReasons": [
+    "FKGL 6.24 > 4.8",
+    "LongWordRatio 17.8% > 17.0%"
+  ],
+  "qualityAccepted": false,
+  "noModelCallDuringAudit": true,
+  "noPublicationDuringAudit": true,
+  "referenceEqualsFrozenModelEssay": true,
+  "referenceNeedsSeparateTaskStandardRevision": true
+}

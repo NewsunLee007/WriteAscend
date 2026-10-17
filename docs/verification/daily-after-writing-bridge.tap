@@ -1,0 +1,100 @@
+TAP version 13
+# (node:39580) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: primary account binding is idempotent, class scoped, immutable and keeps recording owner IDs
+ok 1 - primary account binding is idempotent, class scoped, immutable and keeps recording owner IDs
+  ---
+  duration_ms: 105.244583
+  type: 'test'
+  ...
+# Subtest: learning self assessments and drafts are private by subject, grade and unit and do not alter scores
+ok 2 - learning self assessments and drafts are private by subject, grade and unit and do not alter scores
+  ---
+  duration_ms: 119.331041
+  type: 'test'
+  ...
+# Subtest: all 19 official unit mappings retain grammar and final outputs, including exact U3 objectives
+ok 3 - all 19 official unit mappings retain grammar and final outputs, including exact U3 objectives
+  ---
+  duration_ms: 32.5
+  type: 'test'
+  ...
+# Subtest: only API-verified signed subject enters the account bridge; Daily credentials never go upstream
+ok 4 - only API-verified signed subject enters the account bridge; Daily credentials never go upstream
+  ---
+  duration_ms: 16.376458
+  type: 'test'
+  ...
+# (node:39581) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: teacher learning APIs require admin identity and same origin, persist reviews and visibility with audit
+ok 5 - teacher learning APIs require admin identity and same origin, persist reviews and visibility with audit
+  ---
+  duration_ms: 256.087167
+  type: 'test'
+  ...
+# Subtest: school account is the default; public login and registration remain explicit options
+ok 6 - school account is the default; public login and registration remain explicit options
+  ---
+  duration_ms: 0.79825
+  type: 'test'
+  ...
+# Subtest: weekly recitation switch opens a school login form and keeps the return destination
+ok 7 - weekly recitation switch opens a school login form and keeps the return destination
+  ---
+  duration_ms: 0.393667
+  type: 'test'
+  ...
+# Subtest: return destinations retain study state and reject other origins, unknown paths and backslashes
+ok 8 - return destinations retain study state and reject other origins, unknown paths and backslashes
+  ---
+  duration_ms: 0.427875
+  type: 'test'
+  ...
+# (node:39583) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: administrator can manage only registered students and teachers, without exposing password hashes or deleting learning history
+ok 9 - administrator can manage only registered students and teachers, without exposing password hashes or deleting learning history
+  ---
+  duration_ms: 11.461292
+  type: 'test'
+  ...
+# Subtest: WordUp routing leaves Daily private APIs and media untouched
+ok 10 - WordUp routing leaves Daily private APIs and media untouched
+  ---
+  duration_ms: 0.694875
+  type: 'test'
+  ...
+# Subtest: Unavailable upstream keeps page navigation and retry context, while APIs return JSON
+ok 11 - Unavailable upstream keeps page navigation and retry context, while APIs return JSON
+  ---
+  duration_ms: 23.421375
+  type: 'test'
+  ...
+# Subtest: Gateway preserves cookies, multipart payloads, status and ranges; rejects foreign writes
+ok 12 - Gateway preserves cookies, multipart payloads, status and ranges; rejects foreign writes
+  ---
+  duration_ms: 10.854792
+  type: 'test'
+  ...
+# Subtest: Theme injection changes only HTML pages, preserving RSC and API payloads and HEAD semantics
+ok 13 - Theme injection changes only HTML pages, preserving RSC and API payloads and HEAD semantics
+  ---
+  duration_ms: 11.135292
+  type: 'test'
+  ...
+# Subtest: writing bridge keeps the same-origin login return and all PKCE state, without allowing external redirects
+ok 14 - writing bridge keeps the same-origin login return and all PKCE state, without allowing external redirects
+  ---
+  duration_ms: 1.2105
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 360.811208

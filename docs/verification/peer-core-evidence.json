@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-10-16T20:31:18.108765+00:00",
+  "node": "v22.22.3",
+  "sourceSha256": {
+    "apps/peer-review/README.md": "0cee74541f9e78dbc5fc926f0df5f998b817e4a51a6adb2c0bf193d761bc06fd",
+    "apps/peer-review/package-lock.json": "85f3f734d351f1bacd96bd9d796707a68a593b0da8aad3c7ff9b53f762f4f799",
+    "apps/peer-review/package.json": "7a94a1e77b57021039cc46b96fdea281fc7cbbda9473628aa0276c7d59c1fbf9",
+    "apps/peer-review/src/core/allocation.ts": "9aa1775ec44c49ae68a0ca65fcfd0e01c9b67568c8c7cf46c25c0a3ae54a8eba",
+    "apps/peer-review/src/core/feedback.ts": "51b78ef1b0c695b9e885d518830d30d177936424e0c8e63235ff22acced05090",
+    "apps/peer-review/src/core/rubric.ts": "e1a71fb61db7664773a6c48201f9e745b2f4e4431fd59f7368158f8757f6c924",
+    "apps/peer-review/src/core/validation.ts": "6f0bb4328b6f54c67c721e14093cf3325b46535b35cad2c2a9b8c55c2a8d1a58",
+    "apps/peer-review/test/core.test.ts": "14f67349bd12a2638c526a9888d60cebd5cfa68a916f01b946789b3d6dd0a378",
+    "apps/peer-review/tsconfig.json": "474b0d748127dae0e2584159f9af0535acf67437e3db35d3353af0887995d196"
+  },
+  "checks": {
+    "teacherTests": 135,
+    "latestPeerCoreTests": 8,
+    "standaloneNpmCi": true,
+    "peerTypecheck": true
+  },
+  "scope": "Domain core only; no peer authentication, data API, browser interface or deployment claim."
+}

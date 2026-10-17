@@ -1,0 +1,75 @@
+/* Teacher application surfaces only. Preserve the original printable report. */
+@media screen{
+ .teacher-workspace{--wa-accent:#4f46e5;--wa-text:#334155;--wa-muted:#5f6f86;--wa-border:#dbe2ea;--wa-bg:#f6f8fb;--wa-radius:12px;background:var(--wa-bg)}
+ .teacher-workspace .teacher-task-tools{max-width:810px;margin:4px auto 0;padding:0 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+ .teacher-workspace .teacher-task-tools .teacher-tasks-bar{flex:1;min-width:0;padding:0;margin:0;gap:8px}
+ .teacher-workspace .teacher-task-tools .cloud-snapshot-bar{flex:0 1 auto;min-width:0;padding:0;margin:0;gap:8px}
+ .teacher-workspace .teacher-task-tools .cloud-snapshot-bar>span:empty{display:none}
+ .teacher-workspace .teacher-task-tools .cloud-snapshot-bar:has(>span:not(:empty)){flex-basis:100%}
+ .teacher-workspace .cloud-connection[data-status=ready]>div:first-child{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px}
+ .teacher-workspace .cloud-connection[data-status=ready] span{margin:0;font-size:12px;color:#166534}
+ .teacher-workspace .quick-grading{max-width:850px;padding-top:22px;color:var(--wa-text)}
+ .teacher-workspace .quick-heading{margin-bottom:20px}
+ .teacher-workspace .quick-heading h1{font-size:28px;line-height:1.45;margin-bottom:8px;color:#1e293b}
+ .teacher-workspace .quick-heading>span{font-size:14px;color:var(--wa-muted)}
+ .teacher-workspace .quick-card{border:1px solid var(--wa-border);border-radius:var(--wa-radius);box-shadow:none;padding:24px;margin-bottom:20px}
+ .teacher-workspace .quick-card-title{margin-bottom:16px}
+ .teacher-workspace .quick-card-title h2{font-size:17px;color:var(--wa-text)}
+ .teacher-workspace .quick-card-title h2 b{background:#eef2ff;color:var(--wa-accent);border-radius:6px}
+ .teacher-workspace .quick-task-summary>strong{display:block;font-size:16px;font-weight:600;line-height:1.6;color:var(--wa-text);overflow-wrap:anywhere}
+ .teacher-workspace .quick-task-summary>p{font-size:14px;color:#475569;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:8px 0 12px;white-space:pre-line;overflow-wrap:anywhere}
+ .teacher-workspace .quick-task-summary>div{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--wa-text)}
+ .teacher-workspace .quick-task-summary>small{display:block;margin-top:12px;font-size:12px;color:var(--wa-muted)}
+ .teacher-workspace :is(.quick-fields label,.quick-topic-label){font-size:14px;color:#475569}
+ .teacher-workspace :is(.quick-help,.quick-class-tools>span,.quick-file-summary,.quick-advanced summary small,.quick-topic-tools small,.quick-rubric-summary p,.quick-files small){font-size:12px;color:var(--wa-muted);line-height:1.7}
+ .teacher-workspace .quick-advanced summary{font-size:14px;color:#475569;min-height:44px}
+ .teacher-workspace :is(.quick-rubric-summary strong,.quick-files strong){font-size:14px;color:var(--wa-text)}
+ .teacher-workspace .quick-topic-label>span{font-size:12px;color:#8a5d21}
+ .teacher-workspace .quick-upload-actions>button{min-height:88px;background:#f8faff;border:1px dashed #aebde1;border-radius:10px;color:var(--wa-accent)}
+ .teacher-workspace .quick-upload-actions>button span{font-size:15px}
+ .teacher-workspace .quick-upload-actions>button small{font-size:12px;color:var(--wa-muted)}
+ .teacher-workspace :is(.quick-grading,.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog) button{min-height:44px;min-width:44px;touch-action:manipulation}
+ .teacher-workspace .teacher-quick-header>a{min-height:44px}
+ .teacher-workspace .collection-capture-tools>label{min-height:44px;display:inline-flex;align-items:center}
+ .teacher-workspace :is(.collection-capture-tools>label,.quick-file-button):focus-within{outline:3px solid #818cf8;outline-offset:3px}
+ .teacher-workspace .collection-confirm{min-height:44px;align-items:center}
+ .teacher-workspace :is(.writing-collection-dialog .collection-error,.teacher-tasks-dialog .task-error,.cloud-snapshot-dialog .cloud-history-error){color:#9a3412}
+ .teacher-workspace .writing-collection-dialog .collection-warning{color:#805721}
+ .teacher-workspace .teacher-tasks-dialog .task-notice{color:#166534}
+ .teacher-workspace .quick-upload-actions>button{min-height:88px;padding:14px 12px}
+ .teacher-workspace .quick-start-bar{border-radius:12px;border-color:var(--wa-border);box-shadow:0 4px 20px #24324d0d;background:#fff;backdrop-filter:none}
+ .teacher-workspace .quick-start-bar strong{font-size:14px;color:var(--wa-text)}
+ .teacher-workspace .quick-start-bar small{font-size:12px;color:var(--wa-muted);line-height:1.5}
+ .teacher-workspace .quick-start-bar>button{background:var(--wa-accent);border-radius:9px}
+ .teacher-workspace .quick-start-bar>button:disabled{background:#cbd5e1;color:#475569}
+ .teacher-workspace :is(.teacher-quick-header button,.quick-card-title>button,.quick-class-tools button,.quick-topic-tools>button,.quick-file-button,.quick-advanced-actions>button,.quick-file-summary button,.teacher-tasks-bar button,.cloud-snapshot-bar button,.cloud-connection button){min-height:44px;font-size:13px;color:var(--wa-accent)}
+ .teacher-workspace .teacher-quick-header{background:#fff;border-bottom-color:var(--wa-border);padding-top:12px;padding-bottom:12px}
+ .teacher-workspace .teacher-quick-header>a{color:var(--wa-text)}
+ .teacher-workspace :is(.cloud-connection,.teacher-tasks-bar,.cloud-snapshot-bar){font-size:12px;color:var(--wa-muted)}
+ .teacher-workspace .cloud-connection{margin-top:12px;padding:10px 16px;border-color:var(--wa-border);background:#fff;border-radius:10px;backdrop-filter:none}
+ .teacher-workspace .cloud-connection strong{font-size:13px;color:var(--wa-text)}
+ .teacher-workspace .cloud-connection span{font-size:12px;color:var(--wa-muted)}
+ .teacher-workspace :is(.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog){color:var(--wa-text);border-radius:14px;background:var(--wa-bg)}
+ .teacher-workspace :is(.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog) button{min-height:44px;font-size:14px}
+ .teacher-workspace :is(.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog) header button{min-width:44px;font-size:26px;padding:0}
+ .teacher-workspace :is(.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog) :is(p,small,label){font-size:13px;line-height:1.75;color:var(--wa-muted)}
+ .teacher-workspace :is(.collection-member strong,.teacher-tasks-content article strong){font-size:15px;color:var(--wa-text)}
+ .teacher-workspace :is(.collection-roster-tools,.collection-manual,.collection-student-capture) label{font-size:13px;color:#475569}
+ .teacher-workspace :is(.quick-grading,.teacher-tasks-dialog,.writing-collection-dialog,.writing-sheets-dialog,.cloud-snapshot-dialog) button:disabled{cursor:not-allowed}
+ .teacher-workspace :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #818cf8;outline-offset:3px}
+ .teacher-workspace .cloud-model-settings p{font-size:13px;line-height:1.8;color:var(--wa-muted)}
+ .teacher-workspace .cloud-model-settings label{font-size:14px;color:#475569}
+ @media(max-width:640px){
+  .teacher-workspace .quick-grading{padding:18px 16px 150px}
+  .teacher-workspace .quick-heading h1{font-size:24px}
+  .teacher-workspace .quick-card{padding:18px 16px}
+  .teacher-workspace .quick-start-bar{padding:12px;bottom:max(12px,env(safe-area-inset-bottom))}
+  .teacher-workspace .quick-start-bar strong{font-size:13px}
+  .teacher-workspace .quick-start-bar small{font-size:11px;max-width:155px}
+  .teacher-workspace .quick-start-bar>button{min-width:132px;font-size:14px}
+  .teacher-workspace .quick-fields{grid-template-columns:1fr 1fr}
+  .teacher-workspace .quick-advanced summary{align-items:flex-start;flex-direction:column;justify-content:center;gap:4px}
+  .teacher-workspace .teacher-quick-header{gap:6px;padding:10px 16px}
+  .teacher-workspace .cloud-connection{gap:6px 12px;align-items:center}
+ }
+}

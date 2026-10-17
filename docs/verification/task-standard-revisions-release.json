@@ -1,0 +1,77 @@
+{
+  "sourceCommit": "59c9684bd638e5ecbb9bbab0c2cb7813ff51db85",
+  "productionVersion": "cbe64bd9-5e02-4420-97e0-3cca615826a9",
+  "previousProductionVersion": "4b793430-18ac-44db-8cca-4c8fd5ff8b45",
+  "originalProductionVersionBeforeThisFeature": "a41ae96c-37dc-466b-8e7a-57906cdf5648",
+  "stagingVersion": "c8d65625-0524-4df4-b13a-66678e8f2279",
+  "previousStagingVersion": "9818bf19-2cd5-4304-b810-36dc02bb8f83",
+  "releasedAt": "2026-10-17T12:39:22.544Z",
+  "rootTests": 251,
+  "peerTests": 9,
+  "githubRun": 39032963261,
+  "githubConclusion": "success",
+  "pipelineVersion": "context-aware-v2",
+  "newDatabaseMigrations": 0,
+  "teacherMigrations": 18,
+  "routeIdsAndRulesUnchanged": true,
+  "backups": {
+    "staging": {
+      "bytes": 26310,
+      "sha256": "251c2a9a276cddc462f546569aeaa4ca604db6c8f656e072cb3cfa38ed4fbd63"
+    },
+    "production": {
+      "bytes": 122031,
+      "sha256": "a1b893501e050131dd898e6eaede671b736a32c33b5682bdc4f2788df689a9cc"
+    }
+  },
+  "online": {
+    "passed": true,
+    "target": "production",
+    "origin": "https://writeascend.newsunenglish.com",
+    "sourceCommit": "59c9684bd638e5ecbb9bbab0c2cb7813ff51db85",
+    "version": "cbe64bd9-5e02-4420-97e0-3cca615826a9",
+    "assets": [
+      "/assets/index-CY1Q7jfA.js",
+      "/assets/rolldown-runtime-COiEfhsA.js",
+      "/assets/legacy-import-CnnmTrul.js",
+      "/assets/index-P3qYT1lf.css",
+      "/assets/BoundGradingPanel-BliYnSq3.css",
+      "/assets/BoundGradingPanel-TcwvPeXc.js",
+      "/assets/TaskStandardRevision-DS9J5PFn.js"
+    ],
+    "anonymousDenied": [
+      "/api/tasks/11111111-1111-4111-8111-111111111111/standard",
+      "/api/me",
+      "/api/classes",
+      "/api/student/reports",
+      "/api/model/profiles",
+      "/api/model/local-status",
+      "/api/tasks/11111111-1111-4111-8111-111111111111/standard POST",
+      "/api/local-relay/poll POST",
+      "/api/local-relay/result POST",
+      "/api/model/personal POST"
+    ],
+    "cspUnchanged": true,
+    "loginCallbackVerified": true,
+    "checkedAt": "2026-10-17T12:39:22.544Z"
+  },
+  "dailyChanged": false,
+  "peerChanged": false,
+  "originalRealReport": {
+    "oldReportContentHashUnchanged": true,
+    "oldReportRevisionUnchanged": true,
+    "oldGradingStillReady": true,
+    "currentInputStillOriginal": true,
+    "taskVersion": 1,
+    "publications": 0,
+    "checkedAt": "2026-10-17T12:38:34.968020+00:00"
+  },
+  "teacherConfirmedWordCount": "60–80 words",
+  "realTaskStandardRevised": false,
+  "realModelRerunWithNewRules": false,
+  "stagingActivationRecovery": "API timeout before activation; verified previous version then activated the same uploaded version and checked all routes.",
+  "remaining": [
+    "Use the real teacher session to save the explicit 60–80 word standard revision and rerun grading.",
+    "Review actual feedback; verify real student publication, peer review and handwritten revision."
+  ]
+}

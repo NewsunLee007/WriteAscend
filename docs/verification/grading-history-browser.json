@@ -1,0 +1,55 @@
+{
+  "grading-history": {
+    "passed": true,
+    "reportRevisionHistory": true,
+    "readOnlyHistory": true,
+    "historyComparison": true,
+    "restoreCreatesNewRevision": true,
+    "historyDoesNotInvokeAI": true,
+    "regradeExplicitlyInvokesOneModel": true,
+    "regradePreservesPublishedVersion": true,
+    "oldReportAccessibleDuringRegrade": true,
+    "dailyPublishedSummary": true,
+    "dailyOwnAccountLink": true,
+    "dailyDatabaseRestoreRepaired": true,
+    "lostAcknowledgmentReconciled": true,
+    "syncAndHistoryHaveNoAdditionalModelCalls": true,
+    "withdrawalClearsDaily": true,
+    "disabledEntryLeavesExistingPage": true,
+    "teacherDailyEntry": true,
+    "studentLogin": true,
+    "unpublishedHidden": true,
+    "teacherConfirmation": true,
+    "readOnlyFeedback": true,
+    "stableOwnReportLink": true,
+    "studentPdfRendered": true,
+    "studentOwnOriginal": true,
+    "sameNameIsolated": true,
+    "teacherEditsAwaitRepublish": true,
+    "versionedRepublish": true,
+    "withdrawalBlocksReportAndImage": true,
+    "responsiveWidths": [
+      375,
+      390,
+      768,
+      1440
+    ],
+    "recordedAt": "2026-10-16T17:26:06.384609+00:00",
+    "scriptSha256": "3a7d674ef1847af6cfda012ab21a31dfd84c1946aea331a83c09d70475fe1433"
+  },
+  "quick-grading": {
+    "passed": true,
+    "allScriptAssertionsCompleted": true,
+    "recordedAt": "2026-10-16T17:26:11.458697+00:00",
+    "scriptSha256": "9908af2e69c236842acefd61258f0425e1185c367d2da751b76fd4b33f63248b"
+  },
+  "teacher-workflow": {
+    "passed": true,
+    "originalReportSections": 6,
+    "modelCalled": true,
+    "snapshotSaved": true,
+    "mobileWidth": 390,
+    "recordedAt": "2026-10-16T17:26:16.232105+00:00",
+    "scriptSha256": "cbc5e1a7518f3548b1921da58028b8433cf15a679f4d0f5aed8e0b3e5ef1bd37"
+  }
+}

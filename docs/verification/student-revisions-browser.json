@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "studentOwnRevision": true,
+  "sameTeacherRubric": true,
+  "offlinePhotoCached": true,
+  "refreshRestoresLocalPhotoAndEvidence": true,
+  "crossDeviceConflictExplicit": true,
+  "photoOrdering": true,
+  "teacherReturnAndResubmit": true,
+  "teacherAcceptanceCreatesNextDraft": true,
+  "originalOneClickGrading": true,
+  "firstFeedbackPreserved": true,
+  "studentAuthorshipVisible": true,
+  "noAutoModelOrPublication": true,
+  "studentAndTeacherIsolation": true,
+  "logoutClearsCache": true,
+  "logoutFencesDelayedWrites": true,
+  "syntheticModelCalls": 2,
+  "responsiveWidths": [
+    375,
+    390,
+    768,
+    1440
+  ],
+  "recordedAt": "2026-10-16T20:05:30.978368+00:00",
+  "scriptSha256": "1bab10f1d15a14a1a9dd185851e09da368f34803332a1265382db9852fa336c0"
+}

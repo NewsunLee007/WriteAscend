@@ -1,0 +1,87 @@
+{
+  "name": "newsun-writing-peer",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-16",
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+  "env": {
+    "development": {
+      "name": "newsun-writing-peer-development",
+      "vars": {
+        "PUBLIC_ORIGIN": "http://127.0.0.1:8793",
+        "DAILY_ORIGIN": "http://127.0.0.1:8890"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "writing-peer-local-qa",
+          "database_id": "00000000-0000-4000-8000-000000000099",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "version_metadata": {
+        "binding": "VERSION"
+      }
+    },
+    "staging": {
+      "name": "newsun-writing-peer-staging",
+      "workers_dev": true,
+      "preview_urls": false,
+      "version_metadata": {
+        "binding": "VERSION"
+      },
+      "vars": {
+        "PUBLIC_ORIGIN": "https://newsun-writing-peer-staging.317792050.workers.dev",
+        "DAILY_ORIGIN": "https://daily.newsunenglish.com",
+        "SOURCE_ORIGIN": "https://writeascend-staging.317792050.workers.dev"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "writing-peer-staging",
+          "database_id": "262e2da0-f181-44ce-afc7-a584f708ecbd",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "services": [
+        {
+          "binding": "SOURCE_SERVICE",
+          "service": "writeascend-staging"
+        }
+      ]
+    },
+    "production": {
+      "name": "newsun-writing-peer-production",
+      "workers_dev": true,
+      "preview_urls": false,
+      "version_metadata": {
+        "binding": "VERSION"
+      },
+      "vars": {
+        "PUBLIC_ORIGIN": "https://newsun-writing-peer-production.317792050.workers.dev",
+        "DAILY_ORIGIN": "https://daily.newsunenglish.com",
+        "SOURCE_ORIGIN": "https://writeascend.newsunenglish.com"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "writing-peer-production",
+          "database_id": "3dc945f1-9f2c-4718-802a-a85f58745617",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "services": [
+        {
+          "binding": "SOURCE_SERVICE",
+          "service": "writeascend-production"
+        }
+      ]
+    }
+  },
+  "account_id": "41c0024342aae8d7b6a8b67c7def1d3e",
+  "workers_dev": false
+}

@@ -1,0 +1,61 @@
+{
+  "sourceCommit": "5d4e05e7198c6f22cd31e8f6a850f59f8462e593",
+  "productionVersion": "a41ae96c-37dc-466b-8e7a-57906cdf5648",
+  "previousProductionVersion": "b4be06a2-dc3f-4fde-b21c-5d1e5054dff7",
+  "stagingVersion": "1d45ac71-5078-4dbe-8f61-a46f7d8788be",
+  "previousStagingVersion": "008f8eac-c5fe-4e81-ac1c-fa512bd79159",
+  "releasedAt": "2026-10-17T12:03:59.683Z",
+  "rootTests": 246,
+  "peerTests": 9,
+  "githubRun": 39030527664,
+  "githubConclusion": "success",
+  "pipelineVersion": "context-aware-v2",
+  "newDatabaseMigrations": 0,
+  "teacherMigrations": 18,
+  "routeIdsAndRulesUnchanged": true,
+  "backups": {
+    "staging": {
+      "bytes": 25997,
+      "sha256": "ba136db0c31d9a021477c9125df32e6f6835578b69cd357a5dcf6e2d90cdd61c"
+    },
+    "production": {
+      "bytes": 121718,
+      "sha256": "fb0e0e9ba33353ec00f5ca5997b36055eb97d6931f9bec9d77d831cb93e0e34a"
+    }
+  },
+  "online": {
+    "passed": true,
+    "target": "production",
+    "origin": "https://writeascend.newsunenglish.com",
+    "sourceCommit": "5d4e05e7198c6f22cd31e8f6a850f59f8462e593",
+    "version": "a41ae96c-37dc-466b-8e7a-57906cdf5648",
+    "assets": [
+      "/assets/index-1DFjw8uy.js",
+      "/assets/rolldown-runtime-COiEfhsA.js",
+      "/assets/index-DVDmP0Zg.css",
+      "/assets/BoundGradingPanel-BliYnSq3.css",
+      "/assets/BoundGradingPanel-DHyi14PE.js"
+    ],
+    "anonymousDenied": [
+      "/api/me",
+      "/api/classes",
+      "/api/student/reports",
+      "/api/model/profiles",
+      "/api/model/local-status",
+      "/api/local-relay/poll POST",
+      "/api/local-relay/result POST",
+      "/api/model/personal POST"
+    ],
+    "cspUnchanged": true,
+    "loginCallbackVerified": true,
+    "checkedAt": "2026-10-17T12:03:59.683Z"
+  },
+  "dailyChanged": false,
+  "peerChanged": false,
+  "originalReportRetained": true,
+  "realModelRerunWithNewRules": false,
+  "remaining": [
+    "Correct the existing task through an explicit immutable standard revision, then regrade and review.",
+    "Verify student publication, peer review and handwritten revision with real accounts."
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "recordedAt": "2026-10-16T14:54:16.879320+00:00",
+  "syntheticOnly": true,
+  "checks": [
+    {
+      "script": "scripts/qa/ui-quality.cjs",
+      "scriptSha256": "a186b607be1ed1e2d1b43e742139c706d33fd19396284f4e7e17cf20cae4d9d5",
+      "result": {
+        "passed": true,
+        "reusedTaskShowsSummary": true,
+        "mobileUploadVisibleBeforeActionBar": true,
+        "teacherEditsSurviveFolding": true,
+        "blankTaskRemainsEditable": true,
+        "touchTargetsAtLeast44": true,
+        "metadataContrast": 4.81,
+        "responsiveWidths": [
+          375,
+          390,
+          768,
+          1440
+        ]
+      }
+    },
+    {
+      "script": "scripts/qa/teacher-workflow.cjs",
+      "scriptSha256": "840f6fc4c3331ecfc83719b2ee9a4913b9e291f9828bf7df845ba51723a176d1",
+      "result": {
+        "passed": true,
+        "originalReportSections": 6,
+        "modelCalled": true,
+        "snapshotSaved": true,
+        "mobileWidth": 390
+      }
+    },
+    {
+      "script": "scripts/qa/quick-grading.cjs",
+      "scriptSha256": "9908af2e69c236842acefd61258f0425e1185c367d2da751b76fd4b33f63248b",
+      "result": {
+        "passed": true,
+        "completedWithoutError": true
+      }
+    },
+    {
+      "script": "scripts/qa/batch-grading.cjs",
+      "scriptSha256": "7908499d8fc4515a95b8a8f319df6360dc5c703c02b2181073f022fedc0d2db3",
+      "result": {
+        "passed": true,
+        "completedWithoutError": true
+      }
+    },
+    {
+      "script": "scripts/qa/cloud-grading.cjs",
+      "scriptSha256": "9b07846d32a718a9e52c8f3e5b3e568a6b026b747a22a3123046daa6fe9fa768",
+      "result": {
+        "passed": true,
+        "originalReportPreserved": true,
+        "refreshReusesModelJob": true,
+        "privateTeacherIsolation": true
+      }
+    },
+    {
+      "script": "scripts/qa/cloud-snapshots.cjs",
+      "scriptSha256": "b4d48f25461de825d8daa6c19586f52996ec16ce6d5daf2747aa326d708c891f",
+      "result": {
+        "passed": true,
+        "completedWithoutError": true
+      }
+    },
+    {
+      "script": "scripts/qa/student-first-capture.cjs",
+      "scriptSha256": "d18c56f4ca9cbe5c06662f273c7e177bdaa7693c0ea0ecdb814dd2f14bb9d17a",
+      "result": {
+        "passed": true,
+        "pinyinInitials": true,
+        "sameNameCandidatesRetained": true,
+        "studentFirstUpload": true,
+        "nextOnlyAfterReceipt": true,
+        "qrMismatchRequiresChoice": true,
+        "offlineIdentitySurvivesReload": true,
+        "multiPageRetainsStudent": true,
+        "mobileWidth": 390
+      }
+    },
+    {
+      "script": "scripts/qa/writing-collection.cjs",
+      "scriptSha256": "2469d8b609b15ff4681199290ab4057b0427e2d782cd3859c4690c5ed090a160",
+      "result": {
+        "passed": true,
+        "offlinePhotoRecovered": true,
+        "lostReceiptReused": true,
+        "multiPageComplete": true,
+        "rescanDeduplicated": true,
+        "replacementHistoryPreserved": true,
+        "sameNameSeparated": true,
+        "manualIdentityReviewed": true,
+        "multiplePapersBlocked": true,
+        "cameraStopsOnClose": true,
+        "logoutClearsPhotosAcrossTabs": true
+      }
+    }
+  ]
+}

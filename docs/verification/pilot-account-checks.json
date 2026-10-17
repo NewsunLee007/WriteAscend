@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-10-17T06:00:01.191Z",
+  "humanConfirmedSamePerson": true,
+  "primaryLoginRetained": true,
+  "accountConsolidation": {
+    "passed": true,
+    "mode": "apply",
+    "checkedAt": "2026-10-17T05:58:55.064Z",
+    "sourceAccountDisabled": true,
+    "sourceRecordPreserved": true,
+    "teacherRowsUnchanged": true,
+    "loginNamesChanged": 0,
+    "credentialsChanged": 0,
+    "otherAccountsChanged": 0,
+    "auditEntries": 2,
+    "replayDoesNotDuplicate": true
+  },
+  "pilotGrants": {
+    "checkedAt": "2026-10-17T05:57:24.800Z",
+    "realAdministratorVerified": true,
+    "school": "瑞安市新纪元实验学校",
+    "academicYear": "2026-1",
+    "classes": [
+      {
+        "name": "八（13）班",
+        "students": 47
+      },
+      {
+        "name": "八（14）班",
+        "students": 49
+      }
+    ],
+    "totalStudents": 96,
+    "permissions": [
+      "roster.read",
+      "writing.manage",
+      "writing.grade",
+      "writing.publish"
+    ],
+    "grants": 2,
+    "repeatDoesNotDuplicate": true,
+    "otherTeacherGrantCount": 0,
+    "realTeacherSessionVerified": false
+  },
+  "liveVerification": {
+    "checkedAt": "2026-10-17T06:00:01.191Z",
+    "accountConsolidationVerified": true,
+    "oneActiveCanonicalAccount": true,
+    "oldRecordPreserved": true,
+    "passwordsChanged": false,
+    "loginUsernamesChanged": false,
+    "grants": [
+      {
+        "name": "八（13）班",
+        "academicYear": "2026-1",
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ],
+        "version": 1
+      },
+      {
+        "name": "八（14）班",
+        "academicYear": "2026-1",
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ],
+        "version": 1
+      }
+    ],
+    "oldDuplicateAccountGrants": 0,
+    "currentSession": {
+      "status": 200,
+      "role": "admin",
+      "active": true,
+      "classCount": 54
+    },
+    "realTeacherLoginVerified": false,
+    "liveAdminDirectorySeesConsolidation": true
+  },
+  "cloudOwnershipRead": {
+    "teacherAccountColumns": 36,
+    "peerAccountColumns": 7,
+    "sourceAccountBusinessRows": 0,
+    "targetAccountBusinessRows": 0,
+    "cloudBusinessDataRewritten": false
+  },
+  "backups": {
+    "databases": [
+      "WordUp",
+      "Daily recitations",
+      "Daily content"
+    ],
+    "onlineBackup": true,
+    "quickCheckPassed": true,
+    "sha256Verified": true,
+    "privateOutsideRepositories": true
+  },
+  "userCredentialsExported": false,
+  "teacherInteractiveLoginVerified": true,
+  "realModelCalled": false,
+  "productionDomainChanged": false,
+  "authorityRuntimeDataDirectoryMatches": true,
+  "postConsolidationTeacherAcceptance": {
+    "checkedAt": "2026-10-17T06:15:19.282Z",
+    "status": 200,
+    "role": "teacher",
+    "name": "NewsunLee",
+    "active": true,
+    "classes": [
+      {
+        "name": "八（13）班",
+        "academicYear": "2026-1",
+        "students": 47,
+        "uniqueIdentities": 47,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      },
+      {
+        "name": "八（14）班",
+        "academicYear": "2026-1",
+        "students": 49,
+        "uniqueIdentities": 49,
+        "scopes": [
+          "roster.read",
+          "writing.grade",
+          "writing.manage",
+          "writing.publish"
+        ]
+      }
+    ],
+    "otherClassDenied": true,
+    "realTeacherLoginVerified": true
+  }
+}

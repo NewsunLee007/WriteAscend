@@ -1,0 +1,143 @@
+{
+  "environment": "staging",
+  "sourceCommit": "4a46344a0b901d30c565e0ef46107dc4173aead9",
+  "teacherVersion": "c3518d4d-696f-4445-a117-5e13f16d7c8b",
+  "previousTeacherVersion": "4a3b7b47-4d69-4592-b087-a73b2905665f",
+  "peerVersion": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+  "deployedAt": "2026-10-17T08:29:14.588490+00:00",
+  "manifestSha256": "1d15293946f4a696eca172ae0ca92d11eed1927a4c4456fa78bce9146adefbda",
+  "databaseMigrations": {
+    "teacher": 17,
+    "peer": 3,
+    "newMigrations": [
+      "0017_teacher_rubric_library.sql"
+    ]
+  },
+  "backup": {
+    "sqlBytes": 24325,
+    "sqlSha256": "a74f7993e9c905d12a9cc2e3370d6564dde2a9458b22a61b33493cd168c933b0",
+    "bookmarkRecorded": true,
+    "checkedAt": "2026-10-17T08:26:59.071329+00:00"
+  },
+  "tests": {
+    "teacher": 230,
+    "peer": 9,
+    "buildAndWorkerDryRuns": true,
+    "linuxCi": {
+      "runId": 39017399150,
+      "conclusion": "success",
+      "sourceCommit": "4a46344a0b901d30c565e0ef46107dc4173aead9"
+    }
+  },
+  "online": {
+    "passed": true,
+    "checkedAt": "2026-10-17T08:29:43.929Z",
+    "gitCommit": "4a46344a0b901d30c565e0ef46107dc4173aead9",
+    "checks": [
+      {
+        "kind": "teacher",
+        "version": "c3518d4d-696f-4445-a117-5e13f16d7c8b",
+        "page": 200,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-BpHkLL79.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/rolldown-runtime-COiEfhsA.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-Dwq3S_Ly.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-BliYnSq3.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-C0Bk9Oi3.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-D4UW3rFQ.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-Dfez8hQU.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-CBpnjnhR.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-Cx_u_A6V.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel--c8SDP-l.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel-BLkPR0Vy.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-CjrmFQST.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-CV7v0oVv.js",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/classes": 401,
+          "/api/student/reports": 401,
+          "/api/tasks": 401,
+          "/api/model/profiles": 401,
+          "/api/snapshots": 401,
+          "/api/admin/writing-directory/overview": 401,
+          "/api/rubric-templates": 401,
+          "/api/model/discover POST": 401,
+          "/api/model/personal POST": 401,
+          "/api/rubric-templates POST": 401
+        },
+        "machine": 401
+      },
+      {
+        "kind": "peer",
+        "version": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+        "page": 200,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-D50hf-eb.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-CD5FMhBD.css",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/rounds": 401
+        },
+        "machine": 401
+      }
+    ]
+  },
+  "activationRetry": {
+    "firstAttempt": "Cloudflare deployments API returned 10013; health still showed the previous stable version",
+    "secondAttempt": "succeeded and verified by health and matching resource digests"
+  },
+  "rollback": {
+    "workerVersion": "4a3b7b47-4d69-4592-b087-a73b2905665f",
+    "database": "Additive migration only. Keep new rubric tables when rolling back Worker code; data restoration is a separate operation."
+  },
+  "realClassroomValidatedThisRelease": false
+}

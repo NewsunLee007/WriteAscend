@@ -1,0 +1,131 @@
+{
+  "environment": "staging",
+  "sourceCommit": "6da901642ffa20b0ce4b70f7a68698ba53a9b16a",
+  "teacherVersion": "4a3b7b47-4d69-4592-b087-a73b2905665f",
+  "previousTeacherVersion": "e96df8e8-24cd-4ed9-af06-62f2cf873444",
+  "beforeFeatureTeacherVersion": "5de8f9e7-6fb7-4b7a-9bed-710027908c99",
+  "peerVersion": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+  "deployedAt": "2026-10-17T07:50:28.093325+00:00",
+  "manifestSha256": "251372773ff7cf155569e924749301a564246a6a31554fdb168c1255005c20ed",
+  "databaseMigrations": {
+    "teacher": 16,
+    "peer": 3,
+    "newMigrations": 0
+  },
+  "backup": {
+    "sqlBytes": 24325,
+    "sqlSha256": "a74f7993e9c905d12a9cc2e3370d6564dde2a9458b22a61b33493cd168c933b0",
+    "bookmarkRecorded": true,
+    "checkedAt": "2026-10-17T07:49:24.686324+00:00"
+  },
+  "tests": {
+    "teacher": 222,
+    "peer": 9,
+    "buildAndWorkerDryRuns": true,
+    "linuxCi": {
+      "runId": 39015169047,
+      "conclusion": "success",
+      "sourceCommit": "6da901642ffa20b0ce4b70f7a68698ba53a9b16a"
+    }
+  },
+  "online": {
+    "passed": true,
+    "checkedAt": "2026-10-17T07:50:52.974Z",
+    "gitCommit": "6da901642ffa20b0ce4b70f7a68698ba53a9b16a",
+    "checks": [
+      {
+        "kind": "teacher",
+        "version": "4a3b7b47-4d69-4592-b087-a73b2905665f",
+        "page": 200,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-D78dCmQ-.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/rolldown-runtime-COiEfhsA.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-BPtZ06W-.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-B_Sm_Ygb.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/BoundGradingPanel-BliYnSq3.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-D4UW3rFQ.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/PeerMaterialsPanel-D8IqNYHT.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-CBpnjnhR.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/SchoolDirectoryPanel-D_PTY12r.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel--c8SDP-l.css",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingCollectionPanel-CnvSuUSU.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-C0zQaKU_.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/WritingSheetsPanel-CjrmFQST.css",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/classes": 401,
+          "/api/student/reports": 401,
+          "/api/tasks": 401,
+          "/api/model/profiles": 401,
+          "/api/snapshots": 401,
+          "/api/admin/writing-directory/overview": 401,
+          "/api/model/discover POST": 401,
+          "/api/model/personal POST": 401
+        },
+        "machine": 401
+      },
+      {
+        "kind": "peer",
+        "version": "2a0eae02-3de2-46b4-85e7-cea566d03c60",
+        "page": 200,
+        "csp": true,
+        "assets": [
+          {
+            "path": "/assets/index-D50hf-eb.js",
+            "sha256Verified": true
+          },
+          {
+            "path": "/assets/index-CD5FMhBD.css",
+            "sha256Verified": true
+          }
+        ],
+        "anonymous": {
+          "/api/me": 401,
+          "/api/rounds": 401
+        },
+        "machine": 401
+      }
+    ]
+  }
+}

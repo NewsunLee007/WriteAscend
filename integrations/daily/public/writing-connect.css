@@ -1,0 +1,14 @@
+:root { font-family: system-ui, sans-serif; color: #27354b; background: #f1f4f8; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px; min-height: 100dvh; display: grid; place-items: center; }
+.connect-card { width: min(100%, 460px); background: white; border: 1px solid #e1e6ef; border-radius: 24px; padding: 36px; }
+.brand { color: #5558bb; font-size: 24px; font-weight: 750; text-decoration: none; }
+.eyebrow { margin-top: 32px; font-size: 13px; color: #7c879d; }
+h1 { font-size: 24px; line-height: 1.4; }
+#status { font-size: 15px; line-height: 1.8; min-height: 55px; }
+button { width: 100%; border: 0; border-radius: 12px; padding: 15px; margin: 10px 0 18px; background: #6265cf; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: .6; }
+#login { color: #5558bb; font-size: 14px; }
+.note { margin: 30px 0 0; font-size: 12px; color: #8792a7; line-height: 1.8; }
+[hidden] { display: none !important; }
+@media (max-width: 480px) { body { padding: 16px; }.connect-card { padding: 28px 24px; } }
